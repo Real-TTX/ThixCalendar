@@ -47,10 +47,12 @@
 
   <!--
     The OAuth app registrations of the online accounts (Microsoft 365 / Outlook.com, Google). CI passes them from the
-    repository secrets (THIXCALENDAR_MICROSOFT_CLIENT_ID, _GOOGLE_CLIENT_ID, _GOOGLE_CLIENT_SECRET); a local build can pass
-    them with -p:… or the user enters their own in Einstellungen › Konten-Zugang. Desktop apps cannot keep a secret: the
-    Google "client secret" of a desktop app is not confidential by Google's own definition.
+    repository secrets (THIXCALENDAR_MICROSOFT_CLIENT_ID, _GOOGLE_CLIENT_ID, _GOOGLE_CLIENT_SECRET); a local build reads
+    them from secrets.local.props next to this file (ignored by git, template: secrets.local.props.example). Users never
+    see them: they just sign in. Desktop apps cannot keep a secret: the Google "client secret" of a desktop app is not
+    confidential by Google's own definition (docs/APP-REGISTRIERUNG.md).
   -->
+  <Import Project="secrets.local.props" Condition="Exists('$(MSBuildThisFileDirectory)secrets.local.props')" />
   <PropertyGroup>
     <MicrosoftClientId Condition="'$(MicrosoftClientId)' == ''"></MicrosoftClientId>
     <GoogleClientId Condition="'$(GoogleClientId)' == ''"></GoogleClientId>

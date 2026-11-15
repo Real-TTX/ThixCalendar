@@ -16,6 +16,7 @@ public partial class SettingsPage : UserControl, IRefreshable
     public const string GeneralTab = "general";
     public const string RemindersTab = "reminders";
     public const string SyncTab = "sync";
+    /// <summary>The own app registrations (Erweitert, folded section for administrators).</summary>
     public const string AccessTab = "access";
     public const string UpdatesTab = "updates";
 
@@ -72,11 +73,17 @@ public partial class SettingsPage : UserControl, IRefreshable
         Refresh();
     }
 
-    public void SelectTab(string tab) => Tabs.SelectedItem = tab switch
+    public void SelectTab(string tab)
+    {
+        AccessExpander.IsExpanded = tab == AccessTab;
+        Tabs.SelectedItem = TabFor(tab);
+    }
+
+    private TabItem TabFor(string tab) => tab switch
     {
         RemindersTab => RemindersTabItem,
         SyncTab => SyncTabItem,
-        AccessTab => AccessTabItem,
+        AccessTab => AdvancedTabItem,
         UpdatesTab => UpdatesTabItem,
         _ => GeneralTabItem,
     };
@@ -191,7 +198,7 @@ public partial class SettingsPage : UserControl, IRefreshable
             GoogleClientSecret = GoogleSecretBox.Text ?? "",
         });
         Refresh();
-        Message.Show("Gespeichert. Unter „Konten“ kannst du dich jetzt anmelden.", InfoSeverity.Success);
+        Message.Show("Gespeichert. Unter „Konten“ meldest du dich jetzt an.", InfoSeverity.Success);
     });
 
     private void OnTestReminderClick(object? sender, RoutedEventArgs e) => App.Instance.ShowTestReminder();

@@ -18,7 +18,8 @@ Thumbs.db
 # Node (icon rendering)
 node_modules/
 
-# Secrets
+# Secrets (secrets.local.props: the app registrations for local builds)
+secrets.local.props
 *.pfx
 *.pem
 *.key

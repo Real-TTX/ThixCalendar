@@ -65,11 +65,12 @@ src/ThixCalendar        (Avalonia app)
                         "Meine Kalender" with coloured switches, MiniMonth, reminder state, version = about, fold with
                         Ctrl/Cmd+B; its width = the brand column of the header), the page beside it; a back stack for the
                         editors; keyboard (OnPreviewKeyDown)
-  Pages/                CalendarPage (title with sync and filter; account chips; ‹ Heute ›, period
-                        title + KW, segments Tag | Arbeitswoche | Woche | Monat), EventsPage (CRUD list: the header search,
+  Pages/                CalendarPage (the grid gets the room – owner's requirement: ONE slim toolbar with ‹ Heute ›,
+                        period + KW, segments Tag | Arbeitswoche | Woche | Monat, sync, filter with accounts and
+                        calendars; no big title, no chips row), EventsPage (CRUD list: the header search,
                         toolbar calendar / period / sort, list, Pager, actions), EventEditorPage (tabs Termin | Notizen | Erinnerung),
                         AccountsPage (CRUD list), AccountEditorPage (tabs Allgemein | Kalender), SettingsPage (tabs Allgemein |
-                        Erinnerungen | Synchronisierung | Konten-Zugang | Updates | Erweitert), AboutPage
+                        Erinnerungen | Synchronisierung | Updates | Erweitert – own app registrations folded there for admins), AboutPage
   Controls/             ONE code base per control: TimeGridView (+ DayColumnPanel, EventLayout lanes), MonthView, MiniMonth,
                         EventVisuals (block, chip, tool tip), Pager, TimeField, ColorSwatches, AccountMark, ActionBar,
                         FormField, SettingRow, InfoBar, IconLabel, IconView
@@ -120,4 +121,6 @@ tests/ThixCalendar.Tests
   test), macOS (test, publish osx-arm64 + osx-x64, `package-macos.sh` → dmg/zip), publish (manifest
   `thixcalendar-update.json`, rolling releases `release-channel` / `nightly-channel`, versioned release `v<version>` on main).
   Optional secrets `THIXCALENDAR_MICROSOFT_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_SECRET`
-  become the built-in app registrations (MSBuild reads them from the environment).
+  become the built-in app registrations (MSBuild reads them from the environment); local builds read secrets.local.props
+  (ignored by git, template secrets.local.props.example). **Users never enter client ids: they just sign in**
+  (owner's requirement) – the registration is the publisher's one-time job (docs/APP-REGISTRIERUNG.md).

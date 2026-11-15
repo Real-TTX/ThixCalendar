@@ -163,7 +163,7 @@ public sealed class SyncTests
         }
 
         var error = await Assert.ThrowsAsync<BusinessException>(() => AccountService.AddMicrosoftAsync(_ => { }));
-        Assert.Contains("Konten-Zugang", error.Message);
+        Assert.Contains("APP-REGISTRIERUNG", error.Message);
     }
 
     [Fact]

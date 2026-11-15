@@ -179,7 +179,7 @@ internal static class OAuthClient
         if (error is "invalid_grant" or "interaction_required" or "invalid_client" or "unauthorized_client")
         {
             throw new ProviderException(error == "invalid_client" || error == "unauthorized_client"
-                ? $"{profile.ProviderName} kennt die App-Registrierung nicht (Client-ID prüfen: Einstellungen › Konten-Zugang)."
+                ? $"{profile.ProviderName} kennt die App-Registrierung nicht (Einstellungen › Erweitert › Eigene App-Registrierung prüfen)."
                 : "Die Anmeldung ist abgelaufen oder wurde widerrufen – bitte neu anmelden.", isSignInExpired: true);
         }
 

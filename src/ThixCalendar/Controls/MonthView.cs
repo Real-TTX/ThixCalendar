@@ -48,7 +48,7 @@ public sealed class MonthView : UserControl
                 FontWeight = FontWeight.Medium,
                 Foreground = Ui.Brush("TextMutedBrush"),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 4, 0, 8),
+                Margin = new Thickness(0, 0, 0, 5),
             };
             Grid.SetColumn(name, column);
             _grid.Children.Add(name);

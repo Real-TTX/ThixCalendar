@@ -109,7 +109,7 @@ public sealed class TimeGridView : UserControl
             var label = new TextBlock
             {
                 Text = day.ToString("ddd d.", Ui.German),
-                FontSize = 14.5,
+                FontSize = 13.5,
                 FontWeight = isToday ? FontWeight.SemiBold : FontWeight.Medium,
                 Foreground = isToday ? Ui.Brush("OnAccentBrush") : day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? Ui.Brush("TextMutedBrush") : Ui.Brush("TextBrush"),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -117,8 +117,8 @@ public sealed class TimeGridView : UserControl
             var pill = new Border
             {
                 Background = isToday ? Ui.Brush("AccentBrush") : Brushes.Transparent,
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(14, 6),
+                CornerRadius = new CornerRadius(9),
+                Padding = new Thickness(12, 3),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Child = label,
                 Cursor = new Cursor(StandardCursorType.Hand),
@@ -135,7 +135,7 @@ public sealed class TimeGridView : UserControl
             {
                 BorderBrush = Ui.Brush("GridLineBrush"),
                 BorderThickness = new Thickness(0, 0, 0, 1),
-                Padding = new Thickness(0, 6, 0, 8),
+                Padding = new Thickness(0, 2, 0, 5),
                 Child = pill,
             };
             Grid.SetColumn(cell, index + 1);

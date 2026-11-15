@@ -39,9 +39,10 @@ Der Grund, warum es ThixCalendar gibt:
 ## Kalender
 
 - **Tag, Arbeitswoche, Woche, Monat** wie im Mockup ([docs/mockups/hauptfenster.png](docs/mockups/hauptfenster.png)):
-  aufgebaut wie ThixClip (Kopfzeile mit Suche und „Neuer Termin“, Seitenleiste mit Trennlinie); Konten als Chips mit
-  Schalter, „Meine Kalender“ mit farbigen Schaltern und der kleine Monat in der Seitenleiste,
-  heute als blaue Pille, eine rote Linie für „jetzt“, überlappende Termine nebeneinander.
+  aufgebaut wie ThixClip (Kopfzeile mit Suche und „Neuer Termin“, Seitenleiste mit Trennlinie); der Kalender bekommt
+  den Platz – darüber nur eine schmale Leiste (‹ Heute ›, Zeitraum mit KW, Ansicht, Synchronisieren, Filter für Konten
+  und Kalender). „Meine Kalender“ mit farbigen Schaltern und der kleine Monat in der Seitenleiste, heute als blaue
+  Pille, eine rote Linie für „jetzt“, überlappende Termine nebeneinander.
 - **Termine anlegen, ändern, löschen** – auch direkt in Microsoft 365 und Google (lokal gespeichert wird erst, was der
   Anbieter angenommen hat). Doppelklick auf freie Zeit legt dort einen Termin an.
 - **Termine** (Liste): die Suche oben im Fenster findet Titel, Ort, Notizen, Personen und Kalender; Filter nach Kalender und Zeitraum,
@@ -104,22 +105,12 @@ dein Passwort nie. Gespeichert wird nur das Refresh-Token – unter Windows mit 
 Schlüsselbund. Abgeglichen werden alle 5 Minuten (einstellbar) zwei Wochen zurück und vier Monate voraus; andere
 Zeiträume, sobald du sie ansiehst. Ohne Netz bleiben Termine und Erinnerungen erhalten.
 
-### Konten-Zugang (App-Registrierungen)
+### Anmeldung bei Microsoft und Google
 
-Microsoft und Google lassen Apps nur mit einer **App-Registrierung** auf Kalender zugreifen. Ein Build kann sie
-eingebaut haben (Repository-Secrets, siehe unten); sonst trägt man sie unter **Einstellungen › Konten-Zugang** ein:
-
-**Microsoft 365 / Outlook.com** – [Microsoft Entra](https://entra.microsoft.com) › App-Registrierungen › Neue Registrierung
-1. Unterstützte Kontotypen: *Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten*.
-2. Authentifizierung › Plattform hinzufügen › *Mobile- und Desktopanwendungen*, Umleitungs-URI `http://localhost`.
-3. API-Berechtigungen (Microsoft Graph, delegiert): `Calendars.ReadWrite`, `User.Read`, `offline_access`.
-4. Die *Anwendungs-ID (Client-ID)* eintragen. Ein Client-Secret ist nicht nötig (öffentlicher Client).
-
-**Google** – [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-1. Projekt anlegen, *Google Calendar API* aktivieren.
-2. OAuth-Zustimmungsbildschirm einrichten (Bereich `…/auth/calendar`; im Testmodus die eigene Adresse als Testnutzer).
-3. Anmeldedaten › OAuth-Client-ID › Anwendungstyp **Desktop-App**; Client-ID und Client-Secret eintragen (bei
-   Desktop-Apps laut Google kein echtes Geheimnis).
+Du meldest dich einfach mit deinem Entra-/Microsoft- bzw. Google-Konto an – nichts weiter einzutragen. Dafür bringt
+ThixCalendar seine eigene App-Registrierung bei Microsoft und Google mit; der Herausgeber legt sie **einmalig** an und
+baut sie über Repository-Secrets ein: [docs/APP-REGISTRIERUNG.md](docs/APP-REGISTRIERUNG.md). Nur Firmen, die fremde
+Apps sperren, können unter Einstellungen › Erweitert eine eigene Registrierung eintragen.
 
 Ganz ohne Registrierung geht es lesend über **ICS**: Google Kalender › Einstellungen › *Privatadresse im iCal-Format*;
 Outlook › Einstellungen › Kalender › Freigegebene Kalender › *Kalender veröffentlichen* › ICS-Link.

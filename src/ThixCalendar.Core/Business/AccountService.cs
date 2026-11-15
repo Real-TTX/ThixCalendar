@@ -291,8 +291,8 @@ public static class AccountService
         if (!IsConfigured(kind))
         {
             throw new BusinessException(kind == AccountKind.Microsoft
-                ? "Für Microsoft 365 fehlt die App-Registrierung (Client-ID). Trage sie unter Einstellungen › Konten-Zugang ein – die Anleitung steht dort."
-                : "Für Google fehlt die App-Registrierung (Client-ID und Secret). Trage sie unter Einstellungen › Konten-Zugang ein – die Anleitung steht dort.");
+                ? "In dieser ThixCalendar-Version ist die Anmeldung bei Microsoft noch nicht hinterlegt (App-Registrierung des Herausgebers, siehe docs/APP-REGISTRIERUNG.md). Administratoren können eine eigene unter Einstellungen › Erweitert eintragen."
+                : "In dieser ThixCalendar-Version ist die Anmeldung bei Google noch nicht hinterlegt (App-Registrierung des Herausgebers, siehe docs/APP-REGISTRIERUNG.md). Administratoren können eine eigene unter Einstellungen › Erweitert eintragen.");
         }
 
         var profile = Profile(kind);

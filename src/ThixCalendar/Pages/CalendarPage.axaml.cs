@@ -140,7 +140,6 @@ public partial class CalendarPage : UserControl, IRefreshable
         }
 
         RefreshTitle(from, to);
-        RefreshChips();
         RefreshSyncState();
         RefreshHint();
         RangeChanged?.Invoke(this, _mode == CalendarViewMode.Month ? (new DateTime(Anchor.Year, Anchor.Month, 1), new DateTime(Anchor.Year, Anchor.Month, 1).AddMonths(1).AddDays(-1)) : (from, to));
@@ -182,45 +181,6 @@ public partial class CalendarPage : UserControl, IRefreshable
         }
     }
 
-    /// <summary>Accounts as chips (mockup): mark, name, switch that shows or hides all its calendars.</summary>
-    private void RefreshChips()
-    {
-        AccountChips.Children.Clear();
-        var accounts = CalendarService.Accounts();
-        var calendars = CalendarService.Calendars();
-        AccountChips.IsVisible = accounts.Count > 0;
-        foreach (var account in accounts)
-        {
-            var color = calendars.FirstOrDefault(calendar => calendar.AccountId == account.Id && calendar.IsPrimary)?.Color
-                        ?? calendars.FirstOrDefault(calendar => calendar.AccountId == account.Id)?.Color ?? CalendarColors.Default;
-            var toggle = new ToggleSwitch { IsChecked = account.IsVisible, OnContent = "", OffContent = "", MinWidth = 0, Margin = new Thickness(10, 0, -6, 0), VerticalAlignment = VerticalAlignment.Center };
-            toggle.Resources["ToggleSwitchFillOn"] = Ui.SolidBrush(color);
-            toggle.Resources["ToggleSwitchFillOnPointerOver"] = Ui.SolidBrush(color);
-            AutomationProperties.SetName(toggle, $"{account.Name} anzeigen");
-            var accountId = account.Id;
-            toggle.IsCheckedChanged += (_, _) => CalendarService.SetAccountVisible(accountId, toggle.IsChecked == true);
-            var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-            content.Children.Add(new AccountMark { Kind = account.Kind, Width = 18, Height = 18 });
-            content.Children.Add(new TextBlock { Text = account.Name, FontSize = 14, FontWeight = FontWeight.Medium, VerticalAlignment = VerticalAlignment.Center, MaxWidth = 220, TextTrimming = TextTrimming.CharacterEllipsis });
-            if (account.State == AccountState.SignedOut)
-            {
-                var warning = new IconView { Data = Ui.Icon("Icon.Warning"), Width = 15, Height = 15, Foreground = Ui.Brush("DangerBrush") };
-                ToolTip.SetTip(warning, "Abgemeldet – unter „Konten“ neu anmelden");
-                content.Children.Add(warning);
-            }
-
-            content.Children.Add(toggle);
-            AccountChips.Children.Add(new Border
-            {
-                Background = Ui.Tint(color, Ui.IsDark ? 0.18 : 0.09),
-                CornerRadius = new CornerRadius(14),
-                Padding = new Thickness(14, 6, 8, 6),
-                Margin = new Thickness(0, 0, 10, 8),
-                Child = content,
-            });
-        }
-    }
-
     private void RefreshSyncState()
     {
         var status = SyncService.Status;
@@ -252,11 +212,35 @@ public partial class CalendarPage : UserControl, IRefreshable
         Hint.Hide();
     }
 
+    /// <summary>The filter: every account (all its calendars at once), then every calendar.</summary>
     private void BuildFilter()
     {
         FilterList.Children.Clear();
-        FilterList.Children.Add(new TextBlock { Text = "Kalender anzeigen", FontWeight = FontWeight.SemiBold, Margin = new Thickness(4, 0, 0, 6) });
-        var accounts = CalendarService.Accounts().ToDictionary(account => account.Id);
+        var accounts = CalendarService.Accounts();
+        FilterList.Children.Add(new TextBlock { Text = "Konten", FontWeight = FontWeight.SemiBold, Margin = new Thickness(4, 0, 0, 4) });
+        foreach (var account in accounts)
+        {
+            var box = new CheckBox
+            {
+                IsChecked = account.IsVisible,
+                Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 8,
+                    Children =
+                    {
+                        new AccountMark { Kind = account.Kind, Width = 14, Height = 14 },
+                        new TextBlock { Text = account.Name, VerticalAlignment = VerticalAlignment.Center },
+                    },
+                },
+            };
+            var accountId = account.Id;
+            box.IsCheckedChanged += (_, _) => CalendarService.SetAccountVisible(accountId, box.IsChecked == true);
+            FilterList.Children.Add(box);
+        }
+
+        FilterList.Children.Add(new TextBlock { Text = "Kalender", FontWeight = FontWeight.SemiBold, Margin = new Thickness(4, 10, 0, 4) });
+        var names = accounts.ToDictionary(account => account.Id, account => account.Name);
         foreach (var calendar in CalendarService.Calendars())
         {
             var box = new CheckBox
@@ -269,7 +253,7 @@ public partial class CalendarPage : UserControl, IRefreshable
                     Children =
                     {
                         new Border { Width = 10, Height = 10, CornerRadius = new CornerRadius(3), Background = Ui.SolidBrush(calendar.Color), VerticalAlignment = VerticalAlignment.Center },
-                        new TextBlock { Text = accounts.TryGetValue(calendar.AccountId, out var account) ? $"{calendar.Name} · {account.Name}" : calendar.Name, VerticalAlignment = VerticalAlignment.Center },
+                        new TextBlock { Text = names.TryGetValue(calendar.AccountId, out var name) ? $"{calendar.Name} · {name}" : calendar.Name, VerticalAlignment = VerticalAlignment.Center },
                     },
                 },
             };

@@ -65,7 +65,7 @@ public sealed class SignInDialog : ThemedWindow
                 Ui.OpenExternal(_url);
             }
         };
-        _settings = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Settings"), Text = "Konten-Zugang einrichten" }, IsVisible = false, Theme = Ui.Theme("PrimaryButton") };
+        _settings = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Settings"), Text = "Eigene Registrierung eintragen" }, IsVisible = false };
         _settings.Click += (_, _) =>
         {
             Close();
@@ -122,7 +122,7 @@ public sealed class SignInDialog : ThemedWindow
             _reopen.IsVisible = false;
             _error.Show(exception.Message, InfoSeverity.Error);
             _settings.IsVisible = !AccountService.IsConfigured(_kind);
-            _text.Text = AccountService.IsConfigured(_kind) ? "Die Anmeldung hat nicht geklappt." : "Für diese Kontoart fehlt noch die App-Registrierung.";
+            _text.Text = AccountService.IsConfigured(_kind) ? "Die Anmeldung hat nicht geklappt." : "Diese Version kann sich bei diesem Anbieter noch nicht anmelden.";
         }
     }
 }

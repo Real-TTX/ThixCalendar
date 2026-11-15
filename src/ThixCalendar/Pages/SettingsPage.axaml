@@ -94,52 +94,6 @@
         </ScrollViewer>
       </TabItem>
 
-      <!-- ===== Konten-Zugang (app registrations) ===== -->
-      <TabItem x:Name="AccessTabItem" Header="Konten-Zugang">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0" Spacing="12">
-            <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
-                       Text="Microsoft und Google lassen Apps nur mit einer App-Registrierung auf Kalender zugreifen. Ist in diesem Build keine hinterlegt (oder möchtest du deine eigene nutzen), trage sie hier ein. Leer = die eingebaute." />
-            <Border Theme="{StaticResource Card}">
-              <StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
-                  <controls:AccountMark Kind="Microsoft" Width="18" Height="18" />
-                  <TextBlock Text="Microsoft 365 / Outlook.com" FontWeight="SemiBold" />
-                  <TextBlock x:Name="MicrosoftState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
-                </StackPanel>
-                <controls:FormField Label="Anwendungs-ID (Client-ID)" Field="MicrosoftClientId"
-                                    Hint="Microsoft Entra › App-Registrierungen › Neu: „Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten“, Plattform „Mobile und Desktop“ mit Umleitungs-URI http://localhost, Berechtigungen Calendars.ReadWrite, User.Read, offline_access.">
-                  <TextBox x:Name="MicrosoftClientBox" Watermark="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" AutomationProperties.Name="Microsoft Client-ID" />
-                </controls:FormField>
-                <Button Theme="{StaticResource LinkButton}" Content="Microsoft Entra öffnen" Click="OnOpenEntraClick" HorizontalAlignment="Left" />
-              </StackPanel>
-            </Border>
-            <Border Theme="{StaticResource Card}">
-              <StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
-                  <controls:AccountMark Kind="Google" Width="18" Height="18" />
-                  <TextBlock Text="Google Kalender" FontWeight="SemiBold" />
-                  <TextBlock x:Name="GoogleState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
-                </StackPanel>
-                <controls:FormField Label="Client-ID" Field="GoogleClientId"
-                                    Hint="Google Cloud Console › APIs &amp; Dienste: „Google Calendar API“ aktivieren, OAuth-Zustimmungsbildschirm anlegen, Anmeldedaten › OAuth-Client-ID › Anwendungstyp „Desktop-App“.">
-                  <TextBox x:Name="GoogleClientBox" Watermark="….apps.googleusercontent.com" AutomationProperties.Name="Google Client-ID" />
-                </controls:FormField>
-                <controls:FormField Label="Client-Secret" Field="GoogleClientSecret" Hint="Bei Desktop-Apps laut Google kein echtes Geheimnis; es bleibt trotzdem nur auf diesem Computer.">
-                  <TextBox x:Name="GoogleSecretBox" PasswordChar="•" AutomationProperties.Name="Google Client-Secret" />
-                </controls:FormField>
-                <Button Theme="{StaticResource LinkButton}" Content="Google Cloud Console öffnen" Click="OnOpenGoogleConsoleClick" HorizontalAlignment="Left" />
-              </StackPanel>
-            </Border>
-            <controls:ActionBar>
-              <Button Theme="{StaticResource PrimaryButton}" Click="OnSaveAccessClick">
-                <controls:IconLabel Icon="{StaticResource Icon.Check}" Text="Speichern" />
-              </Button>
-            </controls:ActionBar>
-          </StackPanel>
-        </ScrollViewer>
-      </TabItem>
-
       <!-- ===== Updates ===== -->
       <TabItem x:Name="UpdatesTabItem" Header="Updates">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -191,6 +145,49 @@
             </controls:SettingRow>
             <controls:SettingRow Title="Richtlinien (Administratoren)" BorderThickness="0"
                                  Description="Windows: HKLM\SOFTWARE\Policies\ThixCalendar, macOS: Profil für info.schmoldt.thixcalendar – LockConfiguration, DisableOnlineAccounts, DisableUpdates (1 = an)." />
+            <!-- Own app registrations: only for administrators – normal users just sign in (the build has them built in). -->
+            <Expander x:Name="AccessExpander" Header="Eigene App-Registrierung (Administratoren)" HorizontalAlignment="Stretch" Margin="0,14,0,0">
+              <StackPanel Spacing="12" Margin="0,4,0,0">
+                <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
+                           Text="Normalerweise nicht nötig: ThixCalendar bringt seine Anmeldung bei Microsoft und Google mit. Nur wer eine eigene Registrierung verwenden muss (z. B. weil die Organisation fremde Apps sperrt), trägt sie hier ein. Leer = die eingebaute." />
+                <Border Theme="{StaticResource Card}">
+                  <StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                      <controls:AccountMark Kind="Microsoft" Width="18" Height="18" />
+                      <TextBlock Text="Microsoft 365 / Outlook.com" FontWeight="SemiBold" />
+                      <TextBlock x:Name="MicrosoftState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <controls:FormField Label="Anwendungs-ID (Client-ID)" Field="MicrosoftClientId"
+                                        Hint="Microsoft Entra › App-Registrierungen › Neu: „Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten“, Plattform „Mobile und Desktop“ mit Umleitungs-URI http://localhost, Berechtigungen Calendars.ReadWrite, User.Read, offline_access.">
+                      <TextBox x:Name="MicrosoftClientBox" Watermark="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" AutomationProperties.Name="Microsoft Client-ID" />
+                    </controls:FormField>
+                    <Button Theme="{StaticResource LinkButton}" Content="Microsoft Entra öffnen" Click="OnOpenEntraClick" HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Border>
+                <Border Theme="{StaticResource Card}">
+                  <StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                      <controls:AccountMark Kind="Google" Width="18" Height="18" />
+                      <TextBlock Text="Google Kalender" FontWeight="SemiBold" />
+                      <TextBlock x:Name="GoogleState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <controls:FormField Label="Client-ID" Field="GoogleClientId"
+                                        Hint="Google Cloud Console › APIs &amp; Dienste: „Google Calendar API“ aktivieren, OAuth-Zustimmungsbildschirm anlegen, Anmeldedaten › OAuth-Client-ID › Anwendungstyp „Desktop-App“.">
+                      <TextBox x:Name="GoogleClientBox" Watermark="….apps.googleusercontent.com" AutomationProperties.Name="Google Client-ID" />
+                    </controls:FormField>
+                    <controls:FormField Label="Client-Secret" Field="GoogleClientSecret" Hint="Bei Desktop-Apps laut Google kein echtes Geheimnis; es bleibt trotzdem nur auf diesem Computer.">
+                      <TextBox x:Name="GoogleSecretBox" PasswordChar="•" AutomationProperties.Name="Google Client-Secret" />
+                    </controls:FormField>
+                    <Button Theme="{StaticResource LinkButton}" Content="Google Cloud Console öffnen" Click="OnOpenGoogleConsoleClick" HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Border>
+                <controls:ActionBar>
+                  <Button Theme="{StaticResource PrimaryButton}" Click="OnSaveAccessClick">
+                    <controls:IconLabel Icon="{StaticResource Icon.Check}" Text="Speichern" />
+                  </Button>
+                </controls:ActionBar>
+              </StackPanel>
+            </Expander>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
