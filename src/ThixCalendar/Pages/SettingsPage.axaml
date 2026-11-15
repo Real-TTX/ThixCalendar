@@ -3,8 +3,8 @@
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.SettingsPage">
   <!-- The settings in tabs. Every change is saved at once through the business layer (values and policies are checked there). -->
-  <DockPanel Margin="26,20,22,16">
-    <TextBlock DockPanel.Dock="Top" Text="Einstellungen" FontSize="28" FontWeight="Bold" Margin="0,0,0,6" />
+  <DockPanel Margin="26,18,22,16">
+    <TextBlock DockPanel.Dock="Top" Text="Einstellungen" Theme="{StaticResource PageTitle}" Margin="0,0,0,6" />
     <controls:InfoBar DockPanel.Dock="Top" x:Name="PolicyNote" Margin="0,8,0,0" />
     <controls:InfoBar DockPanel.Dock="Top" x:Name="Message" Margin="0,8,0,0" />
 

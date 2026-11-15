@@ -33,6 +33,7 @@ public partial class EventsPage : UserControl, IRefreshable
     private List<CalendarInfo> _calendars = [];
     private List<EventItem> _items = [];
     private bool _isLoading;
+    private string _search = "";
 
     public EventsPage()
     {
@@ -41,7 +42,6 @@ public partial class EventsPage : UserControl, IRefreshable
         PeriodFilter.SelectedIndex = 2;
         SortChoice.ItemsSource = Sorts;
         SortChoice.SelectedIndex = 0;
-        SearchBox.TextChanged += (_, _) => Reload(resetPage: true);
         CalendarFilter.SelectionChanged += (_, _) => Reload(resetPage: true);
         PeriodFilter.SelectionChanged += (_, _) => Reload(resetPage: true);
         SortChoice.SelectionChanged += (_, _) => Reload(resetPage: true);
@@ -67,15 +67,6 @@ public partial class EventsPage : UserControl, IRefreshable
                 _ = DeleteSelectedAsync();
             }
         };
-        SearchBox.KeyDown += (_, e) =>
-        {
-            if (e.Key == Key.Down && EventList.ItemCount > 0)
-            {
-                e.Handled = true;
-                EventList.SelectedIndex = Math.Max(0, EventList.SelectedIndex);
-                (EventList.ContainerFromIndex(EventList.SelectedIndex) as Control)?.Focus();
-            }
-        };
         Refresh();
     }
 
@@ -83,13 +74,17 @@ public partial class EventsPage : UserControl, IRefreshable
 
     private EventItem? Selected => (EventList.SelectedItem as Control)?.Tag as EventItem;
 
-    public void SetSearch(string text) => SearchBox.Text = text;
-
-    public void FocusSearch() => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+    /// <summary>The words of the header search (MainWindow); the list filters at once.</summary>
+    public void SetSearch(string text)
     {
-        SearchBox.Focus();
-        SearchBox.SelectAll();
-    }, Avalonia.Threading.DispatcherPriority.Loaded);
+        if (_search == text)
+        {
+            return;
+        }
+
+        _search = text;
+        Reload(resetPage: true);
+    }
 
     public void Refresh()
     {
@@ -127,7 +122,7 @@ public partial class EventsPage : UserControl, IRefreshable
         {
             From = period.Name == "Heute" ? DateTime.Today : start,
             To = DateTime.Today.AddDays(period.ToDays),
-            Search = SearchBox.Text ?? "",
+            Search = _search,
             CalendarId = calendarId,
             Sort = (EventSort)SortChoice.SelectedIndex,
         }).ToList();
@@ -142,7 +137,7 @@ public partial class EventsPage : UserControl, IRefreshable
         var rows = _items.Skip(Pager.Page * Pager.PageSize).Take(Pager.PageSize).Select(Row).ToList();
         EventList.ItemsSource = rows;
         EmptyText.IsVisible = rows.Count == 0;
-        EmptyText.Text = string.IsNullOrWhiteSpace(SearchBox.Text) ? "Keine Termine in diesem Zeitraum." : $"Nichts gefunden für „{SearchBox.Text}“.";
+        EmptyText.Text = string.IsNullOrWhiteSpace(_search) ? "Keine Termine in diesem Zeitraum." : $"Nichts gefunden für „{_search}“.";
         EventList.SelectedItem = rows.FirstOrDefault(row => (row.Tag as EventItem)?.Event.Id == keep) ?? rows.FirstOrDefault();
         RefreshActions();
     }

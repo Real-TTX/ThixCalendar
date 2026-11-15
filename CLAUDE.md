@@ -60,12 +60,14 @@ src/ThixCalendar.Core   (no UI) models, business layer (static classes), infrast
 src/ThixCalendar        (Avalonia app)
   Program / App         start-up: ProblemReports first, self test, Windows setup mode, single instance (mutex + pipe), tray,
                         sync, reminders; ShowMainWindow, ToggleReminderPauseAsync, ExitApplication
-  MainWindow            title bar (own caption buttons on Windows / traffic lights on macOS), sidebar card (sections, "Meine
-                        Kalender" with coloured switches, MiniMonth, reminder state, version = about, fold with Ctrl/Cmd+B),
-                        page card; navigation with a back stack for the editors; keyboard (OnPreviewKeyDown)
-  Pages/                CalendarPage (toolbar: title, search, sync, filter, "Neuer Termin"; account chips; ‹ Heute ›, period
-                        title + KW, segments Tag | Arbeitswoche | Woche | Monat), EventsPage (CRUD list: toolbar search /
-                        calendar / period / sort, list, Pager, actions), EventEditorPage (tabs Termin | Notizen | Erinnerung),
+  MainWindow            built like ThixClip: header across the width (logo, search over all events → "Termine", "Neuer Termin",
+                        own caption buttons on Windows / traffic lights on macOS), sidebar flush with a line (sections,
+                        "Meine Kalender" with coloured switches, MiniMonth, reminder state, version = about, fold with
+                        Ctrl/Cmd+B; its width = the brand column of the header), the page beside it; a back stack for the
+                        editors; keyboard (OnPreviewKeyDown)
+  Pages/                CalendarPage (title with sync and filter; account chips; ‹ Heute ›, period
+                        title + KW, segments Tag | Arbeitswoche | Woche | Monat), EventsPage (CRUD list: the header search,
+                        toolbar calendar / period / sort, list, Pager, actions), EventEditorPage (tabs Termin | Notizen | Erinnerung),
                         AccountsPage (CRUD list), AccountEditorPage (tabs Allgemein | Kalender), SettingsPage (tabs Allgemein |
                         Erinnerungen | Synchronisierung | Konten-Zugang | Updates | Erweitert), AboutPage
   Controls/             ONE code base per control: TimeGridView (+ DayColumnPanel, EventLayout lanes), MonthView, MiniMonth,

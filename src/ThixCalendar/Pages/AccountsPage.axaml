@@ -20,9 +20,9 @@
       <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
     </Style>
   </UserControl.Styles>
-  <DockPanel Margin="26,20,22,16">
+  <DockPanel Margin="26,18,22,16">
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,0,0,14">
-      <TextBlock Text="Konten" FontSize="28" FontWeight="Bold" VerticalAlignment="Center" />
+      <TextBlock Text="Konten" Theme="{StaticResource PageTitle}" VerticalAlignment="Center" />
       <TextBlock x:Name="CountText" Theme="{StaticResource MutedText}" FontSize="14" VerticalAlignment="Center" Margin="0,6,0,0" />
     </StackPanel>
 

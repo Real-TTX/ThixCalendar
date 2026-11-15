@@ -48,9 +48,10 @@ public partial class MainWindow : ThemedWindow
         {
             // The traffic lights stay where macOS draws them; the name moves right of them.
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.PreferSystemChrome;
-            ExtendClientAreaTitleBarHeightHint = 46;
+            ExtendClientAreaTitleBarHeightHint = 68;
             CaptionButtons.IsVisible = false;
-            Brand.Margin = new Thickness(84, 0, 0, 0);
+            HeaderGrid.Margin = new Thickness(84, 0, 18, 0);
+            HeaderGrid.ColumnDefinitions[0].Width = new GridLength(186);
         }
         else
         {
@@ -63,6 +64,22 @@ public partial class MainWindow : ThemedWindow
         _calendar.RangeChanged += (_, range) => MiniMonth.Select(range.From, range.To);
         MiniMonth.DayChosen += (_, day) => ShowCalendar(day);
         MiniMonth.Select(_calendar.Range.From, _calendar.Range.To);
+
+        // The search of the header searches every event: typing shows the list "Termine" with the result.
+        SearchBox.TextChanged += (_, _) =>
+        {
+            var text = SearchBox.Text ?? "";
+            if (PageHost.Content != _events.Value && text.Length > 0)
+            {
+                Navigate(_events.Value, NavEvents, keepHistory: false);
+            }
+
+            if (_events.IsValueCreated)
+            {
+                _events.Value.SetSearch(text);
+            }
+        };
+        ToolTip.SetTip(NewEventButton, $"Neuer Termin ({Ui.CommandKey.Name}+N)");
 
         _sizeTimer.Tick += (_, _) =>
         {
@@ -147,10 +164,17 @@ public partial class MainWindow : ThemedWindow
         Navigate(_events.Value, NavEvents, keepHistory: false);
         if (search is not null)
         {
-            _events.Value.SetSearch(search);
+            SearchBox.Text = search;
         }
 
-        _events.Value.FocusSearch();
+        _events.Value.SetSearch(SearchBox.Text ?? "");
+    }
+
+    /// <summary>Ctrl/Cmd+F: into the search of the header.</summary>
+    public void FocusSearch()
+    {
+        SearchBox.Focus();
+        SearchBox.SelectAll();
     }
 
     public void ShowAccounts() => Navigate(_accounts.Value, NavAccounts, keepHistory: false);
@@ -318,7 +342,11 @@ public partial class MainWindow : ThemedWindow
                 return;
             case Key.F when withCommand:
                 e.Handled = true;
-                ShowEvents();
+                FocusSearch();
+                return;
+            case Key.Escape when SearchBox.IsFocused && !string.IsNullOrEmpty(SearchBox.Text):
+                e.Handled = true;
+                SearchBox.Text = "";
                 return;
             case Key.B when withCommand:
                 e.Handled = true;
@@ -495,6 +523,7 @@ public partial class MainWindow : ThemedWindow
         }
 
         CalendarsSection.IsVisible = !folded;
+        BrandName.IsVisible = !folded || OperatingSystem.IsMacOS();
         MiniMonthCard.IsVisible = !folded && Bounds.Height is 0 or >= 700;
         ReminderText.IsVisible = !folded;
         ReminderStatus.HorizontalContentAlignment = folded ? HorizontalAlignment.Center : HorizontalAlignment.Left;
@@ -530,8 +559,21 @@ public partial class MainWindow : ThemedWindow
         RefreshReminderStatus();
     }
 
-    private void ApplySidebarWidth(double windowWidth) =>
-        BodyGrid.ColumnDefinitions[0].Width = new GridLength(IsSidebarCollapsed ? FoldedSidebarWidth + 12 : windowWidth < 1000 ? 236 : 284);
+    /// <summary>The sidebar and the brand above it share one width, so the search stays in line with the page (as in ThixClip).</summary>
+    private void ApplySidebarWidth(double windowWidth)
+    {
+        var width = IsSidebarCollapsed ? FoldedSidebarWidth : windowWidth < 1000 ? 232 : 262;
+        BodyGrid.ColumnDefinitions[0].Width = new GridLength(width);
+        if (OperatingSystem.IsMacOS())
+        {
+            return; // the traffic lights keep the header as it is
+        }
+
+        HeaderGrid.ColumnDefinitions[0].Width = new GridLength(width);
+        HeaderGrid.Margin = new Thickness(IsSidebarCollapsed ? 18 : 22, 0, 12, 0);
+    }
+
+    private void OnNewEventClick(object? sender, RoutedEventArgs e) => NewEvent(PageHost.Content == _calendar ? _calendar.SuggestedStart() : null);
 
     private void OnCalendarsHeaderClick(object? sender, RoutedEventArgs e)
     {
@@ -553,7 +595,7 @@ public partial class MainWindow : ThemedWindow
 
     private void OnTitleBarPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 1)
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.Source is not TextBox && e.ClickCount == 1)
         {
             BeginMoveDrag(e);
         }
@@ -561,7 +603,7 @@ public partial class MainWindow : ThemedWindow
 
     private void OnTitleBarDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (e.Source is Grid or StackPanel or TextBlock or Image)
+        if (e.Source is Border or Grid or StackPanel or Image)
         {
             OnMaximizeClick(sender, e);
         }

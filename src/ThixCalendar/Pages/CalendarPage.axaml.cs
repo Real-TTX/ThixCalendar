@@ -31,19 +31,8 @@ public partial class CalendarPage : UserControl, IRefreshable
         Month.NewEventRequested += (_, request) => Window?.NewEvent(request.Start, request.IsAllDay);
         TimeGrid.DayChosen += (_, day) => GoTo(day, CalendarViewMode.Day);
         Month.DayChosen += (_, day) => GoTo(day, CalendarViewMode.Day);
-        SearchBox.KeyDown += (_, e) =>
-        {
-            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(SearchBox.Text))
-            {
-                e.Handled = true;
-                var text = SearchBox.Text;
-                SearchBox.Text = "";
-                Window?.ShowEvents(text);
-            }
-        };
         SyncService.StatusChanged += (_, _) => Ui.Post(RefreshSyncState);
         ((Avalonia.Controls.Primitives.PopupFlyoutBase)FilterButton.Flyout!).Opening += (_, _) => BuildFilter();
-        ToolTip.SetTip(NewButton, $"Neuer Termin ({Ui.CommandKey.Name}+N)");
         ToolTip.SetTip(PreviousButton, "Zurück (←)");
         ToolTip.SetTip(NextButton, "Weiter (→)");
         ToolTip.SetTip(TodayButton, "Heute (T)");
@@ -315,8 +304,6 @@ public partial class CalendarPage : UserControl, IRefreshable
     private void OnNextClick(object? sender, RoutedEventArgs e) => Step(1);
 
     private void OnTodayClick(object? sender, RoutedEventArgs e) => GoToday();
-
-    private void OnNewClick(object? sender, RoutedEventArgs e) => Window?.NewEvent(SuggestedStart());
 
     private void OnSyncClick(object? sender, RoutedEventArgs e) => SyncService.Kick();
 

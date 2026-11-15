@@ -39,11 +39,12 @@ Der Grund, warum es ThixCalendar gibt:
 ## Kalender
 
 - **Tag, Arbeitswoche, Woche, Monat** wie im Mockup ([docs/mockups/hauptfenster.png](docs/mockups/hauptfenster.png)):
-  Konten als Chips mit Schalter, „Meine Kalender“ mit farbigen Schaltern und der kleine Monat in der Seitenleiste,
+  aufgebaut wie ThixClip (Kopfzeile mit Suche und „Neuer Termin“, Seitenleiste mit Trennlinie); Konten als Chips mit
+  Schalter, „Meine Kalender“ mit farbigen Schaltern und der kleine Monat in der Seitenleiste,
   heute als blaue Pille, eine rote Linie für „jetzt“, überlappende Termine nebeneinander.
 - **Termine anlegen, ändern, löschen** – auch direkt in Microsoft 365 und Google (lokal gespeichert wird erst, was der
   Anbieter angenommen hat). Doppelklick auf freie Zeit legt dort einen Termin an.
-- **Termine** (Liste): Suche über Titel, Ort, Notizen, Personen und Kalender, Filter nach Kalender und Zeitraum,
+- **Termine** (Liste): die Suche oben im Fenster findet Titel, Ort, Notizen, Personen und Kalender; Filter nach Kalender und Zeitraum,
   Sortierung, Seiten; darunter *Neuer Termin*, *Öffnen*, *Beitreten*, *Im Kalender zeigen* … *Löschen*.
 - **Konten**: verbinden, Farbe / Anzeige / Erinnerungen je Kalender, neu anmelden, synchronisieren, entfernen.
 - Hell / dunkel / wie das System, einklappbares Menü (`Strg/⌘ + B`).
@@ -64,7 +65,7 @@ Der Grund, warum es ThixCalendar gibt:
 | `T` | heute |
 | `D` / `A` / `W` / `M` | Tag / Arbeitswoche / Woche / Monat |
 | `Strg/⌘ + N` | neuer Termin (nächste volle Stunde des gezeigten Tags) |
-| `Strg/⌘ + F` | Termine suchen |
+| `Strg/⌘ + F` | in die Suche (findet alle Termine) |
 | `Strg/⌘ + 1 / 2 / 3` | Kalender / Termine / Konten |
 | `Strg/⌘ + ,` | Einstellungen |
 | `Strg/⌘ + B` | Menü ein- / ausklappen |

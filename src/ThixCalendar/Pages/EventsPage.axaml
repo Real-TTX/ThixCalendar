@@ -3,7 +3,8 @@
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.EventsPage">
   <!--
-    "Termine": the list of events (the CRUD list of the project's UI rules). Toolbar above: search, calendar, period, sort;
+    "Termine": the list of events (the CRUD list of the project's UI rules). The search is the one of the window header
+    (as in ThixClip); the toolbar above the list: calendar, period, sort;
     the list; paging below it; the actions below, left-aligned, positive to negative, delete with a gap.
   -->
   <UserControl.Styles>
@@ -20,19 +21,14 @@
       <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
     </Style>
   </UserControl.Styles>
-  <DockPanel Margin="26,20,22,16">
+  <DockPanel Margin="26,18,22,16">
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,0,0,14">
-      <TextBlock Text="Termine" FontSize="28" FontWeight="Bold" VerticalAlignment="Center" />
+      <TextBlock Text="Termine" Theme="{StaticResource PageTitle}" VerticalAlignment="Center" />
       <TextBlock x:Name="CountText" Theme="{StaticResource MutedText}" FontSize="14" VerticalAlignment="Center" Margin="0,6,0,0" />
     </StackPanel>
 
     <!-- Toolbar: search, filters, sort -->
     <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12" ItemSpacing="10" LineSpacing="8">
-      <Panel Width="320">
-        <TextBox x:Name="SearchBox" Theme="{StaticResource SearchBox}" Watermark="Titel, Ort, Notizen, Personen …" AutomationProperties.Name="Termine durchsuchen" />
-        <controls:IconView Data="{StaticResource Icon.Search}" Width="18" Height="18" Margin="13,0,0,0" HorizontalAlignment="Left"
-                           Foreground="{DynamicResource TextMutedBrush}" IsHitTestVisible="False" />
-      </Panel>
       <ComboBox x:Name="CalendarFilter" MinWidth="200" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Kalender" />
       <ComboBox x:Name="PeriodFilter" MinWidth="170" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Zeitraum" />
       <ComboBox x:Name="SortChoice" MinWidth="170" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Sortierung" />
