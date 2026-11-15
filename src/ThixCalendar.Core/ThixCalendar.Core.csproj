@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Models, business layer (static classes), infrastructure (SQLite store, settings, protected tokens, OAuth, the calendar
+    providers Microsoft Graph / Google Calendar / ICS) and the native bits (sound) of the desktop app for Windows and
+    macOS. No UI.
+  -->
+  <PropertyGroup>
+    <RootNamespace>ThixCalendar.Core</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SupportedOSPlatformVersion Condition="'$(OS)' == 'Windows_NT'">10.0.17763.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ThixCalendar.Tests" />
+    <InternalsVisibleTo Include="ThixCalendar" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ical.Net" Version="5.*" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.15" />
+  </ItemGroup>
+
+</Project>

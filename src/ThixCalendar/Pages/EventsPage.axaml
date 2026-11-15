@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:ThixCalendar.Controls"
+             x:Class="ThixCalendar.Pages.EventsPage">
+  <!--
+    "Termine": the list of events (the CRUD list of the project's UI rules). Toolbar above: search, calendar, period, sort;
+    the list; paging below it; the actions below, left-aligned, positive to negative, delete with a gap.
+  -->
+  <UserControl.Styles>
+    <!-- The rows are drawn by the page (no local colours in code, or these styles could not win). -->
+    <Style Selector="Border.row">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.row">
+      <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover Border.row">
+      <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="26,20,22,16">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,0,0,14">
+      <TextBlock Text="Termine" FontSize="28" FontWeight="Bold" VerticalAlignment="Center" />
+      <TextBlock x:Name="CountText" Theme="{StaticResource MutedText}" FontSize="14" VerticalAlignment="Center" Margin="0,6,0,0" />
+    </StackPanel>
+
+    <!-- Toolbar: search, filters, sort -->
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12" ItemSpacing="10" LineSpacing="8">
+      <Panel Width="320">
+        <TextBox x:Name="SearchBox" Theme="{StaticResource SearchBox}" Watermark="Titel, Ort, Notizen, Personen …" AutomationProperties.Name="Termine durchsuchen" />
+        <controls:IconView Data="{StaticResource Icon.Search}" Width="18" Height="18" Margin="13,0,0,0" HorizontalAlignment="Left"
+                           Foreground="{DynamicResource TextMutedBrush}" IsHitTestVisible="False" />
+      </Panel>
+      <ComboBox x:Name="CalendarFilter" MinWidth="200" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Kalender" />
+      <ComboBox x:Name="PeriodFilter" MinWidth="170" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Zeitraum" />
+      <ComboBox x:Name="SortChoice" MinWidth="170" MinHeight="40" VerticalContentAlignment="Center" AutomationProperties.Name="Sortierung" />
+    </WrapPanel>
+
+    <!-- Actions (below the list), paging above them -->
+    <controls:ActionBar DockPanel.Dock="Bottom" Margin="0,12,0,0">
+      <Button Theme="{StaticResource PrimaryButton}" Click="OnNewClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Plus}" Text="Neuer Termin" />
+      </Button>
+      <Button x:Name="OpenButton" Click="OnOpenClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Edit}" Text="Öffnen" />
+      </Button>
+      <Button x:Name="JoinButton" Click="OnJoinClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Video}" Text="Beitreten" />
+      </Button>
+      <Button x:Name="ShowInCalendarButton" Click="OnShowInCalendarClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Calendar}" Text="Im Kalender zeigen" />
+      </Button>
+      <Button x:Name="DeleteButton" Theme="{StaticResource DangerButton}" controls:ActionBar.Separated="True" Click="OnDeleteClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Delete}" Text="Löschen" />
+      </Button>
+    </controls:ActionBar>
+    <controls:Pager DockPanel.Dock="Bottom" x:Name="Pager" Margin="0,10,0,0" PageSize="50" />
+    <controls:InfoBar DockPanel.Dock="Bottom" x:Name="Message" Margin="0,10,0,0" />
+
+    <Panel>
+      <ListBox x:Name="EventList" Theme="{StaticResource PlainList}" ItemContainerTheme="{StaticResource PlainRow}" SelectionMode="Single" />
+      <TextBlock x:Name="EmptyText" Theme="{StaticResource MutedText}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" />
+    </Panel>
+  </DockPanel>
+</UserControl>

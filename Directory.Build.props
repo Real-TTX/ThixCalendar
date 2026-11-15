@@ -1,0 +1,70 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Company>Matthias Schmoldt</Company>
+    <Product>ThixCalendar</Product>
+    <Authors>Matthias Schmoldt</Authors>
+    <Copyright>© Matthias Schmoldt</Copyright>
+    <SatelliteResourceLanguages>de;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!--
+    Versioning (single source of truth: Major/Minor below). CI sets Channel / BuildNumber / BuildDate:
+      release : <major>.<minor>.<build>-<date>   e.g. 0.1.42-20261115   (branch main)
+      nightly : nightly-<build>-<date>          e.g. nightly-43-20261115 (branch dev)
+      local   : local-<date>                    e.g. local-20261115      (every local build)
+    The build number is the GitHub run number and increases with every build; the update check compares it.
+  -->
+  <PropertyGroup>
+    <ThixCalendarMajor>0</ThixCalendarMajor>
+    <ThixCalendarMinor>1</ThixCalendarMinor>
+
+    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
+    <Channel Condition="'$(Channel)' == ''">local</Channel>
+    <BuildDate Condition="'$(BuildDate)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMdd'))</BuildDate>
+
+    <Version>$(ThixCalendarMajor).$(ThixCalendarMinor).$(BuildNumber)</Version>
+    <AssemblyVersion>$(ThixCalendarMajor).$(ThixCalendarMinor).0.0</AssemblyVersion>
+    <FileVersion>$(ThixCalendarMajor).$(ThixCalendarMinor).$(BuildNumber).0</FileVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Channel)' == 'release'">
+    <InformationalVersion>$(ThixCalendarMajor).$(ThixCalendarMinor).$(BuildNumber)-$(BuildDate)</InformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Channel)' == 'nightly'">
+    <InformationalVersion>nightly-$(BuildNumber)-$(BuildDate)</InformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Channel)' == 'local'">
+    <InformationalVersion>local-$(BuildDate)</InformationalVersion>
+  </PropertyGroup>
+
+  <!--
+    The OAuth app registrations of the online accounts (Microsoft 365 / Outlook.com, Google). CI passes them from the
+    repository secrets (THIXCALENDAR_MICROSOFT_CLIENT_ID, _GOOGLE_CLIENT_ID, _GOOGLE_CLIENT_SECRET); a local build can pass
+    them with -p:… or the user enters their own in Einstellungen › Konten-Zugang. Desktop apps cannot keep a secret: the
+    Google "client secret" of a desktop app is not confidential by Google's own definition.
+  -->
+  <PropertyGroup>
+    <MicrosoftClientId Condition="'$(MicrosoftClientId)' == ''"></MicrosoftClientId>
+    <GoogleClientId Condition="'$(GoogleClientId)' == ''"></GoogleClientId>
+    <GoogleClientSecret Condition="'$(GoogleClientSecret)' == ''"></GoogleClientSecret>
+  </PropertyGroup>
+
+  <!-- The running program needs channel, build number and the app registrations (update check, about page, sign-in). -->
+  <ItemGroup>
+    <AssemblyMetadata Include="ThixCalendarChannel" Value="$(Channel)" />
+    <AssemblyMetadata Include="ThixCalendarBuildNumber" Value="$(BuildNumber)" />
+    <AssemblyMetadata Include="ThixCalendarRepository" Value="Real-TTX/ThixCalendar" />
+    <AssemblyMetadata Include="ThixCalendarMicrosoftClientId" Value="$(MicrosoftClientId)" />
+    <AssemblyMetadata Include="ThixCalendarGoogleClientId" Value="$(GoogleClientId)" />
+    <AssemblyMetadata Include="ThixCalendarGoogleClientSecret" Value="$(GoogleClientSecret)" />
+  </ItemGroup>
+
+</Project>

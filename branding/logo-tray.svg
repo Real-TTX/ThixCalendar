@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256">
+  <!--
+    ThixCalendar tray / menu bar glyph (16-22 px): one colour, no tile – a calendar outline with its header and today's
+    block. On macOS it is a template image (black + alpha; the menu bar colours it), on Windows the app uses the small
+    colour icon instead. Waiting reminders add a badge at the bottom right (drawn by the app, TrayIconImages).
+  -->
+  <path fill="#000000" fill-rule="evenodd"
+        d="M84 20a14 14 0 0 1 14 14v10h60V34a14 14 0 0 1 28 0v10h10a40 40 0 0 1 40 40v116a40 40 0 0 1-40 40H60a40 40 0 0 1-40-40V84a40 40 0 0 1 40-40h10V34a14 14 0 0 1 14-14zM48 112v88a12 12 0 0 0 12 12h136a12 12 0 0 0 12-12v-88z"/>
+  <rect x="132" y="140" width="52" height="48" rx="12" fill="#000000"/>
+</svg>

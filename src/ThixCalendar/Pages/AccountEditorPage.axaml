@@ -1,0 +1,90 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:ThixCalendar.Controls"
+             x:Class="ThixCalendar.Pages.AccountEditorPage">
+  <!--
+    One account (CREATE / UPDATE page): "Allgemein" (name, address of an ICS subscription, state) and "Kalender" (colour,
+    shown, reminders of each calendar). Fields that do not apply are hidden (the address only for ICS, the e-mail only
+    for online accounts, the calendar tab only once the account exists). Buttons: Speichern … Zurück … gap … Entfernen.
+  -->
+  <DockPanel Margin="26,20,22,16">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="14" Margin="0,0,0,8">
+      <controls:AccountMark x:Name="Mark" Width="30" Height="30" />
+      <StackPanel>
+        <TextBlock x:Name="PageTitle" FontSize="26" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxWidth="760" />
+        <TextBlock x:Name="PageSubtitle" Theme="{StaticResource MutedText}" FontSize="14" />
+      </StackPanel>
+    </StackPanel>
+
+    <controls:ActionBar DockPanel.Dock="Bottom" Margin="0,14,0,0">
+      <Button x:Name="SaveButton" Theme="{StaticResource PrimaryButton}" Click="OnSaveClick">
+        <controls:IconLabel x:Name="SaveLabel" Icon="{StaticResource Icon.Check}" Text="Speichern" />
+      </Button>
+      <Button x:Name="ReconnectButton" Click="OnReconnectClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Login}" Text="Neu anmelden" />
+      </Button>
+      <Button x:Name="SyncButton" Click="OnSyncClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt synchronisieren" />
+      </Button>
+      <Button Click="OnBackClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Back}" Text="Zurück" />
+      </Button>
+      <Button x:Name="RemoveButton" Theme="{StaticResource DangerButton}" controls:ActionBar.Separated="True" Click="OnRemoveClick">
+        <controls:IconLabel Icon="{StaticResource Icon.Delete}" Text="Konto entfernen" />
+      </Button>
+    </controls:ActionBar>
+    <controls:InfoBar DockPanel.Dock="Bottom" x:Name="Message" Margin="0,12,0,0" />
+
+    <TabControl x:Name="Tabs">
+      <TabItem Header="Allgemein">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="680" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <controls:InfoBar x:Name="StateNote" />
+            <controls:FormField Label="Name" Field="Name" Hint="So erscheint das Konto in ThixCalendar, z. B. „Arbeit“ oder „Privat“.">
+              <TextBox x:Name="NameBox" AutomationProperties.Name="Name" />
+            </controls:FormField>
+            <controls:FormField x:Name="UrlField" Label="Kalenderadresse (ICS)" Field="Url">
+              <TextBox x:Name="UrlBox" Watermark="https://… oder webcal://…" AutomationProperties.Name="Kalenderadresse" />
+            </controls:FormField>
+            <Border x:Name="UrlHelp" Theme="{StaticResource SubtleCard}" Margin="0,0,0,14">
+              <StackPanel Spacing="6">
+                <TextBlock Text="Wo finde ich die Adresse?" FontWeight="SemiBold" />
+                <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
+                           Text="Google Kalender: Einstellungen › Kalender › „Privatadresse im iCal-Format“. Outlook / Microsoft 365: Einstellungen › Kalender › Freigegebene Kalender › „Kalender veröffentlichen“ › ICS-Link. Feiertage, Schul- und Vereinstermine bieten oft einen „Abonnieren“-Link an. Ein Abo kann nur gelesen werden – für Einträge und Änderungen verbinde das Konto selbst." />
+              </StackPanel>
+            </Border>
+            <Grid x:Name="Facts" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+              <TextBlock Text="Art" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Column="1" x:Name="KindText" Margin="0,3" />
+              <TextBlock Grid.Row="1" x:Name="UserLabel" Text="Angemeldet als" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <SelectableTextBlock Grid.Row="1" Grid.Column="1" x:Name="UserText" Margin="0,3" />
+              <TextBlock Grid.Row="2" Text="Zuletzt synchronisiert" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="2" Grid.Column="1" x:Name="SyncText" Margin="0,3" TextWrapping="Wrap" />
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      <TabItem x:Name="CalendarsTab" Header="Kalender">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0" Spacing="12">
+            <TextBlock x:Name="CalendarsIntro" Theme="{StaticResource MutedText}" TextWrapping="Wrap" />
+            <StackPanel x:Name="CalendarCards" Spacing="12" />
+            <Border x:Name="AddCalendarCard" Theme="{StaticResource Card}">
+              <StackPanel Spacing="10">
+                <TextBlock Text="Weiteren Kalender anlegen" FontWeight="SemiBold" />
+                <controls:FormField Field="NewCalendar" Margin="0">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox x:Name="NewCalendarBox" Width="280" Watermark="z. B. Sport, Familie …" AutomationProperties.Name="Name des neuen Kalenders" />
+                    <Button Click="OnAddCalendarClick">
+                      <controls:IconLabel Icon="{StaticResource Icon.Plus}" Text="Anlegen" />
+                    </Button>
+                  </StackPanel>
+                </controls:FormField>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

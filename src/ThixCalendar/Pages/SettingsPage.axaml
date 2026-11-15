@@ -1,0 +1,199 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:ThixCalendar.Controls"
+             x:Class="ThixCalendar.Pages.SettingsPage">
+  <!-- The settings in tabs. Every change is saved at once through the business layer (values and policies are checked there). -->
+  <DockPanel Margin="26,20,22,16">
+    <TextBlock DockPanel.Dock="Top" Text="Einstellungen" FontSize="28" FontWeight="Bold" Margin="0,0,0,6" />
+    <controls:InfoBar DockPanel.Dock="Top" x:Name="PolicyNote" Margin="0,8,0,0" />
+    <controls:InfoBar DockPanel.Dock="Top" x:Name="Message" Margin="0,8,0,0" />
+
+    <TabControl x:Name="Tabs">
+      <!-- ===== Allgemein ===== -->
+      <TabItem x:Name="GeneralTabItem" Header="Allgemein">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <controls:SettingRow Title="Mit der Anmeldung starten" Description="ThixCalendar startet unsichtbar im Infobereich / in der Menüleiste – nur so kommen Erinnerungen auch ohne geöffnetes Fenster.">
+              <ToggleSwitch x:Name="AutostartSwitch" OnContent="" OffContent="" AutomationProperties.Name="Autostart" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Erscheinungsbild" Description="Hell, dunkel oder wie das System.">
+              <ComboBox x:Name="ThemeChoice" MinWidth="170" AutomationProperties.Name="Erscheinungsbild" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Tag beginnt um" Description="Bis hierhin rollt die Tages- und Wochenansicht beim Öffnen.">
+              <ComboBox x:Name="DayStartChoice" MinWidth="170" AutomationProperties.Name="Tag beginnt um" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Ansicht beim Start" Description="Die zuletzt gewählte Ansicht bleibt erhalten.">
+              <ComboBox x:Name="ViewChoice" MinWidth="170" AutomationProperties.Name="Ansicht" />
+            </controls:SettingRow>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Erinnerungen ===== -->
+      <TabItem x:Name="RemindersTabItem" Header="Erinnerungen">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <Border Theme="{StaticResource SubtleCard}" Margin="0,4,0,8">
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <controls:IconView Data="{StaticResource Icon.BellRing}" Width="22" Height="22" Foreground="{DynamicResource AccentBrush}" Margin="0,0,12,0" />
+                <TextBlock Grid.Column="1" Theme="{StaticResource MutedText}" TextWrapping="Wrap" VerticalAlignment="Center"
+                           Text="Erinnerungen bleiben stehen, bis du sie schließt oder verschiebst – sie verschwinden nie von selbst. Was verpasst wurde, während der Computer schlief, kommt beim Aufwachen." />
+                <Button Grid.Column="2" Click="OnTestReminderClick" Margin="12,0,0,0" VerticalAlignment="Center">
+                  <controls:IconLabel Icon="{StaticResource Icon.Play}" Text="Test-Erinnerung" />
+                </Button>
+              </Grid>
+            </Border>
+            <controls:SettingRow Title="Erinnern vor dem Beginn" Description="Wenn ein Termin (oder sein Kalender) selbst keine Erinnerung vorgibt.">
+              <ComboBox x:Name="LeadChoice" MinWidth="210" AutomationProperties.Name="Vorlaufzeit" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Zum Beginn noch einmal erinnern" Description="Eine zweite Erinnerung genau dann, wenn der Termin anfängt.">
+              <ToggleSwitch x:Name="AtStartSwitch" OnContent="" OffContent="" AutomationProperties.Name="Zum Beginn erinnern" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Zum Beginn groß in der Bildschirmmitte" Description="Statt in der Ecke: unübersehbar, mit „Beitreten“ für Online-Besprechungen.">
+              <ToggleSwitch x:Name="CenteredSwitch" OnContent="" OffContent="" AutomationProperties.Name="Beginn in der Bildschirmmitte" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Ton" Description="Ein kurzer Gong, wenn eine Erinnerung erscheint.">
+              <ToggleSwitch x:Name="SoundSwitch" OnContent="" OffContent="" AutomationProperties.Name="Ton" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Ton wiederholen" Description="Solange eine Erinnerung unbeantwortet bleibt.">
+              <ComboBox x:Name="RepeatChoice" MinWidth="210" AutomationProperties.Name="Ton wiederholen" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Ganztägige Termine" Description="Eine Erinnerung am ersten Tag (Urlaub, Geburtstage, Fristen).">
+              <ComboBox x:Name="AllDayChoice" MinWidth="210" AutomationProperties.Name="Ganztägige Termine" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Verpasste Erinnerungen nachholen" Description="Nach dem Einschalten oder Aufwachen: Termine, die vor höchstens so langer Zeit begonnen haben.">
+              <ComboBox x:Name="MissedChoice" MinWidth="210" AutomationProperties.Name="Verpasste Erinnerungen" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Abgelehnte Einladungen ignorieren" Description="Keine Erinnerung für Termine, denen du abgesagt hast.">
+              <ToggleSwitch x:Name="DeclinedSwitch" OnContent="" OffContent="" AutomationProperties.Name="Abgelehnte ignorieren" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Erinnerungen pausieren" BorderThickness="0" x:Name="PauseRow">
+              <Button x:Name="PauseButton" Click="OnPauseClick">
+                <controls:IconLabel x:Name="PauseLabel" Icon="{StaticResource Icon.BellOff}" Text="Pausieren …" />
+              </Button>
+            </controls:SettingRow>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Synchronisierung ===== -->
+      <TabItem x:Name="SyncTabItem" Header="Synchronisierung">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <controls:SettingRow Title="Abgleich alle" Description="So oft fragt ThixCalendar Microsoft 365, Google und die ICS-Abos nach Änderungen.">
+              <ComboBox x:Name="IntervalChoice" MinWidth="170" AutomationProperties.Name="Abgleich-Intervall" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Zustand" x:Name="SyncStateRow">
+              <Button Click="OnSyncNowClick">
+                <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt synchronisieren" />
+              </Button>
+            </controls:SettingRow>
+            <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0"
+                       Text="Abgeglichen werden zwei Wochen zurück und vier Monate voraus; weiter entfernte Zeiträume lädt ThixCalendar, sobald du sie im Kalender ansiehst. Ohne Netz bleiben die zuletzt geladenen Termine und ihre Erinnerungen erhalten." />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Konten-Zugang (app registrations) ===== -->
+      <TabItem x:Name="AccessTabItem" Header="Konten-Zugang">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0" Spacing="12">
+            <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
+                       Text="Microsoft und Google lassen Apps nur mit einer App-Registrierung auf Kalender zugreifen. Ist in diesem Build keine hinterlegt (oder möchtest du deine eigene nutzen), trage sie hier ein. Leer = die eingebaute." />
+            <Border Theme="{StaticResource Card}">
+              <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                  <controls:AccountMark Kind="Microsoft" Width="18" Height="18" />
+                  <TextBlock Text="Microsoft 365 / Outlook.com" FontWeight="SemiBold" />
+                  <TextBlock x:Name="MicrosoftState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                </StackPanel>
+                <controls:FormField Label="Anwendungs-ID (Client-ID)" Field="MicrosoftClientId"
+                                    Hint="Microsoft Entra › App-Registrierungen › Neu: „Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten“, Plattform „Mobile und Desktop“ mit Umleitungs-URI http://localhost, Berechtigungen Calendars.ReadWrite, User.Read, offline_access.">
+                  <TextBox x:Name="MicrosoftClientBox" Watermark="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" AutomationProperties.Name="Microsoft Client-ID" />
+                </controls:FormField>
+                <Button Theme="{StaticResource LinkButton}" Content="Microsoft Entra öffnen" Click="OnOpenEntraClick" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Border>
+            <Border Theme="{StaticResource Card}">
+              <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                  <controls:AccountMark Kind="Google" Width="18" Height="18" />
+                  <TextBlock Text="Google Kalender" FontWeight="SemiBold" />
+                  <TextBlock x:Name="GoogleState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                </StackPanel>
+                <controls:FormField Label="Client-ID" Field="GoogleClientId"
+                                    Hint="Google Cloud Console › APIs &amp; Dienste: „Google Calendar API“ aktivieren, OAuth-Zustimmungsbildschirm anlegen, Anmeldedaten › OAuth-Client-ID › Anwendungstyp „Desktop-App“.">
+                  <TextBox x:Name="GoogleClientBox" Watermark="….apps.googleusercontent.com" AutomationProperties.Name="Google Client-ID" />
+                </controls:FormField>
+                <controls:FormField Label="Client-Secret" Field="GoogleClientSecret" Hint="Bei Desktop-Apps laut Google kein echtes Geheimnis; es bleibt trotzdem nur auf diesem Computer.">
+                  <TextBox x:Name="GoogleSecretBox" PasswordChar="•" AutomationProperties.Name="Google Client-Secret" />
+                </controls:FormField>
+                <Button Theme="{StaticResource LinkButton}" Content="Google Cloud Console öffnen" Click="OnOpenGoogleConsoleClick" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Border>
+            <controls:ActionBar>
+              <Button Theme="{StaticResource PrimaryButton}" Click="OnSaveAccessClick">
+                <controls:IconLabel Icon="{StaticResource Icon.Check}" Text="Speichern" />
+              </Button>
+            </controls:ActionBar>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Updates ===== -->
+      <TabItem x:Name="UpdatesTabItem" Header="Updates">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <controls:SettingRow Title="Automatisch nach Updates suchen" Description="Kurz nach dem Start und alle 6 Stunden.">
+              <ToggleSwitch x:Name="CheckUpdatesSwitch" OnContent="" OffContent="" AutomationProperties.Name="Nach Updates suchen" />
+            </controls:SettingRow>
+            <controls:SettingRow Title="Updates automatisch installieren" Description="Neue Versionen werden ohne Rückfrage installiert; ThixCalendar startet danach wieder im Infobereich.">
+              <ToggleSwitch x:Name="AutoInstallSwitch" OnContent="" OffContent="" AutomationProperties.Name="Updates automatisch installieren" />
+            </controls:SettingRow>
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,14,0,10">
+              <TextBlock Text="Installiert" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Column="1" x:Name="InstalledText" Margin="0,3" />
+              <TextBlock Grid.Row="1" Text="Kanal" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="1" Grid.Column="1" x:Name="ChannelText" Margin="0,3" />
+              <TextBlock Grid.Row="2" Text="Zuletzt geprüft" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LastCheckText" Margin="0,3" />
+            </Grid>
+            <controls:InfoBar x:Name="UpdateMessage" />
+            <ProgressBar x:Name="UpdateProgress" Minimum="0" Maximum="1" Height="6" IsVisible="False" Margin="0,0,0,12" />
+            <controls:ActionBar>
+              <Button x:Name="InstallUpdateButton" Theme="{StaticResource PrimaryButton}" Click="OnInstallUpdateClick" IsVisible="False">
+                <controls:IconLabel Icon="{StaticResource Icon.Download}" Text="Update installieren" />
+              </Button>
+              <Button x:Name="CheckUpdateButton" Click="OnCheckUpdateClick">
+                <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt suchen" />
+              </Button>
+              <Button Click="OnReleasePageClick">
+                <controls:IconLabel Icon="{StaticResource Icon.External}" Text="Versionen auf GitHub" />
+              </Button>
+            </controls:ActionBar>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Erweitert ===== -->
+      <TabItem x:Name="AdvancedTabItem" Header="Erweitert">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <controls:SettingRow Title="Datenordner" x:Name="DataFolderRow">
+              <Button Click="OnOpenDataFolderClick">
+                <controls:IconLabel Icon="{StaticResource Icon.Folder}" Text="Öffnen" />
+              </Button>
+            </controls:SettingRow>
+            <controls:SettingRow Title="Protokolle" Description="Fehler, Abstürze und Hänger. Termininhalte, Passwörter und Anmeldungen stehen nie darin.">
+              <Button Click="OnOpenLogFolderClick">
+                <controls:IconLabel Icon="{StaticResource Icon.Folder}" Text="Öffnen" />
+              </Button>
+            </controls:SettingRow>
+            <controls:SettingRow Title="Richtlinien (Administratoren)" BorderThickness="0"
+                                 Description="Windows: HKLM\SOFTWARE\Policies\ThixCalendar, macOS: Profil für info.schmoldt.thixcalendar – LockConfiguration, DisableOnlineAccounts, DisableUpdates (1 = an)." />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

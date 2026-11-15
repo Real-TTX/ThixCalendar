@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!--
+    ThixCalendar app icon, full detail (48 px and larger): a calendar sheet with binder rings and the days of a week,
+    today marked, and a coral reminder badge with a bell at the top right (reminders are what ThixCalendar is about).
+    Geometry on a 256 grid; tools/render-icons.js renders the PNG, ICO and ICNS files from it.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#5A9CFF"/>
+      <stop offset="1" stop-color="#1E5BE6"/>
+    </linearGradient>
+    <linearGradient id="sheet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF1FF"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF7A6B"/>
+      <stop offset="1" stop-color="#F0483B"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="url(#tile)"/>
+  <!-- the sheet with its dark header band -->
+  <rect x="50" y="66" width="156" height="144" rx="22" fill="url(#sheet)"/>
+  <path d="M72 66h112a22 22 0 0 1 22 22v18H50V88a22 22 0 0 1 22-22z" fill="#163E9E"/>
+  <!-- binder rings -->
+  <rect x="84" y="48" width="16" height="36" rx="8" fill="#FFFFFF"/>
+  <rect x="140" y="48" width="16" height="36" rx="8" fill="#FFFFFF"/>
+  <!-- days: two rows, today in the accent -->
+  <g fill="#2F6FED" fill-opacity="0.28">
+    <rect x="70" y="124" width="24" height="22" rx="6"/>
+    <rect x="102" y="124" width="24" height="22" rx="6"/>
+    <rect x="166" y="124" width="24" height="22" rx="6"/>
+    <rect x="70" y="160" width="24" height="22" rx="6"/>
+    <rect x="102" y="160" width="24" height="22" rx="6"/>
+    <rect x="134" y="160" width="24" height="22" rx="6"/>
+  </g>
+  <rect x="134" y="124" width="24" height="22" rx="6" fill="#2F6FED"/>
+  <!-- reminder badge: coral circle with a gap to the tile and a white bell -->
+  <circle cx="196" cy="70" r="36" fill="url(#badge)" stroke="#FFFFFF" stroke-width="8"/>
+  <path d="M196 48a14 14 0 0 1 14 14c0 10 3 14 6 17a2 2 0 0 1-1.5 3.4h-37a2 2 0 0 1-1.5-3.4c3-3 6-7 6-17a14 14 0 0 1 14-14z" fill="#FFFFFF"/>
+  <path d="M189 86a7.5 7.5 0 0 0 14 0z" fill="#FFFFFF"/>
+</svg>
