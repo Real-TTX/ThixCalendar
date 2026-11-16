@@ -9,6 +9,14 @@ und alle Konten (Arbeit, privat, andere Firmen).
 
 ## 1. Microsoft (Entra ID + private Microsoft-Konten) – ca. 3 Minuten
 
+**Mit welchem Konto?** Mit dem **Geschäftskonto** der eigenen Firma (Entra-Mandant), das App-Registrierungen anlegen
+darf – nicht mit einem privaten Microsoft-Konto. Ein privates Konto hat kein eigenes Verzeichnis; das Portal landet dann
+im Mandanten „Microsoft Services“ und meldet *„Das ausgewählte Benutzerkonto ist im Mandanten "Microsoft Services" nicht
+vorhanden und kann auf die Anwendung "74658136-…" nicht zugreifen“* (74658136-… ist das Azure-/Entra-Portal selbst, nicht
+ThixCalendar). Abhilfe: im Anmeldefenster *Anderes Konto verwenden* und das Firmenkonto wählen, oder direkt
+`https://entra.microsoft.com/<firmendomain>` öffnen. Die Registrierung gehört dann der Firma, gilt aber trotzdem für alle
+(Arbeit, andere Firmen, private Outlook.com-Konten).
+
 1. <https://entra.microsoft.com> › **Identität › Anwendungen › App-Registrierungen › Neue Registrierung**.
 2. Name: `ThixCalendar`.
    Unterstützte Kontotypen: **Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten**.
