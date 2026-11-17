@@ -20,14 +20,6 @@ name: desktop
 on:
   push:
     branches: ['**']
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'branding/**'
-      - 'scripts/package-macos.sh'
-      - 'Directory.Build.props'
-      - 'global.json'
-      - '.github/workflows/desktop.yml'
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
