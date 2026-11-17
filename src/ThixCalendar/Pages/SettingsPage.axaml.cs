@@ -129,7 +129,7 @@ public partial class SettingsPage : UserControl, IRefreshable
             GoogleClientBox.Text = settings.GoogleClientId;
             GoogleSecretBox.Text = settings.GoogleClientSecret;
             MicrosoftState.Text = settings.MicrosoftClientId.Length > 0 ? "· eigene Registrierung" : AppInfo.BuiltInMicrosoftClientId.Length > 0 ? "· eingebaut" : "· noch nicht eingerichtet";
-            GoogleState.Text = settings.GoogleClientId.Length > 0 ? "· eigene Registrierung" : AppInfo.BuiltInGoogleClientId.Length > 0 ? "· eingebaut" : "· noch nicht eingerichtet";
+            GoogleState.Text = settings.GoogleClientId.Length > 0 ? "· eigene Registrierung" : AppInfo.BuiltInGoogleClientId.Length > 0 && AppInfo.BuiltInGoogleClientSecret.Length > 0 ? "· eingebaut" : "· noch nicht eingerichtet";
 
             LoadCloud();
             CheckUpdatesSwitch.IsChecked = settings.CheckForUpdates;

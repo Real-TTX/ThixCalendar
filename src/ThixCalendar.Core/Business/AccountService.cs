@@ -30,7 +30,8 @@ public static class AccountService
     public static bool IsConfigured(AccountKind kind) => kind switch
     {
         AccountKind.Microsoft => SettingsService.MicrosoftClientId.Length > 0,
-        AccountKind.Google => SettingsService.GoogleClient.ClientId.Length > 0,
+        // Google exchanges the code only with the secret of the registration (also for desktop apps).
+        AccountKind.Google => SettingsService.GoogleClient is { ClientId.Length: > 0, ClientSecret.Length: > 0 },
         _ => true,
     };
 

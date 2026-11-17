@@ -156,8 +156,9 @@ tests/ThixCalendar.Tests
 - `.github/workflows/desktop.yml` (every branch): Windows (test, publish win-x64 single file = `ThixCalendarSetup.exe`, self
   test), macOS (test, publish osx-arm64 + osx-x64, `package-macos.sh` → dmg/zip), publish (manifest
   `thixcalendar-update.json`, rolling releases `release-channel` / `nightly-channel`, versioned release `v<version>` on main).
-  The **Microsoft client id is built in** (`Directory.Build.props`, ThixCalendar's Entra registration, multi-tenant + personal;
-  a public client id is no secret). Optional secrets `THIXCALENDAR_GOOGLE_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_SECRET`
-  (and `THIXCALENDAR_MICROSOFT_CLIENT_ID` to override) become the built-in app registrations (MSBuild reads them from the
-  environment); local builds read secrets.local.props (ignored by git, template secrets.local.props.example). **Users never enter client ids: they just sign in**
+  The **Microsoft and Google client ids are built in** (`Directory.Build.props`; Entra multi-tenant + personal, Google desktop
+  client; a public client id is no secret). Google's client secret comes ONLY from the repository secret
+  `THIXCALENDAR_GOOGLE_CLIENT_SECRET` (GitHub push protection blocks it in git); without it Google counts as not set up
+  (`AccountService.IsConfigured`). `THIXCALENDAR_MICROSOFT_CLIENT_ID` / `_GOOGLE_CLIENT_ID` override (MSBuild reads them from
+  the environment); local builds read secrets.local.props (ignored by git, template secrets.local.props.example). **Users never enter client ids: they just sign in**
   (owner's requirement) – the registration is the publisher's one-time job (docs/APP-REGISTRIERUNG.md).

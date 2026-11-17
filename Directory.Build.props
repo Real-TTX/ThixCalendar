@@ -56,7 +56,7 @@
   <Import Project="secrets.local.props" Condition="Exists('$(MSBuildThisFileDirectory)secrets.local.props')" />
   <PropertyGroup>
     <MicrosoftClientId Condition="'$(MicrosoftClientId)' == ''">67da608f-1ccd-4664-94d7-fd12ea31f063</MicrosoftClientId>
-    <GoogleClientId Condition="'$(GoogleClientId)' == ''"></GoogleClientId>
+    <GoogleClientId Condition="'$(GoogleClientId)' == ''">466427641870-qud3jgehsu1qsgnb92rq27qve5cbifs6.apps.googleusercontent.com</GoogleClientId>
     <GoogleClientSecret Condition="'$(GoogleClientSecret)' == ''"></GoogleClientSecret>
   </PropertyGroup>
 

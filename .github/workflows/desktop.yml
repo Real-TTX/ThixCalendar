@@ -36,7 +36,8 @@ env:
   DOTNET_VERSION: '10.0.x'
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  # Read by MSBuild as properties (Directory.Build.props); empty = the defaults there (Microsoft built in, Google none yet).
+  # Read by MSBuild as properties (Directory.Build.props); empty = the defaults there (Microsoft and the Google client id are
+  # built in; the Google client secret comes only from THIXCALENDAR_GOOGLE_CLIENT_SECRET - GitHub push protection blocks it in git).
   MicrosoftClientId: ${{ secrets.THIXCALENDAR_MICROSOFT_CLIENT_ID }}
   GoogleClientId: ${{ secrets.THIXCALENDAR_GOOGLE_CLIENT_ID }}
   GoogleClientSecret: ${{ secrets.THIXCALENDAR_GOOGLE_CLIENT_SECRET }}

@@ -65,10 +65,14 @@ nicht – die Client-ID bleibt dieselbe.
 - **Microsoft:** Die Client-ID steht direkt in `Directory.Build.props` (`MicrosoftClientId`) – sie ist kein Geheimnis
   (sie steht in jeder Anmeldeadresse). Jeder Build, lokal und in CI, hat sie damit eingebaut.
   Eingebaut: `67da608f-1ccd-4664-94d7-fd12ea31f063` (Entra-Registrierung „ThixCalendar“).
-- **Google – GitHub (alle CI-Builds):** Repository › Settings › Secrets and variables › Actions:
-  `THIXCALENDAR_GOOGLE_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_SECRET`.
-- **Google – lokale Builds:** `secrets.local.props.example` nach `secrets.local.props` kopieren und ausfüllen (von git
-  ignoriert).
+- **Google – Client-ID:** steht ebenfalls in `Directory.Build.props` (`GoogleClientId`), eingebaut:
+  `466427641870-qud3jgehsu1qsgnb92rq27qve5cbifs6.apps.googleusercontent.com`.
+- **Google – Client-Secret (alle CI-Builds):** Repository › Settings › Secrets and variables › Actions › *New repository
+  secret* `THIXCALENDAR_GOOGLE_CLIENT_SECRET` (`GOCSPX-…`). Es steht bewusst **nicht** im Repository: GitHubs Push-Schutz
+  sperrt Google-Secrets. Ohne Secret zeigt ThixCalendar Google als „noch nicht eingerichtet“ (Google tauscht die Anmeldung
+  nur mit Secret ein).
+- **Google – lokale Builds:** `secrets.local.props.example` nach `secrets.local.props` kopieren und das Secret eintragen
+  (von git ignoriert).
 - Überschreiben (z. B. Test-Registrierung): `THIXCALENDAR_MICROSOFT_CLIENT_ID` als Secret bzw. `MicrosoftClientId` in
   `secrets.local.props`.
 
