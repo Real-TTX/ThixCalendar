@@ -1,5 +1,6 @@
-<local:ThemedWindow xmlns="https://github.com/avaloniaui"
+<mat:MatWindow xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mat="using:MatDesktop"
                     xmlns:local="using:ThixCalendar"
                     xmlns:controls="using:ThixCalendar.Controls"
                     x:Class="ThixCalendar.Setup.SetupWindow"
@@ -8,29 +9,29 @@
   <!-- The Windows setup of ThixCalendar (like ThixTunnel's):
        Install: Welcome -> Progress -> Finish. Uninstall: Confirm -> Progress -> Finish. -->
   <DockPanel>
-    <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+    <Border DockPanel.Dock="Top" Background="{DynamicResource Mat.Surface}" BorderBrush="{DynamicResource Mat.Border}" BorderThickness="0,0,0,1"
             Padding="28,18">
       <StackPanel Orientation="Horizontal">
         <Image Source="/Assets/logo-64.png" Width="44" Height="44" RenderOptions.BitmapInterpolationMode="HighQuality" />
         <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" FontSize="26" FontWeight="SemiBold">
-          <Run Text="Thix" /><Run Text="Calendar" Foreground="{DynamicResource AccentBrush}" />
+          <Run Text="Thix" /><Run Text="Calendar" Foreground="{DynamicResource Mat.Accent}" />
         </TextBlock>
-        <TextBlock x:Name="ModeText" Margin="14,5,0,0" VerticalAlignment="Center" FontSize="16" Foreground="{DynamicResource TextMutedBrush}" Text="Setup" />
+        <TextBlock x:Name="ModeText" Margin="14,5,0,0" VerticalAlignment="Center" FontSize="16" Foreground="{DynamicResource Mat.TextMuted}" Text="Setup" />
       </StackPanel>
     </Border>
 
-    <Border DockPanel.Dock="Bottom" Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0"
+    <Border DockPanel.Dock="Bottom" Background="{DynamicResource Mat.NavBg}" BorderBrush="{DynamicResource Mat.Border}" BorderThickness="0,1,0,0"
             Padding="28,12">
       <DockPanel>
         <controls:ActionBar DockPanel.Dock="Right">
-          <Button x:Name="PrimaryButton" Theme="{StaticResource PrimaryButton}" Click="OnPrimaryClick" IsDefault="True">
-            <controls:IconLabel x:Name="PrimaryLabel" Icon="{StaticResource Icon.Download}" Text="Installieren" />
+          <Button x:Name="PrimaryButton" Theme="{StaticResource MatButton.Primary}" Click="OnPrimaryClick" IsDefault="True">
+            <controls:IconLabel x:Name="PrimaryLabel" Icon="download" Text="Installieren" />
           </Button>
           <Button x:Name="CancelButton" Click="OnCancelClick" IsCancel="True">
-            <controls:IconLabel Icon="{StaticResource Icon.Close}" Text="Abbrechen" />
+            <controls:IconLabel Icon="x" Text="Abbrechen" />
           </Button>
         </controls:ActionBar>
-        <TextBlock x:Name="VersionText" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+        <TextBlock x:Name="VersionText" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource Mat.TextMuted}" />
       </DockPanel>
     </Border>
 
@@ -38,20 +39,20 @@
       <Grid Margin="28,22,28,20">
         <!-- Install / update -->
         <StackPanel x:Name="WelcomePage">
-          <TextBlock x:Name="WelcomeTitle" Text="Willkommen" Theme="{StaticResource SectionTitle}" FontSize="20" Margin="0,0,0,10" />
+          <TextBlock x:Name="WelcomeTitle" Text="Willkommen" Theme="{StaticResource MatText.SectionTitle}" FontSize="20" Margin="0,0,0,10" />
           <TextBlock x:Name="WelcomeText" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="21"
                      Text="ThixCalendar zeigt deine Kalender aus Microsoft 365, Google und ICS-Abos zusammen und erinnert dich an jeden Termin – so, dass du keinen mehr verpasst. Es läuft im Infobereich der Taskleiste." />
-          <Border x:Name="OptionsCard" Theme="{StaticResource Card}" Padding="18,2" Margin="0,0,0,14">
+          <Border x:Name="OptionsCard" Theme="{StaticResource MatCard}" Padding="18,2" Margin="0,0,0,14">
             <StackPanel>
-              <controls:SettingRow Title="Bei der Windows-Anmeldung starten" Description="Im Infobereich, ohne Fenster – damit Erinnerungen immer kommen">
+              <mat:MatSettingRow Title="Bei der Windows-Anmeldung starten" Description="Im Infobereich, ohne Fenster – damit Erinnerungen immer kommen">
                 <ToggleSwitch x:Name="AutostartToggle" IsChecked="True" OnContent="" OffContent="" AutomationProperties.Name="Bei der Windows-Anmeldung starten" />
-              </controls:SettingRow>
-              <controls:SettingRow Title="Verknüpfung auf dem Desktop" Description="Ein Startmenü-Eintrag wird immer angelegt">
+              </mat:MatSettingRow>
+              <mat:MatSettingRow Title="Verknüpfung auf dem Desktop" Description="Ein Startmenü-Eintrag wird immer angelegt">
                 <ToggleSwitch x:Name="DesktopToggle" OnContent="" OffContent="" AutomationProperties.Name="Verknüpfung auf dem Desktop" />
-              </controls:SettingRow>
-              <controls:SettingRow Title="Updates automatisch installieren" Description="Neue Versionen ohne Rückfrage, ThixCalendar startet danach neu" BorderThickness="0">
+              </mat:MatSettingRow>
+              <mat:MatSettingRow Title="Updates automatisch installieren" Description="Neue Versionen ohne Rückfrage, ThixCalendar startet danach neu" BorderThickness="0">
                 <ToggleSwitch x:Name="AutoUpdateToggle" IsChecked="True" OnContent="" OffContent="" AutomationProperties.Name="Updates automatisch installieren" />
-              </controls:SettingRow>
+              </mat:MatSettingRow>
             </StackPanel>
           </Border>
           <controls:InfoBar x:Name="PlaceInfo" />
@@ -59,27 +60,27 @@
 
         <!-- Uninstall -->
         <StackPanel x:Name="ConfirmPage" IsVisible="False">
-          <TextBlock Text="ThixCalendar entfernen" Theme="{StaticResource SectionTitle}" FontSize="20" Margin="0,0,0,10" />
+          <TextBlock Text="ThixCalendar entfernen" Theme="{StaticResource MatText.SectionTitle}" FontSize="20" Margin="0,0,0,10" />
           <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="21"
                      Text="Programm, Startmenü-Eintrag, Desktop-Verknüpfung und Autostart werden entfernt. Deine Termine bei Microsoft 365 und Google bleiben unberührt." />
-          <Border Theme="{StaticResource Card}" Padding="18,2">
-            <controls:SettingRow Title="Auch meine Daten löschen" BorderThickness="0"
+          <Border Theme="{StaticResource MatCard}" Padding="18,2">
+            <mat:MatSettingRow Title="Auch meine Daten löschen" BorderThickness="0"
                                  Description="Konten, lokale Kalender, Einstellungen und Protokolle auf diesem Computer. Ohne Haken bleiben sie für eine spätere Installation erhalten.">
               <ToggleSwitch x:Name="DeleteDataToggle" OnContent="" OffContent="" AutomationProperties.Name="Auch meine Daten löschen" />
-            </controls:SettingRow>
+            </mat:MatSettingRow>
           </Border>
         </StackPanel>
 
         <!-- Work in progress -->
         <StackPanel x:Name="ProgressPage" IsVisible="False">
-          <TextBlock x:Name="ProgressTitle" Text="Installiere …" Theme="{StaticResource SectionTitle}" FontSize="20" Margin="0,0,0,12" />
+          <TextBlock x:Name="ProgressTitle" Text="Installiere …" Theme="{StaticResource MatText.SectionTitle}" FontSize="20" Margin="0,0,0,12" />
           <ProgressBar x:Name="Progress" Height="4" MinHeight="4" IsIndeterminate="True" Margin="0,0,0,16" />
           <ItemsControl x:Name="StepList">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <DockPanel Margin="0,0,0,6">
-                  <controls:IconView DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Width="16" Height="16"
-                                     Foreground="{DynamicResource SuccessBrush}" Margin="0,0,10,0" />
+                  <mat:MatIcon Size="16" DockPanel.Dock="Left" Icon="check"
+                                     Foreground="{DynamicResource Mat.Success}" Margin="0,0,10,0" />
                   <TextBlock Text="{Binding}" TextWrapping="Wrap" />
                 </DockPanel>
               </DataTemplate>
@@ -89,15 +90,15 @@
 
         <!-- Done -->
         <StackPanel x:Name="FinishPage" IsVisible="False">
-          <TextBlock x:Name="FinishTitle" Text="ThixCalendar ist bereit" Theme="{StaticResource SectionTitle}" FontSize="20" Margin="0,0,0,12" />
+          <TextBlock x:Name="FinishTitle" Text="ThixCalendar ist bereit" Theme="{StaticResource MatText.SectionTitle}" FontSize="20" Margin="0,0,0,12" />
           <controls:InfoBar x:Name="ResultBar" />
-          <Border x:Name="StartCard" Theme="{StaticResource Card}" Padding="18,2">
-            <controls:SettingRow Title="ThixCalendar jetzt starten" BorderThickness="0">
+          <Border x:Name="StartCard" Theme="{StaticResource MatCard}" Padding="18,2">
+            <mat:MatSettingRow Title="ThixCalendar jetzt starten" BorderThickness="0">
               <ToggleSwitch x:Name="StartToggle" IsChecked="True" OnContent="" OffContent="" AutomationProperties.Name="ThixCalendar jetzt starten" />
-            </controls:SettingRow>
+            </mat:MatSettingRow>
           </Border>
         </StackPanel>
       </Grid>
     </ScrollViewer>
   </DockPanel>
-</local:ThemedWindow>
+</mat:MatWindow>

@@ -184,7 +184,7 @@ public partial class CalendarPage : UserControl, IRefreshable
     private void RefreshSyncState()
     {
         var status = SyncService.Status;
-        var brush = status.SignedOutAccounts > 0 ? "DangerBrush" : status.FailedAccounts > 0 ? "WarningBrush" : status.IsSyncing ? "AccentBrush" : status.LastSync is not null ? "SuccessBrush" : null;
+        var brush = status.SignedOutAccounts > 0 ? "Mat.Danger" : status.FailedAccounts > 0 ? "Mat.Warning" : status.IsSyncing ? "Mat.Accent" : status.LastSync is not null ? "Mat.Success" : null;
         SyncDot.IsVisible = brush is not null;
         if (brush is not null)
         {

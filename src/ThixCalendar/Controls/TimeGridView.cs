@@ -111,12 +111,12 @@ public sealed class TimeGridView : UserControl
                 Text = day.ToString("ddd d.", Ui.German),
                 FontSize = 13.5,
                 FontWeight = isToday ? FontWeight.SemiBold : FontWeight.Medium,
-                Foreground = isToday ? Ui.Brush("OnAccentBrush") : day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? Ui.Brush("TextMutedBrush") : Ui.Brush("TextBrush"),
+                Foreground = isToday ? Ui.Brush("Mat.OnAccent") : day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? Ui.Brush("Mat.TextMuted") : Ui.Brush("Mat.Text"),
                 HorizontalAlignment = HorizontalAlignment.Center,
             };
             var pill = new Border
             {
-                Background = isToday ? Ui.Brush("AccentBrush") : Brushes.Transparent,
+                Background = isToday ? Ui.Brush("Mat.Accent") : Brushes.Transparent,
                 CornerRadius = new CornerRadius(9),
                 Padding = new Thickness(12, 3),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -133,7 +133,7 @@ public sealed class TimeGridView : UserControl
             };
             var cell = new Border
             {
-                BorderBrush = Ui.Brush("GridLineBrush"),
+                BorderBrush = Ui.Brush("Mat.Border"),
                 BorderThickness = new Thickness(0, 0, 0, 1),
                 Padding = new Thickness(0, 2, 0, 5),
                 Child = pill,
@@ -142,15 +142,15 @@ public sealed class TimeGridView : UserControl
             _header.Children.Add(cell);
         }
 
-        var corner = new Border { BorderBrush = Ui.Brush("GridLineBrush"), BorderThickness = new Thickness(0, 0, 0, 1) };
+        var corner = new Border { BorderBrush = Ui.Brush("Mat.Border"), BorderThickness = new Thickness(0, 0, 0, 1) };
         _header.Children.Add(corner);
     }
 
     private void BuildAllDayRow(IReadOnlyList<EventItem> items)
     {
         var allDay = items.Where(item => item.Event.IsAllDay).ToList();
-        var label = new TextBlock { Text = "ganztägig", FontSize = 11, Foreground = Ui.Brush("TextFaintBrush"), HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 8, 0) };
-        var gutter = new Border { BorderBrush = Ui.Brush("GridLineBrush"), BorderThickness = new Thickness(0, 0, 0, 1), Child = label, MinHeight = 30 };
+        var label = new TextBlock { Text = "ganztägig", FontSize = 11, Foreground = Ui.Brush("Mat.TextFaint"), HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 8, 0) };
+        var gutter = new Border { BorderBrush = Ui.Brush("Mat.Border"), BorderThickness = new Thickness(0, 0, 0, 1), Child = label, MinHeight = 30 };
         _allDay.Children.Add(gutter);
         _allDay.IsVisible = true;
         for (var index = 0; index < DayCount; index++)
@@ -165,7 +165,7 @@ public sealed class TimeGridView : UserControl
 
             if (ofDay.Count > MaxAllDayRows)
             {
-                var more = new Button { Theme = Ui.Theme("LinkButton"), Content = $"+{ofDay.Count - MaxAllDayRows} weitere", FontSize = 11.5, Margin = new Thickness(6, 0, 0, 0) };
+                var more = new Button { Theme = Ui.Theme("MatButton.Link"), Content = $"+{ofDay.Count - MaxAllDayRows} weitere", FontSize = 11.5, Margin = new Thickness(6, 0, 0, 0) };
                 more.Click += (_, _) => DayChosen?.Invoke(this, day);
                 stack.Children.Add(more);
             }
@@ -173,7 +173,7 @@ public sealed class TimeGridView : UserControl
             var cell = new Border
             {
                 Background = Brushes.Transparent,
-                BorderBrush = Ui.Brush("GridLineBrush"),
+                BorderBrush = Ui.Brush("Mat.Border"),
                 BorderThickness = new Thickness(1, 0, 0, 1),
                 MinHeight = 30,
                 Child = stack,
@@ -195,7 +195,7 @@ public sealed class TimeGridView : UserControl
         var gutter = new Canvas { Height = HourHeight * 24 };
         for (var hour = 1; hour < 24; hour++)
         {
-            var text = new TextBlock { Text = $"{hour:00}:00", FontSize = 12, Foreground = Ui.Brush("TextMutedBrush"), Width = GutterWidth - 12, TextAlignment = TextAlignment.Right };
+            var text = new TextBlock { Text = $"{hour:00}:00", FontSize = 12, Foreground = Ui.Brush("Mat.TextMuted"), Width = GutterWidth - 12, TextAlignment = TextAlignment.Right };
             Canvas.SetTop(text, hour * HourHeight - 8);
             gutter.Children.Add(text);
         }
@@ -207,9 +207,9 @@ public sealed class TimeGridView : UserControl
             var panel = new DayColumnPanel
             {
                 HourHeight = HourHeight,
-                LineBrush = Ui.Brush("GridLineBrush"),
-                HalfLineBrush = Ui.Brush("GridHalfLineBrush"),
-                Background = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? Ui.Brush("WeekendBrush") : Brushes.Transparent,
+                LineBrush = Ui.Brush("Mat.Border"),
+                HalfLineBrush = Ui.Brush("Mat.Surface3"),
+                Background = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? Ui.Brush("Mat.Bg2") : Brushes.Transparent,
             };
             foreach (var slot in EventLayout.Arrange(day, items))
             {
@@ -249,7 +249,7 @@ public sealed class TimeGridView : UserControl
             return;
         }
 
-        var brush = Ui.Brush("NowBrush");
+        var brush = Ui.Brush("Mat.Danger");
         var line = new Grid
         {
             Height = 10,

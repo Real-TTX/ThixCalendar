@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
+using MatDesktop;
 
 namespace ThixCalendar.Controls;
 
@@ -11,7 +11,7 @@ namespace ThixCalendar.Controls;
 /// </summary>
 public sealed class IconLabel : StackPanel
 {
-    public static readonly StyledProperty<Geometry?> IconProperty = AvaloniaProperty.Register<IconLabel, Geometry?>(nameof(Icon));
+    public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<IconLabel, string?>(nameof(Icon));
 
     public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<IconLabel, string>(nameof(Text), "");
 
@@ -19,7 +19,7 @@ public sealed class IconLabel : StackPanel
 
     public static readonly StyledProperty<bool> IsTextVisibleProperty = AvaloniaProperty.Register<IconLabel, bool>(nameof(IsTextVisible), true);
 
-    private readonly IconView _icon = new() { Width = 16, Height = 16 };
+    private readonly MatIcon _icon = new() { Size = 16 };
     private readonly TextBlock _text = new() { VerticalAlignment = VerticalAlignment.Center };
 
     static IconLabel()
@@ -39,7 +39,8 @@ public sealed class IconLabel : StackPanel
         Refresh();
     }
 
-    public Geometry? Icon
+    /// <summary>An icon of MatDesktop's sprite by name ("plus", "trash" …).</summary>
+    public string? Icon
     {
         get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
@@ -65,7 +66,7 @@ public sealed class IconLabel : StackPanel
 
     private void Refresh()
     {
-        _icon.Data = Icon;
+        _icon.Icon = Icon;
         _icon.IsFilled = IsIconFilled;
         _icon.IsVisible = Icon is not null;
         _text.Text = Text;

@@ -11,6 +11,7 @@ using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Reminders;
 using TrayIcon = ThixCalendar.Tray.TrayIcon;
+using MatDesktop;
 
 namespace ThixCalendar;
 
@@ -45,7 +46,19 @@ public partial class App : Application
 
     public static App Instance => (App)Current!;
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    /// <summary>ThixCalendar's accent: the blue of its logo (the same in MatCloud's pages of ThixCalendar).</summary>
+    public const string Accent = "#2F6FED";
+
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+
+        // ThixCalendar speaks German, the texts of MatDesktop (title bar, menu, tray, setup) too.
+        MatText.Language = "de";
+        MatTheme.Install(this, new MatThemeOptions(Accent) { Icon = Ui.AppIcon });
+        Resources.MergedDictionaries.Add((ResourceDictionary)AvaloniaXamlLoader.Load(new Uri("avares://ThixCalendar/Themes/Icons.axaml")));
+        Resources.MergedDictionaries.Add((ResourceDictionary)AvaloniaXamlLoader.Load(new Uri("avares://ThixCalendar/Themes/Theme.axaml")));
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -114,6 +127,8 @@ public partial class App : Application
         }
 
         SyncService.Start();
+        CloudService.Start();
+        _ = ConnectFromLauncherAsync();
         ReminderCoordinator.Start();
 
         // Crashed or hung last time: say so, with the report.
@@ -205,12 +220,22 @@ public partial class App : Application
         }
     }
 
-    public void ApplyTheme(ThemeChoice theme) => RequestedThemeVariant = theme switch
+    /// <summary>The setting "Erscheinungsbild": Wie das System, Hell, Dunkel (DESK-02).</summary>
+    public void ApplyTheme(ThemeChoice theme) => MatTheme.SetAppearance(theme switch
     {
-        ThemeChoice.Light => ThemeVariant.Light,
-        ThemeChoice.Dark => ThemeVariant.Dark,
-        _ => ThemeVariant.Default,
-    };
+        ThemeChoice.Light => MatAppearance.Light,
+        ThemeChoice.Dark => MatAppearance.Dark,
+        _ => MatAppearance.System,
+    });
+
+    /// <summary>ThixLauncher installed ThixCalendar and left its MatCloud sign-in: connected without the browser.</summary>
+    private async Task ConnectFromLauncherAsync()
+    {
+        if (await Task.Run(() => CloudService.ConnectFromLauncherAsync()) is { } account)
+        {
+            Ui.Post(() => _trayIcon?.ShowNotification("Mit der MatCloud verbunden", $"ThixCalendar gleicht deine Kalender jetzt mit der MatCloud ab (Konto {account}, angemeldet von ThixLauncher)."));
+        }
+    }
 
     /// <summary>"Beenden": ends the application.</summary>
     public void ExitApplication()
@@ -226,6 +251,7 @@ public partial class App : Application
         var watch = System.Diagnostics.Stopwatch.StartNew();
         ReminderCoordinator.Stop();
         SyncService.Stop();
+        CloudService.Stop();
         _trayIcon?.Dispose();
         if (_mainWindow is not null)
         {

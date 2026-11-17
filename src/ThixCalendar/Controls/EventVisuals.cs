@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Core.Providers;
+using MatDesktop;
 
 namespace ThixCalendar.Controls;
 
@@ -42,16 +43,16 @@ internal static class EventVisuals
             content.Children.Add(title);
             // The time, with a camera when the event is an online meeting.
             var time = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
-            time.Children.Add(new TextBlock { Text = Ui.TimeRange(calendarEvent), FontSize = 11.5, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis });
+            time.Children.Add(new TextBlock { Text = Ui.TimeRange(calendarEvent), FontSize = 11.5, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis });
             if (calendarEvent.MeetingUrl.Length > 0)
             {
-                time.Children.Add(new IconView { Data = Ui.Icon("Icon.Video"), Width = 13, Height = 13, StrokeWidth = 2.2, Foreground = Ui.SolidBrush(item.Calendar.Color) });
+                time.Children.Add(new MatIcon { Icon = "video", Size = 13, StrokeWidth = 2.2, Foreground = Ui.SolidBrush(item.Calendar.Color) });
             }
 
             content.Children.Add(time);
             if (heightHint > 70 && calendarEvent.Location.Length > 0)
             {
-                content.Children.Add(new TextBlock { Text = calendarEvent.Location, FontSize = 11.5, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis });
+                content.Children.Add(new TextBlock { Text = calendarEvent.Location, FontSize = 11.5, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis });
             }
         }
 
@@ -100,7 +101,7 @@ internal static class EventVisuals
         else
         {
             var dot = new Ellipse { Width = 7, Height = 7, Fill = Ui.SolidBrush(item.Calendar.Color), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 0) };
-            var time = new TextBlock { Text = calendarEvent.StartLocal.ToString("HH:mm"), FontSize = 12, Foreground = Ui.Brush("TextMutedBrush"), Margin = new Thickness(0, 0, 5, 0), VerticalAlignment = VerticalAlignment.Center };
+            var time = new TextBlock { Text = calendarEvent.StartLocal.ToString("HH:mm"), FontSize = 12, Foreground = Ui.Brush("Mat.TextMuted"), Margin = new Thickness(0, 0, 5, 0), VerticalAlignment = VerticalAlignment.Center };
             var title = new TextBlock { Text = calendarEvent.Title, FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
             DockPanel.SetDock(dot, Dock.Left);
             DockPanel.SetDock(time, Dock.Left);

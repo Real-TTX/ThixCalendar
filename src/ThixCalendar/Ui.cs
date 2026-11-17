@@ -6,6 +6,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
+using MatDesktop;
 
 namespace ThixCalendar;
 
@@ -15,17 +16,27 @@ internal static class Ui
     /// <summary>The app speaks German, whatever the system language is.</summary>
     public static readonly CultureInfo German = CultureInfo.GetCultureInfo("de-DE");
 
+    private static WindowIcon? _appIcon;
+
+    /// <summary>The icon of every window (MatThemeOptions.Icon) and of the setup.</summary>
+    public static WindowIcon AppIcon => _appIcon ??= new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://ThixCalendar/Assets/thixcalendar.ico")));
+
+    private static Avalonia.Media.Imaging.Bitmap? _logo;
+
+    /// <summary>The logo of the title bar, the setup and the dialogs.</summary>
+    public static Avalonia.Media.Imaging.Bitmap Logo => _logo ??= new Avalonia.Media.Imaging.Bitmap(Avalonia.Platform.AssetLoader.Open(new Uri("avares://ThixCalendar/Assets/logo-256.png")));
+
     public static object Resource(string key) =>
         Application.Current!.TryGetResource(key, Application.Current.ActualThemeVariant, out var value) && value is not null
             ? value
-            : throw new InvalidOperationException($"Resource {key} is missing in Themes/*.axaml.");
+            : throw new InvalidOperationException($"Resource {key} is missing (MatDesktop or Themes/*.axaml).");
 
     public static IBrush Brush(string key) => (IBrush)Resource(key);
 
-    /// <summary>An icon geometry ("Icon.Calendar", Themes/Icons.axaml).</summary>
-    public static Geometry Icon(string key) => (Geometry)Resource(key);
+    /// <summary>An icon of MatDesktop's sprite as a geometry ("calendar"; ThixCalendar's own few in Themes/Icons.axaml).</summary>
+    public static Geometry Icon(string name) => MatDesktop.MatIcon.Find(name) ?? throw new InvalidOperationException($"The icon {name} is missing in the sprite.");
 
-    /// <summary>A named look (ControlTheme) such as "PrimaryButton" or "MutedText".</summary>
+    /// <summary>A named look (ControlTheme) such as "MatButton.Primary" or "MatText.Muted".</summary>
     public static ControlTheme Theme(string key) => (ControlTheme)Resource(key);
 
     /// <summary>Runs the action on the UI thread (events of the business layer come from any thread).</summary>

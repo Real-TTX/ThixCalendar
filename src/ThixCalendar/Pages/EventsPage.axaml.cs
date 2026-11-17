@@ -9,6 +9,7 @@ using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Dialogs;
+using MatDesktop;
 
 namespace ThixCalendar.Pages;
 
@@ -154,7 +155,7 @@ public partial class EventsPage : UserControl, IRefreshable
             Children =
             {
                 new TextBlock { Text = Ui.DayName(calendarEvent.StartLocal), FontWeight = FontWeight.SemiBold, FontSize = 13.5 },
-                new TextBlock { Text = Ui.TimeRange(calendarEvent), FontSize = 12.5, Foreground = Ui.Brush("TextMutedBrush") },
+                new TextBlock { Text = Ui.TimeRange(calendarEvent), FontSize = 12.5, Foreground = Ui.Brush("Mat.TextMuted") },
             },
         };
         var details = calendarEvent.Location.Length > 0 ? calendarEvent.Location : calendarEvent.MeetingUrl.Length > 0 ? Core.Providers.MeetingLinks.ServiceName(calendarEvent.MeetingUrl) : "";
@@ -165,7 +166,7 @@ public partial class EventsPage : UserControl, IRefreshable
             {
                 new TextBlock { Text = calendarEvent.Title, FontSize = 14.5, FontWeight = FontWeight.Medium, TextTrimming = TextTrimming.CharacterEllipsis,
                                 TextDecorations = calendarEvent.IsCancelled ? TextDecorations.Strikethrough : null },
-                new TextBlock { Text = details, FontSize = 12.5, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis, IsVisible = details.Length > 0 },
+                new TextBlock { Text = details, FontSize = 12.5, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis, IsVisible = details.Length > 0 },
             },
         };
         var calendar = new StackPanel
@@ -177,12 +178,12 @@ public partial class EventsPage : UserControl, IRefreshable
             Children =
             {
                 new AccountMark { Kind = item.Account.Kind, Width = 14, Height = 14 },
-                new TextBlock { Text = item.Calendar.Name, FontSize = 12.5, Foreground = Ui.Brush("TextMutedBrush"), MaxWidth = 170, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center },
+                new TextBlock { Text = item.Calendar.Name, FontSize = 12.5, Foreground = Ui.Brush("Mat.TextMuted"), MaxWidth = 170, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center },
             },
         };
         if (calendarEvent.MeetingUrl.Length > 0)
         {
-            calendar.Children.Insert(0, new IconView { Data = Ui.Icon("Icon.Video"), Width = 15, Height = 15, Foreground = Ui.Brush("AccentBrush") });
+            calendar.Children.Insert(0, new MatIcon { Icon = "video", Size = 15, Foreground = Ui.Brush("Mat.Accent") });
         }
 
         DockPanel.SetDock(bar, Dock.Left);

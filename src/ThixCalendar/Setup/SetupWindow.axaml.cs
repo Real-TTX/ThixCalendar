@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Infrastructure;
+using MatDesktop;
 
 namespace ThixCalendar.Setup;
 
@@ -12,7 +13,7 @@ namespace ThixCalendar.Setup;
 /// steps into the progress page; the window only steers. It cannot be closed halfway through.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public partial class SetupWindow : ThemedWindow
+public partial class SetupWindow : MatWindow
 {
     private readonly bool _isUninstall;
     private readonly bool _isUpdate;
@@ -98,9 +99,9 @@ public partial class SetupWindow : ThemedWindow
         ModeText.Text = "Deinstallation";
         WelcomePage.IsVisible = false;
         ConfirmPage.IsVisible = true;
-        PrimaryButton.Theme = Ui.Theme("DangerButton");
+        PrimaryButton.Theme = Ui.Theme("MatButton.Danger");
         PrimaryButton.IsDefault = false;
-        PrimaryLabel.Icon = Ui.Icon("Icon.Delete");
+        PrimaryLabel.Icon = "trash";
         PrimaryLabel.Text = "Deinstallieren";
     }
 
@@ -170,8 +171,8 @@ public partial class SetupWindow : ThemedWindow
         CancelButton.IsVisible = false;
         PrimaryButton.IsEnabled = true;
         PrimaryButton.IsDefault = true;
-        PrimaryButton.Theme = Ui.Theme("PrimaryButton");
-        PrimaryLabel.Icon = Ui.Icon("Icon.Check");
+        PrimaryButton.Theme = Ui.Theme("MatButton.Primary");
+        PrimaryLabel.Icon = "check";
         PrimaryLabel.Text = "Fertig";
         StartCard.IsVisible = _succeeded && !_isUninstall;
 

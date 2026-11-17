@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using ThixCalendar.Controls;
+using MatDesktop;
 
 namespace ThixCalendar.Tray;
 
@@ -11,7 +12,7 @@ namespace ThixCalendar.Tray;
 /// A short notification next to the tray (Windows: bottom right, macOS: top right below the menu bar).
 /// Disappears after a few seconds; a click opens ThixCalendar. Never takes the keyboard focus.
 /// </summary>
-internal sealed class NotificationToast : ThemedWindow
+internal sealed class NotificationToast : MatWindow
 {
     private static readonly List<NotificationToast> Open = [];
 
@@ -24,14 +25,12 @@ internal sealed class NotificationToast : ThemedWindow
         ShowActivated = false;
         ShowInTaskbar = false;
         CanResize = false;
-        Background = Ui.Brush("CardBrush");
+        Background = Ui.Brush("Mat.Surface");
 
-        var icon = new IconView
-        {
-            Data = Ui.Icon(isWarning ? "Icon.Warning" : "Icon.Info"),
-            Width = 20,
-            Height = 20,
-            Foreground = Ui.Brush(isWarning ? "WarningBrush" : "AccentBrush"),
+        var icon = new MatIcon {
+            Icon = isWarning ? "alert" : "info",
+            Size = 20,
+            Foreground = Ui.Brush(isWarning ? "Mat.Warning" : "Mat.Accent"),
             Margin = new Thickness(0, 1, 12, 0),
             VerticalAlignment = VerticalAlignment.Top,
         };
@@ -41,13 +40,13 @@ internal sealed class NotificationToast : ThemedWindow
             Children =
             {
                 new TextBlock { Text = title, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap },
-                new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Foreground = Ui.Brush("TextMutedBrush"), Margin = new Thickness(0, 3, 0, 0), MaxHeight = 120 },
+                new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Foreground = Ui.Brush("Mat.TextMuted"), Margin = new Thickness(0, 3, 0, 0), MaxHeight = 120 },
             },
         };
 
         Content = new Border
         {
-            BorderBrush = Ui.Brush("BorderBrush"),
+            BorderBrush = Ui.Brush("Mat.Border"),
             BorderThickness = new Thickness(1),
             Padding = new Thickness(16, 14),
             Child = new DockPanel { Children = { icon, texts } },

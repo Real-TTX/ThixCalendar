@@ -42,8 +42,8 @@ public partial class AboutPage : UserControl, IRefreshable
                     ? "Noch nicht geprüft."
                     : $"{result.Message} Zuletzt geprüft: {(UpdateService.LastCheck is { } last ? Ui.FormatDateTime(last) : "–")}.";
         UpdateLabel.Text = available ? "Update installieren …" : "Nach Updates suchen …";
-        UpdateButton.Theme = available ? Ui.Theme("PrimaryButton") : null;
-        UpdateIcon.Foreground = Ui.Brush(available ? "AccentBrush" : "TextMutedBrush");
+        UpdateButton.Theme = available ? Ui.Theme("MatButton.Primary") : null;
+        UpdateIcon.Foreground = Ui.Brush(available ? "Mat.Accent" : "Mat.TextMuted");
     }
 
     private void OnUpdateClick(object? sender, RoutedEventArgs e)

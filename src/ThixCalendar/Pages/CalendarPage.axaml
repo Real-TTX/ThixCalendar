@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mat="using:MatDesktop"
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.CalendarPage">
   <!--
@@ -11,18 +12,18 @@
     <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,0,0,6">
       <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
         <Button x:Name="PreviousButton" Theme="{StaticResource RoundButton}" Width="32" Height="32" CornerRadius="16" Click="OnPreviousClick" AutomationProperties.Name="Zurück">
-          <controls:IconView Data="{StaticResource Icon.ChevronLeft}" Width="16" Height="16" />
+          <mat:MatIcon Size="16" Icon="chevron-left" />
         </Button>
         <Button x:Name="TodayButton" Click="OnTodayClick" CornerRadius="16" Padding="12,4" MinHeight="32" Content="Heute" />
         <Button x:Name="NextButton" Theme="{StaticResource RoundButton}" Width="32" Height="32" CornerRadius="16" Click="OnNextClick" AutomationProperties.Name="Weiter">
-          <controls:IconView Data="{StaticResource Icon.ChevronRight}" Width="16" Height="16" />
+          <mat:MatIcon Size="16" Icon="chevron-right" />
         </Button>
       </StackPanel>
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="16,0,12,0">
         <TextBlock x:Name="RangeTitle" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-        <TextBlock x:Name="RangeSubtitle" Theme="{StaticResource MutedText}" FontSize="13.5" VerticalAlignment="Center" TextWrapping="NoWrap" />
+        <TextBlock x:Name="RangeSubtitle" Theme="{StaticResource MatText.Muted}" FontSize="13.5" VerticalAlignment="Center" TextWrapping="NoWrap" />
       </StackPanel>
-      <Border Grid.Column="2" Background="{DynamicResource SubtleBrush}" CornerRadius="9" Padding="3" VerticalAlignment="Center" Margin="0,0,8,0">
+      <Border Grid.Column="2" Background="{DynamicResource Mat.Surface2}" CornerRadius="9" Padding="3" VerticalAlignment="Center" Margin="0,0,8,0">
         <StackPanel Orientation="Horizontal" Spacing="2">
           <ToggleButton x:Name="DayMode" Theme="{StaticResource Segment}" Content="Tag" Click="OnModeClick" Tag="Day" />
           <ToggleButton x:Name="WorkWeekMode" Theme="{StaticResource Segment}" Content="Arbeitswoche" Click="OnModeClick" Tag="WorkWeek" />
@@ -33,13 +34,13 @@
       <Button Grid.Column="3" x:Name="SyncButton" Theme="{StaticResource RoundButton}" Width="32" Height="32" CornerRadius="16" Margin="0,0,4,0"
               Click="OnSyncClick" AutomationProperties.Name="Jetzt synchronisieren">
         <Panel>
-          <controls:IconView Data="{StaticResource Icon.Sync}" Width="16" Height="16" />
+          <mat:MatIcon Size="16" Icon="refresh" />
           <Ellipse x:Name="SyncDot" Width="7" Height="7" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-4,0" />
         </Panel>
       </Button>
       <Button Grid.Column="4" x:Name="FilterButton" Theme="{StaticResource RoundButton}" Width="32" Height="32" CornerRadius="16"
               ToolTip.Tip="Konten und Kalender ein- und ausblenden" AutomationProperties.Name="Kalender filtern">
-        <controls:IconView Data="{StaticResource Icon.Filter}" Width="16" Height="16" />
+        <mat:MatIcon Size="16" Icon="filter" />
         <Button.Flyout>
           <Flyout Placement="BottomEdgeAlignedRight">
             <StackPanel x:Name="FilterList" MinWidth="260" Spacing="2" />

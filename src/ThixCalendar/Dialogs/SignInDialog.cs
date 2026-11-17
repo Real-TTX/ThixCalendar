@@ -5,6 +5,7 @@ using Avalonia.Media;
 using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Models;
+using MatDesktop;
 
 namespace ThixCalendar.Dialogs;
 
@@ -13,7 +14,7 @@ namespace ThixCalendar.Dialogs;
 /// again and cancel. The business layer does the sign-in and the first sync; errors are shown here, with the way to the
 /// settings when the app registration is missing.
 /// </summary>
-public sealed class SignInDialog : ThemedWindow
+public sealed class SignInDialog : MatWindow
 {
     private readonly CancellationTokenSource _cancel = new();
     private readonly AccountKind _kind;
@@ -36,7 +37,7 @@ public sealed class SignInDialog : ThemedWindow
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ShowInTaskbar = false;
-        this[!BackgroundProperty] = this.GetResourceObservable("CardBrush").ToBinding();
+        this[!BackgroundProperty] = this.GetResourceObservable("Mat.Surface").ToBinding();
 
         var heading = new StackPanel
         {
@@ -53,11 +54,11 @@ public sealed class SignInDialog : ThemedWindow
         {
             Text = $"Dein Browser öffnet die Anmeldung von {(kind == AccountKind.Microsoft ? "Microsoft" : "Google")}. Melde dich dort an und erlaube ThixCalendar den Zugriff auf deine Kalender – danach geht es hier von selbst weiter. Dein Passwort sieht ThixCalendar nie.",
             TextWrapping = TextWrapping.Wrap,
-            Foreground = Ui.Brush("TextMutedBrush"),
+            Foreground = Ui.Brush("Mat.TextMuted"),
             Margin = new Thickness(0, 0, 0, 14),
         };
 
-        _reopen = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.External"), Text = "Browser erneut öffnen" }, IsEnabled = false };
+        _reopen = new Button { Content = new IconLabel { Icon = "external", Text = "Browser erneut öffnen" }, IsEnabled = false };
         _reopen.Click += (_, _) =>
         {
             if (_url is not null)
@@ -65,13 +66,13 @@ public sealed class SignInDialog : ThemedWindow
                 Ui.OpenExternal(_url);
             }
         };
-        _settings = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Settings"), Text = "Eigene Registrierung eintragen" }, IsVisible = false };
+        _settings = new Button { Content = new IconLabel { Icon = "settings", Text = "Eigene Registrierung eintragen" }, IsVisible = false };
         _settings.Click += (_, _) =>
         {
             Close();
             App.Instance.ShowMainWindow(window => window.ShowSettings(Pages.SettingsPage.AccessTab));
         };
-        var cancel = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Close"), Text = "Abbrechen" }, IsCancel = true };
+        var cancel = new Button { Content = new IconLabel { Icon = "x", Text = "Abbrechen" }, IsCancel = true };
         cancel.Click += (_, _) => Close();
         Closed += (_, _) => _cancel.Cancel();
 

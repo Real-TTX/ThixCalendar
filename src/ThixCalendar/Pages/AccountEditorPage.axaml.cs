@@ -8,6 +8,7 @@ using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Dialogs;
+using MatDesktop;
 
 namespace ThixCalendar.Pages;
 
@@ -85,9 +86,9 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         }
 
         SaveLabel.Text = isNew ? _kind == AccountKind.Ics ? "Abonnieren" : "Anlegen" : "Speichern";
-        SaveLabel.Icon = Ui.Icon(isNew ? "Icon.Plus" : "Icon.Check");
+        SaveLabel.Icon = (isNew ? "plus" : "check");
         ReconnectButton.IsVisible = account?.IsOnline == true;
-        ReconnectButton.Theme = account?.State == AccountState.SignedOut ? Ui.Theme("WarningButton") : null;
+        ReconnectButton.Theme = account?.State == AccountState.SignedOut ? Ui.Theme("MatButton.Warning") : null;
         SyncButton.IsVisible = account is { Kind: not AccountKind.Local };
         RemoveButton.IsVisible = !isNew;
         CalendarsTab.IsVisible = !isNew;
@@ -123,12 +124,12 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         var header = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10, Children = { dot, nameText, nameBox } };
         if (calendar.IsReadOnly)
         {
-            header.Children.Add(new Border { Theme = Ui.Theme("Badge"), Child = new TextBlock { Text = "Nur lesen" } });
+            header.Children.Add(new Border { Theme = Ui.Theme("MatBadge"), Child = new TextBlock { Text = "Nur lesen" } });
         }
 
         if (calendar.IsPrimary && account.Kind != AccountKind.Ics)
         {
-            header.Children.Add(new Border { Theme = Ui.Theme("Badge"), Child = new TextBlock { Text = "Hauptkalender" } });
+            header.Children.Add(new Border { Theme = Ui.Theme("MatBadge"), Child = new TextBlock { Text = "Hauptkalender" } });
         }
 
         var swatches = new ColorSwatches { SelectedColor = calendar.Color };
@@ -142,7 +143,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
             try
             {
                 current = CalendarService.UpdateCalendar(calendarId, nameBox.Text ?? "", swatches.SelectedColor, reminders.IsChecked == true);
-                FormField.ShowError(this, null, "");
+                FormErrors.ShowError(this, null, "");
             }
             catch (BusinessException exception)
             {
@@ -171,9 +172,9 @@ public partial class AccountEditorPage : UserControl, IRefreshable
             Children =
             {
                 header,
-                new SettingRow { Title = "Farbe", Content = swatches, Padding = new Thickness(0, 8), BorderThickness = new Thickness(0) },
-                new SettingRow { Title = "Im Kalender anzeigen", Content = visible, Padding = new Thickness(0, 6) },
-                new SettingRow
+                new MatSettingRow { Title = "Farbe", Content = swatches, Padding = new Thickness(0, 8), BorderThickness = new Thickness(0) },
+                new MatSettingRow { Title = "Im Kalender anzeigen", Content = visible, Padding = new Thickness(0, 6) },
+                new MatSettingRow
                 {
                     Title = "Erinnerungen",
                     Description = calendar.DefaultReminderMinutes is { } minutes ? $"Standard dieses Kalenders: {Ui.ReminderText(minutes)}" : "Für Feiertage oder Geburtstage meist aus.",
@@ -185,7 +186,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         };
         if (canDelete)
         {
-            var delete = new Button { Theme = Ui.Theme("DangerButton"), Content = new IconLabel { Icon = Ui.Icon("Icon.Delete"), Text = "Kalender löschen" }, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 6, 0, 0) };
+            var delete = new Button { Theme = Ui.Theme("MatButton.Danger"), Content = new IconLabel { Icon = "trash", Text = "Kalender löschen" }, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 6, 0, 0) };
             delete.Click += async (_, _) =>
             {
                 if (Window is { } window && await ConfirmDialog.AskAsync(window, "Kalender löschen?", $"„{current.Name}“ und alle seine Termine werden gelöscht.", "Löschen", isDestructive: true))
@@ -206,7 +207,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
 
         return new Border
         {
-            Theme = Ui.Theme("Card"),
+            Theme = Ui.Theme("MatCard"),
             Child = content,
         };
     }
@@ -256,7 +257,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         catch (BusinessException exception)
         {
             Message.Hide();
-            if (!FormField.ShowError(this, exception.Field, exception.Message))
+            if (!FormErrors.ShowError(this, exception.Field, exception.Message))
             {
                 Message.Show(exception.Message, InfoSeverity.Error);
             }
@@ -283,7 +284,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         }
         catch (BusinessException exception)
         {
-            if (!FormField.ShowError(this, "NewCalendar", exception.Message))
+            if (!FormErrors.ShowError(this, "NewCalendar", exception.Message))
             {
                 Message.Show(exception.Message, InfoSeverity.Error);
             }

@@ -46,7 +46,7 @@ public sealed class ColorSwatches : UserControl
                 Margin = new Thickness(0, 0, 6, 6),
                 CornerRadius = new CornerRadius(13),
                 BorderThickness = new Thickness(isSelected ? 2 : 0),
-                BorderBrush = Ui.Brush("TextBrush"),
+                BorderBrush = Ui.Brush("Mat.Text"),
                 Padding = new Thickness(isSelected ? 3 : 0),
                 Cursor = new Cursor(StandardCursorType.Hand),
                 Focusable = true,

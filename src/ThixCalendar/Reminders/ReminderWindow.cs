@@ -9,6 +9,7 @@ using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Core.Providers;
+using MatDesktop;
 
 namespace ThixCalendar.Reminders;
 
@@ -18,7 +19,7 @@ namespace ThixCalendar.Reminders;
 /// app the user works in. Before the start it sits in the corner (Windows: bottom right, macOS: top right); when an event
 /// begins it comes large into the middle of the screen with a red "Beginnt jetzt" (setting).
 /// </summary>
-internal sealed class ReminderWindow : ThemedWindow
+internal sealed class ReminderWindow : MatWindow
 {
     private const int MaxVisibleCards = 4;
 
@@ -42,9 +43,9 @@ internal sealed class ReminderWindow : ThemedWindow
         TransparencyLevelHint = [WindowTransparencyLevel.Transparent];
         Background = Brushes.Transparent;
 
-        _dismissAll = new Button { Theme = Ui.Theme("LinkButton"), Content = "Alle schließen", VerticalAlignment = VerticalAlignment.Center };
+        _dismissAll = new Button { Theme = Ui.Theme("MatButton.Link"), Content = "Alle schließen", VerticalAlignment = VerticalAlignment.Center };
         _dismissAll.Click += (_, _) => ReminderCoordinator.DismissAll();
-        var bell = new IconView { Data = Ui.Icon("Icon.BellRing"), Width = 18, Height = 18, Foreground = Ui.Brush("AccentBrush"), Margin = new Thickness(0, 0, 9, 0) };
+        var bell = new MatIcon { Icon = "bell-ring", Size = 18, Foreground = Ui.Brush("Mat.Accent"), Margin = new Thickness(0, 0, 9, 0) };
         var header = new DockPanel { Margin = new Thickness(2, 0, 2, 10) };
         DockPanel.SetDock(bell, Dock.Left);
         DockPanel.SetDock(_dismissAll, Dock.Right);
@@ -55,8 +56,8 @@ internal sealed class ReminderWindow : ThemedWindow
         var scroller = new ScrollViewer { Content = _cards, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, MaxHeight = 640 };
         Content = new Border
         {
-            Background = Ui.Brush("WindowBrush"),
-            BorderBrush = Ui.Brush("StrongBorderBrush"),
+            Background = Ui.Brush("Mat.Bg"),
+            BorderBrush = Ui.Brush("Mat.BorderStrong"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(16),
             Padding = new Thickness(14),
@@ -125,14 +126,14 @@ internal sealed class ReminderWindow : ThemedWindow
             Children =
             {
                 new AccountMark { Kind = reminder.Item.Account.Kind, Width = 13, Height = 13 },
-                new TextBlock { Text = reminder.Item.Calendar.Name, FontSize = 12, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 260 },
+                new TextBlock { Text = reminder.Item.Calendar.Name, FontSize = 12, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 260 },
             },
         };
         if (starting)
         {
             calendarLine.Children.Add(new Border
             {
-                Background = Ui.Brush("AlertBrush"),
+                Background = Ui.Brush("Mat.Danger"),
                 CornerRadius = new CornerRadius(6),
                 Padding = new Thickness(7, 1),
                 Margin = new Thickness(4, 0, 0, 0),
@@ -155,7 +156,7 @@ internal sealed class ReminderWindow : ThemedWindow
             Text = $"{Ui.TimeRange(calendarEvent)}  ·  {Ui.Relative(calendarEvent, now)}",
             FontSize = large ? 15 : 13.5,
             FontWeight = FontWeight.Medium,
-            Foreground = starting ? Ui.Brush("AlertBrush") : Ui.Brush("AccentTextBrush"),
+            Foreground = starting ? Ui.Brush("Mat.Danger") : Ui.Brush("Mat.AccentText"),
         };
         var details = new StackPanel { Spacing = 2, Children = { calendarLine, title, when } };
         if (calendarEvent.Location.Length > 0)
@@ -167,8 +168,8 @@ internal sealed class ReminderWindow : ThemedWindow
                 Margin = new Thickness(0, 2, 0, 0),
                 Children =
                 {
-                    new IconView { Data = Ui.Icon("Icon.MapPin"), Width = 14, Height = 14, Foreground = Ui.Brush("TextMutedBrush") },
-                    new TextBlock { Text = calendarEvent.Location, FontSize = 13, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = large ? 440 : 320 },
+                    new MatIcon { Icon = "map-pin", Size = 14, Foreground = Ui.Brush("Mat.TextMuted") },
+                    new TextBlock { Text = calendarEvent.Location, FontSize = 13, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = large ? 440 : 320 },
                 },
             });
         }
@@ -176,18 +177,18 @@ internal sealed class ReminderWindow : ThemedWindow
         var actions = new ActionBar { Margin = new Thickness(0, 12, 0, 0), Spacing = 6, Separation = 14 };
         if (calendarEvent.MeetingUrl.Length > 0)
         {
-            var join = new Button { Theme = Ui.Theme("PrimaryButton"), Content = new IconLabel { Icon = Ui.Icon("Icon.Video"), Text = $"{MeetingLinks.ServiceName(calendarEvent.MeetingUrl)} beitreten" } };
+            var join = new Button { Theme = Ui.Theme("MatButton.Primary"), Content = new IconLabel { Icon = "video", Text = $"{MeetingLinks.ServiceName(calendarEvent.MeetingUrl)} beitreten" } };
             join.Click += (_, _) => ReminderCoordinator.Join(reminder);
             actions.Children.Add(join);
         }
 
-        var open = new Button { Content = new IconView { Data = Ui.Icon("Icon.Calendar"), Width = 16, Height = 16 }, Padding = new Thickness(10, 7) };
+        var open = new Button { Content = new MatIcon { Icon = "calendar", Size = 16 }, Padding = new Thickness(10, 7) };
         ToolTip.SetTip(open, "Im Kalender öffnen");
         AutomationProperties.SetName(open, "Im Kalender öffnen");
         open.Click += (_, _) => ReminderCoordinator.Open(reminder);
         actions.Children.Add(open);
 
-        var snooze = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Snooze"), Text = "Später" } };
+        var snooze = new Button { Content = new IconLabel { Icon = "snooze", Text = "Später" } };
         var menu = new MenuFlyout { Placement = PlacementMode.TopEdgeAlignedLeft };
         foreach (var (label, until) in ReminderService.SnoozeChoices(reminder, now))
         {
@@ -200,15 +201,15 @@ internal sealed class ReminderWindow : ThemedWindow
         ToolTip.SetTip(snooze, "Später noch einmal erinnern");
         actions.Children.Add(snooze);
 
-        var dismiss = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Check"), Text = "Schließen" } };
+        var dismiss = new Button { Content = new IconLabel { Icon = "check", Text = "Schließen" } };
         ActionBar.SetSeparated(dismiss, true);
         dismiss.Click += (_, _) => ReminderCoordinator.Dismiss(reminder);
         actions.Children.Add(dismiss);
 
         var card = new Border
         {
-            Background = Ui.Brush("CardBrush"),
-            BorderBrush = starting ? Ui.Brush("AlertBrush") : Ui.Brush("BorderBrush"),
+            Background = Ui.Brush("Mat.Surface"),
+            BorderBrush = starting ? Ui.Brush("Mat.Danger") : Ui.Brush("Mat.Border"),
             BorderThickness = new Thickness(starting ? 2 : 1),
             CornerRadius = new CornerRadius(12),
             ClipToBounds = true,

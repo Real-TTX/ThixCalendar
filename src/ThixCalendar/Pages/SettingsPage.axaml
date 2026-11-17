@@ -1,10 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mat="using:MatDesktop"
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.SettingsPage">
   <!-- The settings in tabs. Every change is saved at once through the business layer (values and policies are checked there). -->
   <DockPanel Margin="26,18,22,16">
-    <TextBlock DockPanel.Dock="Top" Text="Einstellungen" Theme="{StaticResource PageTitle}" Margin="0,0,0,6" />
+    <TextBlock DockPanel.Dock="Top" Text="Einstellungen" Theme="{StaticResource MatText.PageTitle}" Margin="0,0,0,6" />
     <controls:InfoBar DockPanel.Dock="Top" x:Name="PolicyNote" Margin="0,8,0,0" />
     <controls:InfoBar DockPanel.Dock="Top" x:Name="Message" Margin="0,8,0,0" />
 
@@ -13,18 +14,18 @@
       <TabItem x:Name="GeneralTabItem" Header="Allgemein">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
-            <controls:SettingRow Title="Mit der Anmeldung starten" Description="ThixCalendar startet unsichtbar im Infobereich / in der Menüleiste – nur so kommen Erinnerungen auch ohne geöffnetes Fenster.">
+            <mat:MatSettingRow Title="Mit der Anmeldung starten" Description="ThixCalendar startet unsichtbar im Infobereich / in der Menüleiste – nur so kommen Erinnerungen auch ohne geöffnetes Fenster.">
               <ToggleSwitch x:Name="AutostartSwitch" OnContent="" OffContent="" AutomationProperties.Name="Autostart" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Erscheinungsbild" Description="Hell, dunkel oder wie das System.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Erscheinungsbild" Description="Hell, dunkel oder wie das System.">
               <ComboBox x:Name="ThemeChoice" MinWidth="170" AutomationProperties.Name="Erscheinungsbild" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Tag beginnt um" Description="Bis hierhin rollt die Tages- und Wochenansicht beim Öffnen.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Tag beginnt um" Description="Bis hierhin rollt die Tages- und Wochenansicht beim Öffnen.">
               <ComboBox x:Name="DayStartChoice" MinWidth="170" AutomationProperties.Name="Tag beginnt um" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Ansicht beim Start" Description="Die zuletzt gewählte Ansicht bleibt erhalten.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Ansicht beim Start" Description="Die zuletzt gewählte Ansicht bleibt erhalten.">
               <ComboBox x:Name="ViewChoice" MinWidth="170" AutomationProperties.Name="Ansicht" />
-            </controls:SettingRow>
+            </mat:MatSettingRow>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
@@ -35,43 +36,43 @@
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
             <Border Theme="{StaticResource SubtleCard}" Margin="0,4,0,8">
               <Grid ColumnDefinitions="Auto,*,Auto">
-                <controls:IconView Data="{StaticResource Icon.BellRing}" Width="22" Height="22" Foreground="{DynamicResource AccentBrush}" Margin="0,0,12,0" />
-                <TextBlock Grid.Column="1" Theme="{StaticResource MutedText}" TextWrapping="Wrap" VerticalAlignment="Center"
+                <mat:MatIcon Size="22" Icon="bell-ring" Foreground="{DynamicResource Mat.Accent}" Margin="0,0,12,0" />
+                <TextBlock Grid.Column="1" Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" VerticalAlignment="Center"
                            Text="Erinnerungen bleiben stehen, bis du sie schließt oder verschiebst – sie verschwinden nie von selbst. Was verpasst wurde, während der Computer schlief, kommt beim Aufwachen." />
                 <Button Grid.Column="2" Click="OnTestReminderClick" Margin="12,0,0,0" VerticalAlignment="Center">
-                  <controls:IconLabel Icon="{StaticResource Icon.Play}" Text="Test-Erinnerung" />
+                  <controls:IconLabel Icon="play" Text="Test-Erinnerung" />
                 </Button>
               </Grid>
             </Border>
-            <controls:SettingRow Title="Erinnern vor dem Beginn" Description="Wenn ein Termin (oder sein Kalender) selbst keine Erinnerung vorgibt.">
+            <mat:MatSettingRow Title="Erinnern vor dem Beginn" Description="Wenn ein Termin (oder sein Kalender) selbst keine Erinnerung vorgibt.">
               <ComboBox x:Name="LeadChoice" MinWidth="210" AutomationProperties.Name="Vorlaufzeit" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Zum Beginn noch einmal erinnern" Description="Eine zweite Erinnerung genau dann, wenn der Termin anfängt.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Zum Beginn noch einmal erinnern" Description="Eine zweite Erinnerung genau dann, wenn der Termin anfängt.">
               <ToggleSwitch x:Name="AtStartSwitch" OnContent="" OffContent="" AutomationProperties.Name="Zum Beginn erinnern" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Zum Beginn groß in der Bildschirmmitte" Description="Statt in der Ecke: unübersehbar, mit „Beitreten“ für Online-Besprechungen.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Zum Beginn groß in der Bildschirmmitte" Description="Statt in der Ecke: unübersehbar, mit „Beitreten“ für Online-Besprechungen.">
               <ToggleSwitch x:Name="CenteredSwitch" OnContent="" OffContent="" AutomationProperties.Name="Beginn in der Bildschirmmitte" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Ton" Description="Ein kurzer Gong, wenn eine Erinnerung erscheint.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Ton" Description="Ein kurzer Gong, wenn eine Erinnerung erscheint.">
               <ToggleSwitch x:Name="SoundSwitch" OnContent="" OffContent="" AutomationProperties.Name="Ton" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Ton wiederholen" Description="Solange eine Erinnerung unbeantwortet bleibt.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Ton wiederholen" Description="Solange eine Erinnerung unbeantwortet bleibt.">
               <ComboBox x:Name="RepeatChoice" MinWidth="210" AutomationProperties.Name="Ton wiederholen" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Ganztägige Termine" Description="Eine Erinnerung am ersten Tag (Urlaub, Geburtstage, Fristen).">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Ganztägige Termine" Description="Eine Erinnerung am ersten Tag (Urlaub, Geburtstage, Fristen).">
               <ComboBox x:Name="AllDayChoice" MinWidth="210" AutomationProperties.Name="Ganztägige Termine" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Verpasste Erinnerungen nachholen" Description="Nach dem Einschalten oder Aufwachen: Termine, die vor höchstens so langer Zeit begonnen haben.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Verpasste Erinnerungen nachholen" Description="Nach dem Einschalten oder Aufwachen: Termine, die vor höchstens so langer Zeit begonnen haben.">
               <ComboBox x:Name="MissedChoice" MinWidth="210" AutomationProperties.Name="Verpasste Erinnerungen" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Abgelehnte Einladungen ignorieren" Description="Keine Erinnerung für Termine, denen du abgesagt hast.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Abgelehnte Einladungen ignorieren" Description="Keine Erinnerung für Termine, denen du abgesagt hast.">
               <ToggleSwitch x:Name="DeclinedSwitch" OnContent="" OffContent="" AutomationProperties.Name="Abgelehnte ignorieren" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Erinnerungen pausieren" BorderThickness="0" x:Name="PauseRow">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Erinnerungen pausieren" BorderThickness="0" x:Name="PauseRow">
               <Button x:Name="PauseButton" Click="OnPauseClick">
-                <controls:IconLabel x:Name="PauseLabel" Icon="{StaticResource Icon.BellOff}" Text="Pausieren …" />
+                <controls:IconLabel x:Name="PauseLabel" Icon="bell-off" Text="Pausieren …" />
               </Button>
-            </controls:SettingRow>
+            </mat:MatSettingRow>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
@@ -80,16 +81,118 @@
       <TabItem x:Name="SyncTabItem" Header="Synchronisierung">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
-            <controls:SettingRow Title="Abgleich alle" Description="So oft fragt ThixCalendar Microsoft 365, Google und die ICS-Abos nach Änderungen.">
+            <mat:MatSettingRow Title="Abgleich alle" Description="So oft fragt ThixCalendar Microsoft 365, Google und die ICS-Abos nach Änderungen.">
               <ComboBox x:Name="IntervalChoice" MinWidth="170" AutomationProperties.Name="Abgleich-Intervall" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Zustand" x:Name="SyncStateRow">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Zustand" x:Name="SyncStateRow">
               <Button Click="OnSyncNowClick">
-                <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt synchronisieren" />
+                <controls:IconLabel Icon="refresh" Text="Jetzt synchronisieren" />
               </Button>
-            </controls:SettingRow>
-            <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0"
+            </mat:MatSettingRow>
+            <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" Margin="0,12,0,0"
                        Text="Abgeglichen werden zwei Wochen zurück und vier Monate voraus; weiter entfernte Zeiträume lädt ThixCalendar, sobald du sie im Kalender ansiehst. Ohne Netz bleiben die zuletzt geladenen Termine und ihre Erinnerungen erhalten." />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===== Cloud (MatCloud) ===== -->
+      <TabItem x:Name="CloudTabItem" Header="Cloud">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+            <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" Margin="0,0,0,16"
+                       Text="Mit MatCloud, der Cloud der Thix-Apps, sind deine Konten, die eigenen Kalender mit ihren Terminen, die Einstellungen der Erinnerungen und deine Antworten auf Erinnerungen auf allen PCs und Macs gleich: Schließt du eine Erinnerung am Laptop, ist sie auch am Desktop erledigt. Anmeldungen bei Microsoft und Google bleiben auf jedem Computer für sich." />
+            <controls:InfoBar x:Name="CloudMessage" Margin="0,0,0,12" />
+
+            <!-- Not connected: sign in, in the browser (every account, also MatIdentity) or with user name and password -->
+            <StackPanel x:Name="CloudLogin" MaxWidth="520" HorizontalAlignment="Left">
+              <mat:MatFormField Label="Adresse der MatCloud" controls:FormErrors.Field="ServerUrl" Hint="z. B. https://cloud.example.com – ThixLauncher meldet ThixCalendar beim Installieren schon an.">
+                <TextBox x:Name="ServerUrlBox" Watermark="https://" />
+              </mat:MatFormField>
+              <mat:MatFormField Label="Name dieses Geräts" controls:FormErrors.Field="DeviceName" Hint="So erscheint dieser Computer in der MatCloud unter „Geräte“.">
+                <TextBox x:Name="DeviceNameBox" />
+              </mat:MatFormField>
+
+              <!-- The first way: in the browser -->
+              <StackPanel x:Name="BrowserSignIn" Margin="0,6,0,0">
+                <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="Die Anmeldung öffnet sich im Browser: Melde dich dort an – mit deinem Konto der MatCloud oder über MatIdentity – und bestätige den Code, den ThixCalendar dir zeigt." />
+                <controls:ActionBar>
+                  <Button x:Name="BrowserConnectButton" Theme="{StaticResource MatButton.Primary}" Click="OnBrowserConnectClick">
+                    <controls:IconLabel Icon="globe" Text="Im Browser anmelden" />
+                  </Button>
+                  <Button x:Name="ShowPasswordSignInButton" Click="OnShowPasswordSignInClick">
+                    <controls:IconLabel Icon="key" Text="Mit Benutzername und Passwort" />
+                  </Button>
+                </controls:ActionBar>
+              </StackPanel>
+
+              <!-- Waiting for the browser: the code to compare -->
+              <Border x:Name="BrowserCode" Theme="{StaticResource MatCard}" IsVisible="False" Margin="0,6,0,0">
+                <StackPanel Spacing="10">
+                  <TextBlock Text="Dein Code" Theme="{StaticResource MatText.Muted}" />
+                  <SelectableTextBlock x:Name="BrowserCodeText" FontFamily="{DynamicResource Mat.Mono}" FontSize="{DynamicResource Mat.FontSize3xl}"
+                                       FontWeight="SemiBold" LetterSpacing="3" Foreground="{DynamicResource Mat.AccentText}" AutomationProperties.Name="Code" />
+                  <TextBlock TextWrapping="Wrap" FontWeight="SemiBold" Text="Bestätige den Code im Browser." />
+                  <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap"
+                             Text="Melde dich auf der Seite der MatCloud an und prüfe, dass dort derselbe Code steht. ThixCalendar verbindet sich, sobald du bestätigt hast." />
+                  <controls:ActionBar Margin="0,4,0,0">
+                    <Button x:Name="OpenLinkButton" Click="OnOpenLinkClick">
+                      <controls:IconLabel Icon="external" Text="Seite erneut öffnen" />
+                    </Button>
+                    <Button x:Name="CancelLinkButton" Click="OnCancelLinkClick">
+                      <controls:IconLabel Icon="x" Text="Abbrechen" />
+                    </Button>
+                  </controls:ActionBar>
+                </StackPanel>
+              </Border>
+
+              <!-- The second way: user name and password of a local account -->
+              <StackPanel x:Name="PasswordSignIn" IsVisible="False" Margin="0,6,0,0">
+                <mat:MatFormField Label="Benutzername" controls:FormErrors.Field="UserName">
+                  <TextBox x:Name="UserNameBox" />
+                </mat:MatFormField>
+                <mat:MatFormField Label="Passwort" controls:FormErrors.Field="Password" Hint="Wird nur für die Anmeldung gebraucht und nicht gespeichert.">
+                  <TextBox x:Name="PasswordBox" PasswordChar="●" />
+                </mat:MatFormField>
+                <controls:ActionBar Margin="0,6,0,0">
+                  <Button x:Name="ConnectButton" Theme="{StaticResource MatButton.Primary}" Click="OnConnectClick">
+                    <controls:IconLabel Icon="login" Text="Anmelden" />
+                  </Button>
+                  <Button Click="OnShowBrowserSignInClick">
+                    <controls:IconLabel Icon="globe" Text="Im Browser anmelden" />
+                  </Button>
+                </controls:ActionBar>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Connected: state and actions -->
+            <StackPanel x:Name="CloudConnected" IsVisible="False" Spacing="16">
+              <Border Theme="{StaticResource MatCard}" MaxWidth="560" HorizontalAlignment="Left">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                  <TextBlock Text="MatCloud" Theme="{StaticResource MatText.Muted}" Margin="0,4,24,4" />
+                  <SelectableTextBlock Grid.Column="1" x:Name="CloudServerText" Margin="0,4" />
+                  <TextBlock Grid.Row="1" Text="Konto" Theme="{StaticResource MatText.Muted}" Margin="0,4,24,4" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" x:Name="CloudAccountText" Margin="0,4" />
+                  <TextBlock Grid.Row="2" Text="Dieses Gerät" Theme="{StaticResource MatText.Muted}" Margin="0,4,24,4" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" x:Name="CloudDeviceText" Margin="0,4" />
+                  <TextBlock Grid.Row="3" Text="Status" Theme="{StaticResource MatText.Muted}" Margin="0,4,24,4" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CloudStateText" Margin="0,4" TextWrapping="Wrap" />
+                  <TextBlock Grid.Row="4" Text="Zuletzt" Theme="{StaticResource MatText.Muted}" Margin="0,4,24,4" />
+                  <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CloudLastSyncText" Margin="0,4" />
+                </Grid>
+              </Border>
+              <controls:ActionBar>
+                <Button Theme="{StaticResource MatButton.Primary}" Click="OnCloudSyncNowClick">
+                  <controls:IconLabel Icon="refresh" Text="Jetzt synchronisieren" />
+                </Button>
+                <Button Click="OnOpenCloudClick">
+                  <controls:IconLabel Icon="external" Text="Im Browser öffnen" />
+                </Button>
+                <Button x:Name="DisconnectButton" Theme="{StaticResource MatButton.Danger}" controls:ActionBar.Separated="True" Click="OnDisconnectClick">
+                  <controls:IconLabel Icon="logout" Text="Abmelden" />
+                </Button>
+              </controls:ActionBar>
+            </StackPanel>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
@@ -98,31 +201,31 @@
       <TabItem x:Name="UpdatesTabItem" Header="Updates">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
-            <controls:SettingRow Title="Automatisch nach Updates suchen" Description="Kurz nach dem Start und alle 6 Stunden.">
+            <mat:MatSettingRow Title="Automatisch nach Updates suchen" Description="Kurz nach dem Start und alle 6 Stunden.">
               <ToggleSwitch x:Name="CheckUpdatesSwitch" OnContent="" OffContent="" AutomationProperties.Name="Nach Updates suchen" />
-            </controls:SettingRow>
-            <controls:SettingRow Title="Updates automatisch installieren" Description="Neue Versionen werden ohne Rückfrage installiert; ThixCalendar startet danach wieder im Infobereich.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Updates automatisch installieren" Description="Neue Versionen werden ohne Rückfrage installiert; ThixCalendar startet danach wieder im Infobereich.">
               <ToggleSwitch x:Name="AutoInstallSwitch" OnContent="" OffContent="" AutomationProperties.Name="Updates automatisch installieren" />
-            </controls:SettingRow>
+            </mat:MatSettingRow>
             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,14,0,10">
-              <TextBlock Text="Installiert" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Text="Installiert" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Column="1" x:Name="InstalledText" Margin="0,3" />
-              <TextBlock Grid.Row="1" Text="Kanal" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="1" Text="Kanal" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Row="1" Grid.Column="1" x:Name="ChannelText" Margin="0,3" />
-              <TextBlock Grid.Row="2" Text="Zuletzt geprüft" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="2" Text="Zuletzt geprüft" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LastCheckText" Margin="0,3" />
             </Grid>
             <controls:InfoBar x:Name="UpdateMessage" />
             <ProgressBar x:Name="UpdateProgress" Minimum="0" Maximum="1" Height="6" IsVisible="False" Margin="0,0,0,12" />
             <controls:ActionBar>
-              <Button x:Name="InstallUpdateButton" Theme="{StaticResource PrimaryButton}" Click="OnInstallUpdateClick" IsVisible="False">
-                <controls:IconLabel Icon="{StaticResource Icon.Download}" Text="Update installieren" />
+              <Button x:Name="InstallUpdateButton" Theme="{StaticResource MatButton.Primary}" Click="OnInstallUpdateClick" IsVisible="False">
+                <controls:IconLabel Icon="download" Text="Update installieren" />
               </Button>
               <Button x:Name="CheckUpdateButton" Click="OnCheckUpdateClick">
-                <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt suchen" />
+                <controls:IconLabel Icon="refresh" Text="Jetzt suchen" />
               </Button>
               <Button Click="OnReleasePageClick">
-                <controls:IconLabel Icon="{StaticResource Icon.External}" Text="Versionen auf GitHub" />
+                <controls:IconLabel Icon="external" Text="Versionen auf GitHub" />
               </Button>
             </controls:ActionBar>
           </StackPanel>
@@ -133,57 +236,57 @@
       <TabItem x:Name="AdvancedTabItem" Header="Erweitert">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
-            <controls:SettingRow Title="Datenordner" x:Name="DataFolderRow">
+            <mat:MatSettingRow Title="Datenordner" x:Name="DataFolderRow">
               <Button Click="OnOpenDataFolderClick">
-                <controls:IconLabel Icon="{StaticResource Icon.Folder}" Text="Öffnen" />
+                <controls:IconLabel Icon="folder" Text="Öffnen" />
               </Button>
-            </controls:SettingRow>
-            <controls:SettingRow Title="Protokolle" Description="Fehler, Abstürze und Hänger. Termininhalte, Passwörter und Anmeldungen stehen nie darin.">
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Protokolle" Description="Fehler, Abstürze und Hänger. Termininhalte, Passwörter und Anmeldungen stehen nie darin.">
               <Button Click="OnOpenLogFolderClick">
-                <controls:IconLabel Icon="{StaticResource Icon.Folder}" Text="Öffnen" />
+                <controls:IconLabel Icon="folder" Text="Öffnen" />
               </Button>
-            </controls:SettingRow>
-            <controls:SettingRow Title="Richtlinien (Administratoren)" BorderThickness="0"
+            </mat:MatSettingRow>
+            <mat:MatSettingRow Title="Richtlinien (Administratoren)" BorderThickness="0"
                                  Description="Windows: HKLM\SOFTWARE\Policies\ThixCalendar, macOS: Profil für info.schmoldt.thixcalendar – LockConfiguration, DisableOnlineAccounts, DisableUpdates (1 = an)." />
             <!-- Own app registrations: only for administrators – normal users just sign in (the build has them built in). -->
             <Expander x:Name="AccessExpander" Header="Eigene App-Registrierung (Administratoren)" HorizontalAlignment="Stretch" Margin="0,14,0,0">
               <StackPanel Spacing="12" Margin="0,4,0,0">
-                <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
+                <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap"
                            Text="Normalerweise nicht nötig: ThixCalendar bringt seine Anmeldung bei Microsoft und Google mit. Nur wer eine eigene Registrierung verwenden muss (z. B. weil die Organisation fremde Apps sperrt), trägt sie hier ein. Leer = die eingebaute." />
-                <Border Theme="{StaticResource Card}">
+                <Border Theme="{StaticResource MatCard}">
                   <StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
                       <controls:AccountMark Kind="Microsoft" Width="18" Height="18" />
                       <TextBlock Text="Microsoft 365 / Outlook.com" FontWeight="SemiBold" />
-                      <TextBlock x:Name="MicrosoftState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                      <TextBlock x:Name="MicrosoftState" Theme="{StaticResource MatText.Muted}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <controls:FormField Label="Anwendungs-ID (Client-ID)" Field="MicrosoftClientId"
+                    <mat:MatFormField Label="Anwendungs-ID (Client-ID)" controls:FormErrors.Field="MicrosoftClientId"
                                         Hint="Microsoft Entra › App-Registrierungen › Neu: „Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten“, Plattform „Mobile und Desktop“ mit Umleitungs-URI http://localhost, Berechtigungen Calendars.ReadWrite, User.Read, offline_access.">
                       <TextBox x:Name="MicrosoftClientBox" Watermark="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" AutomationProperties.Name="Microsoft Client-ID" />
-                    </controls:FormField>
-                    <Button Theme="{StaticResource LinkButton}" Content="Microsoft Entra öffnen" Click="OnOpenEntraClick" HorizontalAlignment="Left" />
+                    </mat:MatFormField>
+                    <Button Theme="{StaticResource MatButton.Link}" Content="Microsoft Entra öffnen" Click="OnOpenEntraClick" HorizontalAlignment="Left" />
                   </StackPanel>
                 </Border>
-                <Border Theme="{StaticResource Card}">
+                <Border Theme="{StaticResource MatCard}">
                   <StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
                       <controls:AccountMark Kind="Google" Width="18" Height="18" />
                       <TextBlock Text="Google Kalender" FontWeight="SemiBold" />
-                      <TextBlock x:Name="GoogleState" Theme="{StaticResource MutedText}" VerticalAlignment="Center" />
+                      <TextBlock x:Name="GoogleState" Theme="{StaticResource MatText.Muted}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <controls:FormField Label="Client-ID" Field="GoogleClientId"
+                    <mat:MatFormField Label="Client-ID" controls:FormErrors.Field="GoogleClientId"
                                         Hint="Google Cloud Console › APIs &amp; Dienste: „Google Calendar API“ aktivieren, OAuth-Zustimmungsbildschirm anlegen, Anmeldedaten › OAuth-Client-ID › Anwendungstyp „Desktop-App“.">
                       <TextBox x:Name="GoogleClientBox" Watermark="….apps.googleusercontent.com" AutomationProperties.Name="Google Client-ID" />
-                    </controls:FormField>
-                    <controls:FormField Label="Client-Secret" Field="GoogleClientSecret" Hint="Bei Desktop-Apps laut Google kein echtes Geheimnis; es bleibt trotzdem nur auf diesem Computer.">
+                    </mat:MatFormField>
+                    <mat:MatFormField Label="Client-Secret" controls:FormErrors.Field="GoogleClientSecret" Hint="Bei Desktop-Apps laut Google kein echtes Geheimnis; es bleibt trotzdem nur auf diesem Computer.">
                       <TextBox x:Name="GoogleSecretBox" PasswordChar="•" AutomationProperties.Name="Google Client-Secret" />
-                    </controls:FormField>
-                    <Button Theme="{StaticResource LinkButton}" Content="Google Cloud Console öffnen" Click="OnOpenGoogleConsoleClick" HorizontalAlignment="Left" />
+                    </mat:MatFormField>
+                    <Button Theme="{StaticResource MatButton.Link}" Content="Google Cloud Console öffnen" Click="OnOpenGoogleConsoleClick" HorizontalAlignment="Left" />
                   </StackPanel>
                 </Border>
                 <controls:ActionBar>
-                  <Button Theme="{StaticResource PrimaryButton}" Click="OnSaveAccessClick">
-                    <controls:IconLabel Icon="{StaticResource Icon.Check}" Text="Speichern" />
+                  <Button Theme="{StaticResource MatButton.Primary}" Click="OnSaveAccessClick">
+                    <controls:IconLabel Icon="check" Text="Speichern" />
                   </Button>
                 </controls:ActionBar>
               </StackPanel>

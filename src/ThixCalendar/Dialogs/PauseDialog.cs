@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using ThixCalendar.Controls;
+using MatDesktop;
 
 namespace ThixCalendar.Dialogs;
 
@@ -13,7 +14,7 @@ namespace ThixCalendar.Dialogs;
 /// Enter pauses, Esc cancels. Answers the end of the pause or null; the caller pauses (SettingsService.PauseReminders).
 /// Nothing is lost: what falls due meanwhile appears when the pause ends.
 /// </summary>
-public sealed class PauseDialog : ThemedWindow
+public sealed class PauseDialog : MatWindow
 {
     private readonly ListBox _lengths = new()
     {
@@ -30,22 +31,22 @@ public sealed class PauseDialog : ThemedWindow
         SizeToContent = SizeToContent.Height;
         CanResize = false;
         ShowInTaskbar = false;
-        this[!BackgroundProperty] = this.GetResourceObservable("CardBrush").ToBinding();
+        this[!BackgroundProperty] = this.GetResourceObservable("Mat.Surface").ToBinding();
 
-        _lengths.Theme = Ui.Theme("PlainList");
+        _lengths.Theme = Ui.Theme("MatList");
         AutomationProperties.SetName(_lengths, "Dauer");
         foreach (var (label, until) in Choices(DateTimeOffset.Now))
         {
-            var item = new ListBoxItem { Theme = Ui.Theme("ChoiceRow"), Tag = until, Content = new TextBlock { Text = label } };
+            var item = new ListBoxItem { Theme = Ui.Theme("MatChoiceRow"), Tag = until, Content = new TextBlock { Text = label } };
             AutomationProperties.SetName(item, label);
             item.DoubleTapped += (_, _) => Choose();
             _lengths.Items.Add(item);
         }
 
         _lengths.SelectedIndex = 1;
-        var pause = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.BellOff"), Text = "Pausieren" }, IsDefault = true, Theme = Ui.Theme("PrimaryButton") };
+        var pause = new Button { Content = new IconLabel { Icon = "bell-off", Text = "Pausieren" }, IsDefault = true, Theme = Ui.Theme("MatButton.Primary") };
         pause.Click += (_, _) => Choose();
-        var cancel = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Close"), Text = "Abbrechen" }, IsCancel = true };
+        var cancel = new Button { Content = new IconLabel { Icon = "x", Text = "Abbrechen" }, IsCancel = true };
         cancel.Click += (_, _) => Close();
 
         Content = new StackPanel
@@ -58,10 +59,10 @@ public sealed class PauseDialog : ThemedWindow
                 {
                     Text = "Nicht stören, z. B. während einer Präsentation. Es geht nichts verloren: was in der Zeit fällig wird, erscheint, sobald die Pause endet.",
                     TextWrapping = TextWrapping.Wrap,
-                    Foreground = Ui.Brush("TextMutedBrush"),
+                    Foreground = Ui.Brush("Mat.TextMuted"),
                     Margin = new Thickness(0, 0, 0, 14),
                 },
-                new TextBlock { Text = "Dauer", Theme = Ui.Theme("FieldLabel"), Margin = new Thickness(0, 0, 0, 6) },
+                new TextBlock { Text = "Dauer", Theme = Ui.Theme("MatText.FieldLabel"), Margin = new Thickness(0, 0, 0, 6) },
                 _lengths,
                 new ActionBar { Margin = new Thickness(0, 20, 0, 0), Children = { pause, cancel } },
             },

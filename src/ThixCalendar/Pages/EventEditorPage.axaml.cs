@@ -221,7 +221,7 @@ public partial class EventEditorPage : UserControl, IRefreshable
         catch (BusinessException exception)
         {
             Message.Hide();
-            if (!FormField.ShowError(this, exception.Field, exception.Message))
+            if (!FormErrors.ShowError(this, exception.Field, exception.Message))
             {
                 Message.Show(exception.Message, InfoSeverity.Error);
             }

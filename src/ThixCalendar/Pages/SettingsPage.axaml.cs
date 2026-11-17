@@ -4,6 +4,7 @@ using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
+using MatDesktop;
 
 namespace ThixCalendar.Pages;
 
@@ -19,6 +20,8 @@ public partial class SettingsPage : UserControl, IRefreshable
     /// <summary>The own app registrations (Erweitert, folded section for administrators).</summary>
     public const string AccessTab = "access";
     public const string UpdatesTab = "updates";
+
+    public const string CloudTab = "cloud";
 
     private static readonly int?[] AllDayChoices = [null, 7 * 60, 8 * 60, 9 * 60, 10 * 60, 12 * 60];
     private static readonly int[] MissedChoices = [0, 15, 30, 60, 120, 240];
@@ -70,6 +73,7 @@ public partial class SettingsPage : UserControl, IRefreshable
         UpdateCoordinator.Checked += (_, result) => Ui.Post(() => ShowUpdateResult(result));
         SyncService.StatusChanged += (_, _) => Ui.Post(LoadSyncState);
         SettingsService.Changed += (_, _) => Ui.Post(LoadPause);
+        CloudService.StatusChanged += (_, _) => Ui.Post(LoadCloud);
         Refresh();
     }
 
@@ -85,6 +89,7 @@ public partial class SettingsPage : UserControl, IRefreshable
         SyncTab => SyncTabItem,
         AccessTab => AdvancedTabItem,
         UpdatesTab => UpdatesTabItem,
+        CloudTab => CloudTabItem,
         _ => GeneralTabItem,
     };
 
@@ -126,6 +131,7 @@ public partial class SettingsPage : UserControl, IRefreshable
             MicrosoftState.Text = settings.MicrosoftClientId.Length > 0 ? "· eigene Registrierung" : AppInfo.BuiltInMicrosoftClientId.Length > 0 ? "· eingebaut" : "· noch nicht eingerichtet";
             GoogleState.Text = settings.GoogleClientId.Length > 0 ? "· eigene Registrierung" : AppInfo.BuiltInGoogleClientId.Length > 0 ? "· eingebaut" : "· noch nicht eingerichtet";
 
+            LoadCloud();
             CheckUpdatesSwitch.IsChecked = settings.CheckForUpdates;
             AutoInstallSwitch.IsChecked = settings.InstallUpdatesAutomatically;
             CheckUpdatesSwitch.IsEnabled = AutoInstallSwitch.IsEnabled = UpdateService.CanUpdate && !locked;
@@ -143,7 +149,7 @@ public partial class SettingsPage : UserControl, IRefreshable
                 ShowUpdateResult(result);
             }
 
-            ((SettingRow)DataFolderRow).Description = AppPaths.DataDirectory;
+            ((MatSettingRow)DataFolderRow).Description = AppPaths.DataDirectory;
             LoadSyncState();
             LoadPause();
         }
@@ -161,8 +167,8 @@ public partial class SettingsPage : UserControl, IRefreshable
         var paused = until is { } end && end > DateTimeOffset.Now;
         PauseRow.Description = paused ? $"Pausiert bis {until!.Value.ToLocalTime():HH:mm} – was in der Zeit fällig wird, kommt danach." : "Nicht stören, z. B. während einer Präsentation. Nichts geht verloren: Fälliges erscheint danach.";
         PauseLabel.Text = paused ? "Fortsetzen" : "Pausieren …";
-        PauseLabel.Icon = Ui.Icon(paused ? "Icon.Bell" : "Icon.BellOff");
-        PauseButton.Theme = paused ? Ui.Theme("WarningButton") : null;
+        PauseLabel.Icon = (paused ? "bell" : "bell-off");
+        PauseButton.Theme = paused ? Ui.Theme("MatButton.Warning") : null;
     }
 
     private void Apply(Action change)
@@ -176,11 +182,11 @@ public partial class SettingsPage : UserControl, IRefreshable
         {
             change();
             Message.Hide();
-            FormField.ShowError(this, null, "");
+            FormErrors.ShowError(this, null, "");
         }
         catch (BusinessException exception)
         {
-            if (!FormField.ShowError(this, exception.Field, exception.Message))
+            if (!FormErrors.ShowError(this, exception.Field, exception.Message))
             {
                 Message.Show(exception.Message, InfoSeverity.Error);
             }

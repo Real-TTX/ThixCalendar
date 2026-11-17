@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mat="using:MatDesktop"
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.AccountEditorPage">
   <!--
@@ -11,26 +12,26 @@
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="14" Margin="0,0,0,8">
       <controls:AccountMark x:Name="Mark" Width="30" Height="30" />
       <StackPanel>
-        <TextBlock x:Name="PageTitle" Theme="{StaticResource PageTitle}" TextTrimming="CharacterEllipsis" MaxWidth="760" />
-        <TextBlock x:Name="PageSubtitle" Theme="{StaticResource MutedText}" FontSize="14" />
+        <TextBlock x:Name="PageTitle" Theme="{StaticResource MatText.PageTitle}" TextTrimming="CharacterEllipsis" MaxWidth="760" />
+        <TextBlock x:Name="PageSubtitle" Theme="{StaticResource MatText.Muted}" FontSize="14" />
       </StackPanel>
     </StackPanel>
 
     <controls:ActionBar DockPanel.Dock="Bottom" Margin="0,14,0,0">
-      <Button x:Name="SaveButton" Theme="{StaticResource PrimaryButton}" Click="OnSaveClick">
-        <controls:IconLabel x:Name="SaveLabel" Icon="{StaticResource Icon.Check}" Text="Speichern" />
+      <Button x:Name="SaveButton" Theme="{StaticResource MatButton.Primary}" Click="OnSaveClick">
+        <controls:IconLabel x:Name="SaveLabel" Icon="check" Text="Speichern" />
       </Button>
       <Button x:Name="ReconnectButton" Click="OnReconnectClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Login}" Text="Neu anmelden" />
+        <controls:IconLabel Icon="login" Text="Neu anmelden" />
       </Button>
       <Button x:Name="SyncButton" Click="OnSyncClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Sync}" Text="Jetzt synchronisieren" />
+        <controls:IconLabel Icon="refresh" Text="Jetzt synchronisieren" />
       </Button>
       <Button Click="OnBackClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Back}" Text="Zurück" />
+        <controls:IconLabel Icon="back" Text="Zurück" />
       </Button>
-      <Button x:Name="RemoveButton" Theme="{StaticResource DangerButton}" controls:ActionBar.Separated="True" Click="OnRemoveClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Delete}" Text="Konto entfernen" />
+      <Button x:Name="RemoveButton" Theme="{StaticResource MatButton.Danger}" controls:ActionBar.Separated="True" Click="OnRemoveClick">
+        <controls:IconLabel Icon="trash" Text="Konto entfernen" />
       </Button>
     </controls:ActionBar>
     <controls:InfoBar DockPanel.Dock="Bottom" x:Name="Message" Margin="0,12,0,0" />
@@ -40,25 +41,25 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="680" HorizontalAlignment="Left" Margin="0,0,16,0">
             <controls:InfoBar x:Name="StateNote" />
-            <controls:FormField Label="Name" Field="Name" Hint="So erscheint das Konto in ThixCalendar, z. B. „Arbeit“ oder „Privat“.">
+            <mat:MatFormField Label="Name" controls:FormErrors.Field="Name" Hint="So erscheint das Konto in ThixCalendar, z. B. „Arbeit“ oder „Privat“.">
               <TextBox x:Name="NameBox" AutomationProperties.Name="Name" />
-            </controls:FormField>
-            <controls:FormField x:Name="UrlField" Label="Kalenderadresse (ICS)" Field="Url">
+            </mat:MatFormField>
+            <mat:MatFormField x:Name="UrlField" Label="Kalenderadresse (ICS)" controls:FormErrors.Field="Url">
               <TextBox x:Name="UrlBox" Watermark="https://… oder webcal://…" AutomationProperties.Name="Kalenderadresse" />
-            </controls:FormField>
+            </mat:MatFormField>
             <Border x:Name="UrlHelp" Theme="{StaticResource SubtleCard}" Margin="0,0,0,14">
               <StackPanel Spacing="6">
                 <TextBlock Text="Wo finde ich die Adresse?" FontWeight="SemiBold" />
-                <TextBlock Theme="{StaticResource MutedText}" TextWrapping="Wrap"
+                <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap"
                            Text="Google Kalender: Einstellungen › Kalender › „Privatadresse im iCal-Format“. Outlook / Microsoft 365: Einstellungen › Kalender › Freigegebene Kalender › „Kalender veröffentlichen“ › ICS-Link. Feiertage, Schul- und Vereinstermine bieten oft einen „Abonnieren“-Link an. Ein Abo kann nur gelesen werden – für Einträge und Änderungen verbinde das Konto selbst." />
               </StackPanel>
             </Border>
             <Grid x:Name="Facts" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
-              <TextBlock Text="Art" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Text="Art" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Column="1" x:Name="KindText" Margin="0,3" />
-              <TextBlock Grid.Row="1" x:Name="UserLabel" Text="Angemeldet als" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="1" x:Name="UserLabel" Text="Angemeldet als" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <SelectableTextBlock Grid.Row="1" Grid.Column="1" x:Name="UserText" Margin="0,3" />
-              <TextBlock Grid.Row="2" Text="Zuletzt synchronisiert" Theme="{StaticResource MutedText}" Margin="0,3,24,3" />
+              <TextBlock Grid.Row="2" Text="Zuletzt synchronisiert" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Row="2" Grid.Column="1" x:Name="SyncText" Margin="0,3" TextWrapping="Wrap" />
             </Grid>
           </StackPanel>
@@ -67,19 +68,19 @@
       <TabItem x:Name="CalendarsTab" Header="Kalender">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0" Spacing="12">
-            <TextBlock x:Name="CalendarsIntro" Theme="{StaticResource MutedText}" TextWrapping="Wrap" />
+            <TextBlock x:Name="CalendarsIntro" Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" />
             <StackPanel x:Name="CalendarCards" Spacing="12" />
-            <Border x:Name="AddCalendarCard" Theme="{StaticResource Card}">
+            <Border x:Name="AddCalendarCard" Theme="{StaticResource MatCard}">
               <StackPanel Spacing="10">
                 <TextBlock Text="Weiteren Kalender anlegen" FontWeight="SemiBold" />
-                <controls:FormField Field="NewCalendar" Margin="0">
+                <mat:MatFormField controls:FormErrors.Field="NewCalendar" Margin="0">
                   <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBox x:Name="NewCalendarBox" Width="280" Watermark="z. B. Sport, Familie …" AutomationProperties.Name="Name des neuen Kalenders" />
                     <Button Click="OnAddCalendarClick">
-                      <controls:IconLabel Icon="{StaticResource Icon.Plus}" Text="Anlegen" />
+                      <controls:IconLabel Icon="plus" Text="Anlegen" />
                     </Button>
                   </StackPanel>
-                </controls:FormField>
+                </mat:MatFormField>
               </StackPanel>
             </Border>
           </StackPanel>

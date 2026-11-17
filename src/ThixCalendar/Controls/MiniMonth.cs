@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using MatDesktop;
 
 namespace ThixCalendar.Controls;
 
@@ -21,8 +22,8 @@ public sealed class MiniMonth : UserControl
 
     public MiniMonth()
     {
-        var previous = Arrow("Icon.ChevronLeft", "Vorheriger Monat", -1);
-        var next = Arrow("Icon.ChevronRight", "Nächster Monat", 1);
+        var previous = Arrow("chevron-left", "Vorheriger Monat", -1);
+        var next = Arrow("chevron-right", "Nächster Monat", 1);
         var header = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"), Margin = new Thickness(0, 0, 0, 8) };
         Grid.SetColumn(_title, 1);
         Grid.SetColumn(next, 2);
@@ -49,8 +50,8 @@ public sealed class MiniMonth : UserControl
     {
         var button = new Button
         {
-            Theme = Ui.Theme("GhostButton"),
-            Content = new IconView { Data = Ui.Icon(icon), Width = 16, Height = 16 },
+            Theme = Ui.Theme("MatButton.Ghost"),
+            Content = new MatIcon { Icon = icon, Size = 16 },
             Width = 30,
             Height = 30,
             Padding = new Thickness(0),
@@ -79,7 +80,7 @@ public sealed class MiniMonth : UserControl
             {
                 Text = first.AddDays(column).ToString("ddd", Ui.German).TrimEnd('.'),
                 FontSize = 12,
-                Foreground = Ui.Brush("TextMutedBrush"),
+                Foreground = Ui.Brush("Mat.TextMuted"),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 6),
             };
@@ -98,13 +99,13 @@ public sealed class MiniMonth : UserControl
                 Height = 28,
                 CornerRadius = new CornerRadius(14),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Background = isToday ? Ui.Brush("AccentBrush") : Brushes.Transparent,
+                Background = isToday ? Ui.Brush("Mat.Accent") : Brushes.Transparent,
                 Child = new TextBlock
                 {
                     Text = day.Day.ToString(),
                     FontSize = 13,
                     FontWeight = isToday || selected ? FontWeight.SemiBold : FontWeight.Normal,
-                    Foreground = isToday ? Ui.Brush("OnAccentBrush") : day.Month == _month.Month ? Ui.Brush("TextBrush") : Ui.Brush("TextFaintBrush"),
+                    Foreground = isToday ? Ui.Brush("Mat.OnAccent") : day.Month == _month.Month ? Ui.Brush("Mat.Text") : Ui.Brush("Mat.TextFaint"),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                 },
@@ -112,7 +113,7 @@ public sealed class MiniMonth : UserControl
             // The chosen range is one tinted band (rounded at its ends), like the mockup.
             var band = new Border
             {
-                Background = selected ? Ui.Brush("AccentSoftStrongBrush") : Brushes.Transparent,
+                Background = selected ? Ui.Brush("Mat.AccentSoftStrong") : Brushes.Transparent,
                 Margin = new Thickness(0, 2),
                 CornerRadius = new CornerRadius(day == _selectedFrom || day.DayOfWeek == DayOfWeek.Monday ? 14 : 0, day == _selectedTo || day.DayOfWeek == DayOfWeek.Sunday ? 14 : 0,
                     day == _selectedTo || day.DayOfWeek == DayOfWeek.Sunday ? 14 : 0, day == _selectedFrom || day.DayOfWeek == DayOfWeek.Monday ? 14 : 0),

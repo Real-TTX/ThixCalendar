@@ -146,6 +146,9 @@ public sealed class UiTests
             window.ShowSettings(SettingsPage.AccessTab);
             Settle(window);
             Save(window, $"settings-access-{suffix}");
+            window.ShowSettings(SettingsPage.CloudTab);
+            Settle(window);
+            Save(window, $"settings-cloud-{suffix}");
             window.ShowAbout();
             Settle(window);
             Save(window, $"about-{suffix}");

@@ -1,122 +1,43 @@
-<local:ThemedWindow xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="using:ThixCalendar"
-                    xmlns:controls="using:ThixCalendar.Controls"
-                    x:Class="ThixCalendar.MainWindow"
-                    Title="ThixCalendar" Width="1320" Height="840" MinWidth="760" MinHeight="520"
-                    WindowStartupLocation="CenterScreen"
-                    ExtendClientAreaToDecorationsHint="True">
+<mat:MatWindow xmlns="https://github.com/avaloniaui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:mat="using:MatDesktop"
+               xmlns:controls="using:ThixCalendar.Controls"
+               x:Class="ThixCalendar.MainWindow"
+               Title="ThixCalendar" Width="1320" Height="840" MinWidth="760" MinHeight="520"
+               WindowStartupLocation="CenterScreen">
   <!--
-    The one window of ThixCalendar, built like ThixClip: a header across the whole width (logo, search over all events,
-    "Neuer Termin", caption buttons), the sidebar flush at the left with a line (sections, "Meine Kalender" with their
-    switches, the small month, reminder state, version = about) and the page beside it. Closing it only hides it:
-    ThixCalendar keeps reminding from the tray / menu bar.
+    The one window of ThixCalendar in MatDesktop's chrome, like ThixClip: the title bar (DESK-03: logo and word mark, the
+    search over all events and "Neuer Termin" in the middle, the caption buttons on Windows, the traffic lights on macOS),
+    the menu (DESK-04: Kalender, Termine, Konten, Einstellungen below a line; at its foot "Meine Kalender" with their
+    switches, the small month, the state of the reminders and of MatCloud, the version = About and the fold to a rail) and
+    the page. Closing it only hides it: ThixCalendar keeps reminding from the tray / menu bar.
   -->
   <Grid RowDefinitions="Auto,*">
-    <!-- ===== Header ===== -->
-    <Border x:Name="Header" Background="{DynamicResource HeaderBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
-            Height="68" PointerPressed="OnTitleBarPointerPressed" DoubleTapped="OnTitleBarDoubleTapped">
-      <Grid x:Name="HeaderGrid" ColumnDefinitions="262,*,Auto,Auto" Margin="22,0,12,0">
-        <StackPanel x:Name="Brand" Orientation="Horizontal" Spacing="11" VerticalAlignment="Center" IsHitTestVisible="False">
-          <Image Source="/Assets/logo-64.png" Width="32" Height="32" RenderOptions.BitmapInterpolationMode="HighQuality" />
-          <TextBlock x:Name="BrandName" VerticalAlignment="Center" FontSize="19" FontWeight="SemiBold">
-            <Run Text="Thix" /><Run Text="Calendar" Foreground="{DynamicResource AccentBrush}" />
-          </TextBlock>
-        </StackPanel>
-
-        <!-- Search over all events: typing shows the list "Termine" with the result -->
-        <Panel Grid.Column="1" MaxWidth="620" HorizontalAlignment="Stretch" Margin="8,0,20,0" VerticalAlignment="Center">
-          <TextBox x:Name="SearchBox" Theme="{StaticResource SearchBox}" Watermark="Termine, Personen, Orte suchen"
-                   AutomationProperties.Name="Termine suchen" />
-          <controls:IconView Data="{StaticResource Icon.Search}" Width="18" Height="18" Margin="13,0,0,0" HorizontalAlignment="Left"
-                             Foreground="{DynamicResource TextMutedBrush}" IsHitTestVisible="False" />
-        </Panel>
-
-        <Button Grid.Column="2" x:Name="NewEventButton" Theme="{StaticResource PrimaryButton}" Click="OnNewEventClick" Margin="0,0,12,0" VerticalAlignment="Center">
-          <controls:IconLabel Icon="{StaticResource Icon.Plus}" Text="Neuer Termin" />
-        </Button>
-
-        <StackPanel Grid.Column="3" x:Name="CaptionButtons" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-          <Button Theme="{StaticResource CaptionButton}" Click="OnMinimizeClick" ToolTip.Tip="Minimieren" AutomationProperties.Name="Minimieren">
-            <controls:IconView Data="{StaticResource Icon.Minus}" Width="16" Height="16" StrokeWidth="1.6" />
+    <mat:MatTitleBar x:Name="TitleBar" AppName="ThixCalendar">
+      <mat:MatTitleBar.WordMark>
+        <TextBlock VerticalAlignment="Center" FontSize="{DynamicResource Mat.FontSizeXl}" FontWeight="SemiBold">
+          <Run Text="Thix" /><Run Text="Calendar" Foreground="{DynamicResource Mat.AccentText}" />
+        </TextBlock>
+      </mat:MatTitleBar.WordMark>
+      <mat:MatTitleBar.Center>
+        <Grid ColumnDefinitions="*,Auto">
+          <!-- Search over all events: typing shows the list "Termine" with the result -->
+          <TextBox x:Name="SearchBox" Theme="{StaticResource MatSearchBox}" MaxWidth="620" HorizontalAlignment="Stretch"
+                   Watermark="Termine, Personen, Orte suchen" AutomationProperties.Name="Termine suchen" />
+          <Button Grid.Column="1" x:Name="NewEventButton" Theme="{StaticResource MatButton.Primary}" Click="OnNewEventClick" Margin="12,0,10,0"
+                  VerticalAlignment="Center">
+            <controls:IconLabel Icon="plus" Text="Neuer Termin" />
           </Button>
-          <Button Theme="{StaticResource CaptionButton}" Click="OnMaximizeClick" ToolTip.Tip="Maximieren" AutomationProperties.Name="Maximieren">
-            <controls:IconView x:Name="MaximizeIcon" Data="{StaticResource Icon.Maximize}" Width="15" Height="15" StrokeWidth="1.6" />
-          </Button>
-          <Button Theme="{StaticResource CloseCaptionButton}" Click="OnCloseClick" ToolTip.Tip="Schließen (läuft im Infobereich weiter)" AutomationProperties.Name="Schließen">
-            <controls:IconView Data="{StaticResource Icon.Close}" Width="16" Height="16" StrokeWidth="1.6" />
-          </Button>
-        </StackPanel>
-      </Grid>
-    </Border>
+        </Grid>
+      </mat:MatTitleBar.Center>
+    </mat:MatTitleBar>
 
-    <!-- ===== Body: sidebar flush with a line, the page beside it ===== -->
-    <Grid Grid.Row="1" x:Name="BodyGrid" ColumnDefinitions="262,*">
-      <Border x:Name="Sidebar" Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
-        <DockPanel Margin="14,18,14,14">
-          <!-- Foot: reminders, version (= about page), fold -->
-          <StackPanel DockPanel.Dock="Bottom" Spacing="6">
-            <Button x:Name="ReminderStatus" Theme="{StaticResource GhostButton}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                    Padding="8,6" Click="OnReminderStatusClick">
-              <StackPanel Orientation="Horizontal" Spacing="9">
-                <Panel>
-                  <controls:IconView x:Name="ReminderIcon" Data="{StaticResource Icon.Bell}" Width="18" Height="18" />
-                  <Ellipse x:Name="ReminderDot" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-1,-2,0" />
-                </Panel>
-                <TextBlock x:Name="ReminderText" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="190" />
-              </StackPanel>
-            </Button>
-            <Grid x:Name="SidebarFoot" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-              <Button x:Name="VersionButton" Theme="{StaticResource LinkButton}" Margin="8,0,0,0" VerticalAlignment="Center" Click="OnVersionClick"
-                      ToolTip.Tip="Über ThixCalendar" AutomationProperties.Name="Über ThixCalendar" />
-              <Button Grid.Column="1" x:Name="SidebarToggle" Theme="{StaticResource GhostButton}" VerticalAlignment="Center" Click="OnSidebarToggleClick">
-                <controls:IconView Data="{StaticResource Icon.Sidebar}" Width="18" Height="18" />
-              </Button>
-            </Grid>
-          </StackPanel>
-
-          <!-- Sections -->
-          <StackPanel DockPanel.Dock="Top">
-            <ToggleButton x:Name="NavCalendar" Theme="{StaticResource NavItem}" Click="OnNavClick" Tag="Calendar">
-              <controls:IconLabel Icon="{StaticResource Icon.Calendar}" Text="Kalender" Spacing="13" />
-            </ToggleButton>
-            <ToggleButton x:Name="NavEvents" Theme="{StaticResource NavItem}" Click="OnNavClick" Tag="Events">
-              <controls:IconLabel Icon="{StaticResource Icon.Search}" Text="Termine" Spacing="13" />
-            </ToggleButton>
-            <ToggleButton x:Name="NavAccounts" Theme="{StaticResource NavItem}" Click="OnNavClick" Tag="Accounts">
-              <controls:IconLabel Icon="{StaticResource Icon.Users}" Text="Konten" Spacing="13" />
-            </ToggleButton>
-            <ToggleButton x:Name="NavSettings" Theme="{StaticResource NavItem}" Click="OnNavClick" Tag="Settings">
-              <controls:IconLabel Icon="{StaticResource Icon.Settings}" Text="Einstellungen" Spacing="13" />
-            </ToggleButton>
-            <Border x:Name="NavSeparator" Height="1" Background="{DynamicResource BorderBrush}" Margin="8,8,8,10" />
-          </StackPanel>
-
-          <!-- Small month at the bottom of the sections -->
-          <Border x:Name="MiniMonthCard" DockPanel.Dock="Bottom" Theme="{StaticResource Card}" Margin="0,10,0,10" Padding="10,12">
-            <controls:MiniMonth x:Name="MiniMonth" />
-          </Border>
-
-          <!-- "Meine Kalender": every calendar with its colour and switch -->
-          <DockPanel x:Name="CalendarsSection">
-            <Button x:Name="CalendarsHeader" DockPanel.Dock="Top" Theme="{StaticResource GhostButton}" HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch" Padding="8,4" Click="OnCalendarsHeaderClick" Foreground="{DynamicResource TextBrush}">
-              <DockPanel>
-                <controls:IconView x:Name="CalendarsChevron" DockPanel.Dock="Right" Data="{StaticResource Icon.ChevronDown}" Width="16" Height="16" />
-                <TextBlock Text="Meine Kalender" FontWeight="SemiBold" FontSize="14.5" />
-              </DockPanel>
-            </Button>
-            <ScrollViewer x:Name="CalendarsScroller" VerticalScrollBarVisibility="Auto" Margin="0,6,0,0">
-              <StackPanel x:Name="CalendarList" Spacing="6" />
-            </ScrollViewer>
-          </DockPanel>
-        </DockPanel>
-      </Border>
-
-      <!-- Page -->
-      <Border Grid.Column="1" x:Name="PageArea" Background="{DynamicResource SurfaceBrush}" ClipToBounds="True">
+    <Grid Grid.Row="1" x:Name="BodyGrid" ColumnDefinitions="Auto,*">
+      <!-- The menu; its foot gets "Meine Kalender", the small month and the states (MainWindow.BuildMenuFoot) -->
+      <mat:MatNav x:Name="Sidebar" AppName="ThixCalendar" />
+      <Border Grid.Column="1" x:Name="PageArea" Background="{DynamicResource Mat.Surface}" ClipToBounds="True">
         <ContentControl x:Name="PageHost" />
       </Border>
     </Grid>
   </Grid>
-</local:ThemedWindow>
+</mat:MatWindow>

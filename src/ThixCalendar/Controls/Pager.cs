@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using MatDesktop;
 
 namespace ThixCalendar.Controls;
 
@@ -19,9 +20,9 @@ public sealed class Pager : UserControl
 
     public Pager()
     {
-        _previous = Arrow("Icon.ChevronLeft", "Vorherige Seite", -1);
-        _next = Arrow("Icon.ChevronRight", "Nächste Seite", 1);
-        _range.Foreground = Ui.Brush("TextMutedBrush");
+        _previous = Arrow("chevron-left", "Vorherige Seite", -1);
+        _next = Arrow("chevron-right", "Nächste Seite", 1);
+        _range.Foreground = Ui.Brush("Mat.TextMuted");
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Children = { _previous, _page, _next } };
         var row = new DockPanel { Children = { buttons, _range } };
         DockPanel.SetDock(buttons, Dock.Right);
@@ -48,7 +49,7 @@ public sealed class Pager : UserControl
 
     private Button Arrow(string icon, string name, int step)
     {
-        var button = new Button { Theme = Ui.Theme("RoundButton"), Width = 32, Height = 32, Content = new IconView { Data = Ui.Icon(icon), Width = 16, Height = 16 } };
+        var button = new Button { Theme = Ui.Theme("RoundButton"), Width = 32, Height = 32, Content = new MatIcon { Icon = icon, Size = 16 } };
         AutomationProperties.SetName(button, name);
         ToolTip.SetTip(button, name);
         button.Click += (_, _) =>

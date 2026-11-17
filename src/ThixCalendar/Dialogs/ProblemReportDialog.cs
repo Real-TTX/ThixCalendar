@@ -5,6 +5,7 @@ using Avalonia.Media;
 using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Infrastructure;
+using MatDesktop;
 
 namespace ThixCalendar.Dialogs;
 
@@ -12,7 +13,7 @@ namespace ThixCalendar.Dialogs;
 /// Shown at start when ThixCalendar crashed or hung last time (<see cref="ProblemReports"/>): what happened, the whole report
 /// to read and copy, the log folder. Several reports: the newest one, the others are named.
 /// </summary>
-public sealed class ProblemReportDialog : ThemedWindow
+public sealed class ProblemReportDialog : MatWindow
 {
     private ProblemReportDialog(IReadOnlyList<ProblemReport> reports)
     {
@@ -23,7 +24,7 @@ public sealed class ProblemReportDialog : ThemedWindow
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Topmost = true;
-        this[!BackgroundProperty] = this.GetResourceObservable("CardBrush").ToBinding();
+        this[!BackgroundProperty] = this.GetResourceObservable("Mat.Surface").ToBinding();
 
         var heading = new StackPanel
         {
@@ -32,7 +33,7 @@ public sealed class ProblemReportDialog : ThemedWindow
             Margin = new Thickness(0, 0, 0, 8),
             Children =
             {
-                new IconView { Data = Ui.Icon("Icon.Warning"), Width = 22, Height = 22, Foreground = Ui.Brush(report.IsHang ? "WarningBrush" : "DangerBrush") },
+                new MatIcon { Icon = "alert", Size = 22, Foreground = Ui.Brush(report.IsHang ? "Mat.Warning" : "Mat.Danger") },
                 new TextBlock { Text = Title, FontSize = 17, FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center },
             },
         };
@@ -43,7 +44,7 @@ public sealed class ProblemReportDialog : ThemedWindow
             Text = $"Am {report.Time:dd.MM.yyyy} um {report.Time:HH:mm} Uhr. Der Bericht unten hilft, die Ursache zu finden – kopiere ihn oder öffne den Protokollordner." +
                    (others > 0 ? $" Dazu {(others == 1 ? "ein weiterer Bericht" : $"{others} weitere Berichte")} seit dem letzten Start." : ""),
             TextWrapping = TextWrapping.Wrap,
-            Foreground = Ui.Brush("TextMutedBrush"),
+            Foreground = Ui.Brush("Mat.TextMuted"),
             Margin = new Thickness(0, 0, 0, 12),
         };
 
@@ -61,7 +62,7 @@ public sealed class ProblemReportDialog : ThemedWindow
         ScrollViewer.SetHorizontalScrollBarVisibility(details, Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
         AutomationProperties.SetName(details, "Bericht");
 
-        var copy = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Copy"), Text = "Bericht kopieren" }, Theme = Ui.Theme("PrimaryButton") };
+        var copy = new Button { Content = new IconLabel { Icon = "copy", Text = "Bericht kopieren" }, Theme = Ui.Theme("MatButton.Primary") };
         copy.Click += async (_, _) =>
         {
             if (Clipboard is { } clipboard)
@@ -71,10 +72,10 @@ public sealed class ProblemReportDialog : ThemedWindow
             }
         };
 
-        var folder = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.External"), Text = "Protokollordner öffnen" } };
+        var folder = new Button { Content = new IconLabel { Icon = "external", Text = "Protokollordner öffnen" } };
         folder.Click += (_, _) => Ui.OpenExternal(AppPaths.LogDirectory);
 
-        var close = new Button { Content = new IconLabel { Icon = Ui.Icon("Icon.Close"), Text = "Schließen" }, IsCancel = true, IsDefault = true };
+        var close = new Button { Content = new IconLabel { Icon = "x", Text = "Schließen" }, IsCancel = true, IsDefault = true };
         close.Click += (_, _) => Close();
 
         Content = new StackPanel

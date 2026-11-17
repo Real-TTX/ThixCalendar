@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mat="using:MatDesktop"
              xmlns:controls="using:ThixCalendar.Controls"
              x:Class="ThixCalendar.Pages.EventEditorPage">
   <!--
@@ -11,26 +12,26 @@
     <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
       <StackPanel Orientation="Horizontal" Spacing="12">
         <Border x:Name="ColorDot" Width="14" Height="14" CornerRadius="5" VerticalAlignment="Center" />
-        <TextBlock x:Name="PageTitle" Theme="{StaticResource PageTitle}" TextTrimming="CharacterEllipsis" MaxWidth="760" />
+        <TextBlock x:Name="PageTitle" Theme="{StaticResource MatText.PageTitle}" TextTrimming="CharacterEllipsis" MaxWidth="760" />
       </StackPanel>
-      <TextBlock x:Name="PageSubtitle" Theme="{StaticResource MutedText}" FontSize="14" />
+      <TextBlock x:Name="PageSubtitle" Theme="{StaticResource MatText.Muted}" FontSize="14" />
     </StackPanel>
 
     <controls:ActionBar DockPanel.Dock="Bottom" Margin="0,14,0,0">
-      <Button x:Name="SaveButton" Theme="{StaticResource PrimaryButton}" Click="OnSaveClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Check}" Text="Speichern" />
+      <Button x:Name="SaveButton" Theme="{StaticResource MatButton.Primary}" Click="OnSaveClick">
+        <controls:IconLabel Icon="check" Text="Speichern" />
       </Button>
       <Button x:Name="JoinButton" Click="OnJoinClick">
-        <controls:IconLabel x:Name="JoinLabel" Icon="{StaticResource Icon.Video}" Text="Beitreten" />
+        <controls:IconLabel x:Name="JoinLabel" Icon="video" Text="Beitreten" />
       </Button>
       <Button x:Name="WebButton" Click="OnWebClick">
-        <controls:IconLabel Icon="{StaticResource Icon.External}" Text="Im Browser öffnen" />
+        <controls:IconLabel Icon="external" Text="Im Browser öffnen" />
       </Button>
       <Button Click="OnBackClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Back}" Text="Zurück" />
+        <controls:IconLabel Icon="back" Text="Zurück" />
       </Button>
-      <Button x:Name="DeleteButton" Theme="{StaticResource DangerButton}" controls:ActionBar.Separated="True" Click="OnDeleteClick">
-        <controls:IconLabel Icon="{StaticResource Icon.Delete}" Text="Löschen" />
+      <Button x:Name="DeleteButton" Theme="{StaticResource MatButton.Danger}" controls:ActionBar.Separated="True" Click="OnDeleteClick">
+        <controls:IconLabel Icon="trash" Text="Löschen" />
       </Button>
     </controls:ActionBar>
     <controls:InfoBar DockPanel.Dock="Bottom" x:Name="Message" Margin="0,12,0,0" />
@@ -40,57 +41,57 @@
       <TabItem Header="Termin">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="720" HorizontalAlignment="Left" Margin="0,0,16,0">
-            <controls:FormField Label="Titel" Field="Title">
+            <mat:MatFormField Label="Titel" controls:FormErrors.Field="Title">
               <TextBox x:Name="TitleBox" Watermark="z. B. Team-Meeting" AutomationProperties.Name="Titel" />
-            </controls:FormField>
-            <controls:FormField Label="Kalender" Field="CalendarId">
+            </mat:MatFormField>
+            <mat:MatFormField Label="Kalender" controls:FormErrors.Field="CalendarId">
               <ComboBox x:Name="CalendarChoice" HorizontalAlignment="Stretch" AutomationProperties.Name="Kalender" />
-            </controls:FormField>
-            <controls:SettingRow Title="Ganztägig" Description="Ohne Uhrzeit, z. B. Urlaub oder Geburtstag." BorderThickness="0" Padding="0,0,0,14">
+            </mat:MatFormField>
+            <mat:MatSettingRow Title="Ganztägig" Description="Ohne Uhrzeit, z. B. Urlaub oder Geburtstag." BorderThickness="0" Padding="0,0,0,14">
               <ToggleSwitch x:Name="AllDaySwitch" OnContent="" OffContent="" AutomationProperties.Name="Ganztägig" />
-            </controls:SettingRow>
+            </mat:MatSettingRow>
             <Grid ColumnDefinitions="*,16,*">
-              <controls:FormField Label="Beginn" Field="Start">
+              <mat:MatFormField Label="Beginn" controls:FormErrors.Field="Start">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <CalendarDatePicker x:Name="StartDate" Width="190" SelectedDateFormat="Custom" CustomDateFormatString="ddd, dd.MM.yyyy" AutomationProperties.Name="Beginn Datum" />
                   <controls:TimeField x:Name="StartTime" AutomationProperties.Name="Beginn Uhrzeit" />
                 </StackPanel>
-              </controls:FormField>
-              <controls:FormField Grid.Column="2" Label="Ende" Field="End">
+              </mat:MatFormField>
+              <mat:MatFormField Grid.Column="2" Label="Ende" controls:FormErrors.Field="End">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <CalendarDatePicker x:Name="EndDate" Width="190" SelectedDateFormat="Custom" CustomDateFormatString="ddd, dd.MM.yyyy" AutomationProperties.Name="Ende Datum" />
                   <controls:TimeField x:Name="EndTime" AutomationProperties.Name="Ende Uhrzeit" />
                 </StackPanel>
-              </controls:FormField>
+              </mat:MatFormField>
             </Grid>
-            <controls:FormField Label="Ort" Field="Location">
+            <mat:MatFormField Label="Ort" controls:FormErrors.Field="Location">
               <TextBox x:Name="LocationBox" Watermark="Raum, Adresse …" AutomationProperties.Name="Ort" />
-            </controls:FormField>
-            <controls:FormField Label="Online-Besprechung" Field="MeetingUrl" Hint="Teams-, Meet- oder Zoom-Link. Wird aus Ort und Notizen auch selbst erkannt.">
+            </mat:MatFormField>
+            <mat:MatFormField Label="Online-Besprechung" controls:FormErrors.Field="MeetingUrl" Hint="Teams-, Meet- oder Zoom-Link. Wird aus Ort und Notizen auch selbst erkannt.">
               <TextBox x:Name="MeetingBox" Watermark="https://…" AutomationProperties.Name="Besprechungslink" />
-            </controls:FormField>
-            <TextBlock x:Name="DetailsText" Theme="{StaticResource MutedText}" Margin="0,4,0,0" />
+            </mat:MatFormField>
+            <TextBlock x:Name="DetailsText" Theme="{StaticResource MatText.Muted}" Margin="0,4,0,0" />
           </StackPanel>
         </ScrollViewer>
       </TabItem>
       <TabItem Header="Notizen">
-        <controls:FormField Field="Description" MaxWidth="820" HorizontalAlignment="Left">
+        <mat:MatFormField controls:FormErrors.Field="Description" MaxWidth="820" HorizontalAlignment="Left">
           <TextBox x:Name="DescriptionBox" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="260" VerticalContentAlignment="Top"
                    Watermark="Agenda, Einwahl, Notizen …" AutomationProperties.Name="Notizen" />
-        </controls:FormField>
+        </mat:MatFormField>
       </TabItem>
       <TabItem Header="Erinnerung">
         <StackPanel MaxWidth="720" HorizontalAlignment="Left" Spacing="12">
-          <controls:FormField Label="Erinnern" Field="ReminderMinutes">
+          <mat:MatFormField Label="Erinnern" controls:FormErrors.Field="ReminderMinutes">
             <ComboBox x:Name="ReminderChoice" MinWidth="280" AutomationProperties.Name="Erinnerung" />
-          </controls:FormField>
+          </mat:MatFormField>
           <Border Theme="{StaticResource SubtleCard}">
             <StackPanel Spacing="6">
               <StackPanel Orientation="Horizontal" Spacing="8">
-                <controls:IconView Data="{StaticResource Icon.BellRing}" Width="18" Height="18" Foreground="{DynamicResource AccentBrush}" />
+                <mat:MatIcon Size="18" Icon="bell-ring" Foreground="{DynamicResource Mat.Accent}" />
                 <TextBlock Text="So erinnert ThixCalendar" FontWeight="SemiBold" />
               </StackPanel>
-              <TextBlock x:Name="ReminderExplanation" Theme="{StaticResource MutedText}" TextWrapping="Wrap" />
+              <TextBlock x:Name="ReminderExplanation" Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
         </StackPanel>

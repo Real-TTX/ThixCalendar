@@ -46,7 +46,7 @@ public sealed class MonthView : UserControl
                 Text = first.AddDays(column).ToString("ddd", Ui.German).TrimEnd('.'),
                 FontSize = 13,
                 FontWeight = FontWeight.Medium,
-                Foreground = Ui.Brush("TextMutedBrush"),
+                Foreground = Ui.Brush("Mat.TextMuted"),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 5),
             };
@@ -73,7 +73,7 @@ public sealed class MonthView : UserControl
             Width = 28,
             Height = 28,
             CornerRadius = new CornerRadius(14),
-            Background = isToday ? Ui.Brush("AccentBrush") : Brushes.Transparent,
+            Background = isToday ? Ui.Brush("Mat.Accent") : Brushes.Transparent,
             HorizontalAlignment = HorizontalAlignment.Left,
             Cursor = new Cursor(StandardCursorType.Hand),
             Child = new TextBlock
@@ -81,7 +81,7 @@ public sealed class MonthView : UserControl
                 Text = day.Day == 1 ? day.ToString("d. MMM", Ui.German) : day.Day.ToString(),
                 FontSize = 13,
                 FontWeight = isToday ? FontWeight.SemiBold : FontWeight.Medium,
-                Foreground = isToday ? Ui.Brush("OnAccentBrush") : inMonth ? Ui.Brush("TextBrush") : Ui.Brush("TextFaintBrush"),
+                Foreground = isToday ? Ui.Brush("Mat.OnAccent") : inMonth ? Ui.Brush("Mat.Text") : Ui.Brush("Mat.TextFaint"),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
             },
@@ -112,15 +112,15 @@ public sealed class MonthView : UserControl
 
         if (ordered.Count > ChipsPerDay)
         {
-            var more = new Button { Theme = Ui.Theme("LinkButton"), Content = $"+{ordered.Count - ChipsPerDay} weitere", FontSize = 11.5, Margin = new Thickness(6, 1, 0, 0) };
+            var more = new Button { Theme = Ui.Theme("MatButton.Link"), Content = $"+{ordered.Count - ChipsPerDay} weitere", FontSize = 11.5, Margin = new Thickness(6, 1, 0, 0) };
             more.Click += (_, _) => DayChosen?.Invoke(this, day);
             stack.Children.Add(more);
         }
 
         var cell = new Border
         {
-            Background = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday || !inMonth ? Ui.Brush("WeekendBrush") : Brushes.Transparent,
-            BorderBrush = Ui.Brush("GridLineBrush"),
+            Background = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday || !inMonth ? Ui.Brush("Mat.Bg2") : Brushes.Transparent,
+            BorderBrush = Ui.Brush("Mat.Border"),
             BorderThickness = new Thickness(day.DayOfWeek == DayOfWeek.Monday ? 0 : 1, 1, 0, 0),
             Padding = new Thickness(4),
             ClipToBounds = true,

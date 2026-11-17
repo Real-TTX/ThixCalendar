@@ -44,10 +44,10 @@ public sealed class AccountMark : Control
                 DrawGoogle(context);
                 break;
             case AccountKind.Ics:
-                DrawIcon(context, "Icon.Rss", "#F97316");
+                DrawIcon(context, "rss", "#F97316");
                 break;
             default:
-                DrawIcon(context, "Icon.Home", "#16A34A");
+                DrawIcon(context, "home", "#16A34A");
                 break;
         }
     }

@@ -9,6 +9,7 @@ using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Dialogs;
+using MatDesktop;
 
 namespace ThixCalendar.Pages;
 
@@ -109,15 +110,15 @@ public partial class AccountsPage : UserControl, IRefreshable
             Children =
             {
                 new TextBlock { Text = account.Name, FontSize = 15, FontWeight = FontWeight.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis },
-                new TextBlock { Text = $"{account.KindName} · {subtitle}", FontSize = 12.5, Foreground = Ui.Brush("TextMutedBrush"), TextTrimming = TextTrimming.CharacterEllipsis },
+                new TextBlock { Text = $"{account.KindName} · {subtitle}", FontSize = 12.5, Foreground = Ui.Brush("Mat.TextMuted"), TextTrimming = TextTrimming.CharacterEllipsis },
             },
         };
         var (stateText, stateBrush, stateIcon) = account.State switch
         {
-            AccountState.SignedOut => ("Abgemeldet – neu anmelden", "DangerBrush", "Icon.Warning"),
-            AccountState.Error => ("Nicht erreichbar", "WarningBrush", "Icon.Warning"),
-            AccountState.New => ("Wird eingerichtet …", "AccentBrush", "Icon.Sync"),
-            _ => (account.Kind == AccountKind.Local ? "Bereit" : account.LastSync is { } last ? $"Synchronisiert {Ui.FormatDateTime(last)}" : "Bereit", "SuccessBrush", "Icon.Success"),
+            AccountState.SignedOut => ("Abgemeldet – neu anmelden", "Mat.Danger", "alert"),
+            AccountState.Error => ("Nicht erreichbar", "Mat.Warning", "alert"),
+            AccountState.New => ("Wird eingerichtet …", "Mat.Accent", "refresh"),
+            _ => (account.Kind == AccountKind.Local ? "Bereit" : account.LastSync is { } last ? $"Synchronisiert {Ui.FormatDateTime(last)}" : "Bereit", "Mat.Success", "check-circle"),
         };
         var state = new StackPanel
         {
@@ -127,7 +128,7 @@ public partial class AccountsPage : UserControl, IRefreshable
             Margin = new Thickness(16, 0, 8, 0),
             Children =
             {
-                new IconView { Data = Ui.Icon(stateIcon), Width = 15, Height = 15, Foreground = Ui.Brush(stateBrush) },
+                new MatIcon { Icon = stateIcon, Size = 15, Foreground = Ui.Brush(stateBrush) },
                 new TextBlock { Text = stateText, FontSize = 13, Foreground = Ui.Brush(stateBrush), VerticalAlignment = VerticalAlignment.Center },
             },
         };
@@ -140,7 +141,7 @@ public partial class AccountsPage : UserControl, IRefreshable
         {
             Text = calendarCount == 1 ? "1 Kalender" : $"{calendarCount} Kalender",
             FontSize = 13,
-            Foreground = Ui.Brush("TextMutedBrush"),
+            Foreground = Ui.Brush("Mat.TextMuted"),
             VerticalAlignment = VerticalAlignment.Center,
             Width = 90,
             TextAlignment = TextAlignment.Right,
@@ -167,7 +168,7 @@ public partial class AccountsPage : UserControl, IRefreshable
         RemoveButton.IsEnabled = account is not null;
         SyncButton.IsVisible = account is { Kind: not AccountKind.Local };
         ReconnectButton.IsVisible = account is { IsOnline: true };
-        ReconnectButton.Theme = account?.State == AccountState.SignedOut ? Ui.Theme("WarningButton") : null;
+        ReconnectButton.Theme = account?.State == AccountState.SignedOut ? Ui.Theme("MatButton.Warning") : null;
     }
 
     private void EditSelected()
