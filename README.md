@@ -12,6 +12,15 @@ dafür, dass du keinen Termin mehr übersiehst.
 |---|---|
 | ![Woche](docs/images/desktop-week-light.png) | ![Woche dunkel](docs/images/desktop-week-dark.png) |
 
+## Auf allen Computern gleich – MatCloud und ThixLauncher
+
+- **ThixLauncher** installiert ThixCalendar mit einem Klick, hält es aktuell und meldet es gleich bei deiner **MatCloud** an.
+- **MatCloud** (die Cloud der Thix-Apps) gleicht ab: deine Konten, die eigenen Kalender mit ihren Terminen, die Einstellungen der
+  Erinnerungen und **deine Antworten auf Erinnerungen** – schließt du eine Erinnerung am Laptop, ist sie auch am Desktop erledigt.
+- **Anmeldungen bei Microsoft und Google bleiben auf jedem Computer für sich**: Ein Konto, das von einem anderen Computer kommt,
+  zeigt „Anmeldung nötig“ – einmal „Neu anmelden“, fertig.
+- Ohne Launcher: Einstellungen › Cloud › *Im Browser anmelden* (oder mit Benutzername und Passwort).
+
 ## Erinnerungen, die man nicht übersieht
 
 Der Grund, warum es ThixCalendar gibt:
@@ -147,6 +156,7 @@ Richtlinien (Wert 1 = an) unter `HKLM\SOFTWARE\Policies\ThixCalendar` (Windows) 
 | `LockConfiguration` | Einstellungen und Konten nur lesbar (Kalender und Erinnerungen bleiben nutzbar) |
 | `DisableOnlineAccounts` | keine Microsoft-, Google- oder ICS-Konten – nur Kalender auf diesem Computer |
 | `DisableUpdates` | keine Update-Prüfung und -Installation |
+| `DisableCloud` | keine Verbindung zur MatCloud |
 
 ## Entwicklung
 
