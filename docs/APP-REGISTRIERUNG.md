@@ -18,8 +18,12 @@ ThixCalendar). Abhilfe: im Anmeldefenster *Anderes Konto verwenden* und das Firm
 (Arbeit, andere Firmen, private Outlook.com-Konten).
 
 1. <https://entra.microsoft.com> › **Identität › Anwendungen › App-Registrierungen › Neue Registrierung**.
+   (Wer über *Unternehmensanwendungen › Neue Anwendung › Eigene Anwendung erstellen* kommt, wählt dort *Anwendung für
+   die Integration in Microsoft Entra ID registrieren (von Ihnen entwickelte App)* – nicht Anwendungsproxy und nicht
+   „nicht im Katalog gefunden“.)
 2. Name: `ThixCalendar`.
-   Unterstützte Kontotypen: **Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten**.
+   Unterstützte Kontotypen: **Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten**
+   (nur so können sich alle Nutzer mit ihrem eigenen Konto anmelden – sie müssen nicht im eigenen Mandanten sein).
    Umleitungs-URI: Plattform **Öffentlicher Client/nativ (mobil und Desktop)**, Wert `http://localhost`. › *Registrieren*.
 3. **API-Berechtigungen** › Berechtigung hinzufügen › Microsoft Graph › *Delegierte Berechtigungen*:
    `Calendars.ReadWrite`, `User.Read`, `offline_access` (und `openid`, `profile`).
@@ -27,8 +31,22 @@ ThixCalendar). Abhilfe: im Anmeldefenster *Anderes Konto verwenden* und das Firm
 4. **Authentifizierung** › Erweiterte Einstellungen › *Öffentliche Clientflows zulassen*: **Ja** › Speichern.
 5. **Übersicht** › *Anwendungs-ID (Client-ID)* kopieren. Ein Geheimnis wird **nicht** gebraucht.
 
-Andere Firmen: Erlaubt deren IT Nutzern die Zustimmung zu Apps, klappt die Anmeldung sofort; sonst erteilt deren
-Administrator einmal die Zustimmung (der Anmeldedialog bietet das an).
+**Wer sich anmelden kann:**
+
+| Konto | Was passiert |
+|---|---|
+| Eigene Firma | Sofort; nach der Administratorzustimmung (Schritt 3) ohne Rückfrage. |
+| Privat (Outlook.com, Hotmail, Live) | Sofort; einmal „Zugriff erlauben“ bestätigen. |
+| Andere Firmen | Erlaubt deren IT Nutzern die Zustimmung zu Apps, sofort. Viele Firmen erlauben das aber nur für Apps von **verifizierten Herausgebern** – dann zeigt die Anmeldung „Administratorgenehmigung erforderlich“, und deren Administrator stimmt einmal zu (der Anmeldedialog bietet das an). |
+
+*Unternehmensanwendungen › ThixCalendar › Eigenschaften › Zuweisung erforderlich* bleibt auf **Nein** (Standard) – sonst
+kommen nur ausdrücklich zugewiesene Personen hinein.
+
+**Später (optional): Herausgeberüberprüfung.** Damit der Anmeldedialog „verifiziert“ zeigt und Nutzer anderer Firmen die
+App meist selbst zulassen dürfen: kostenlose Partner-ID (MPN-ID) im *Microsoft AI Cloud Partner Program* (Partner Center,
+mit dem Firmenkonto; Microsoft prüft die Firma, das dauert einige Tage), dann App-Registrierung › *Branding und
+Eigenschaften* › Herausgeberdomäne `matthix.de` bestätigen und die MPN-ID eintragen. ThixCalendar selbst ändert sich dabei
+nicht – die Client-ID bleibt dieselbe.
 
 ## 2. Google – ca. 5 Minuten
 
@@ -44,9 +62,15 @@ Administrator einmal die Zustimmung (der Anmeldedialog bietet das an).
 
 ## 3. Einbauen
 
-- **GitHub (alle CI-Builds):** Repository › Settings › Secrets and variables › Actions:
-  `THIXCALENDAR_MICROSOFT_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_SECRET`.
-- **Lokale Builds:** `secrets.local.props.example` nach `secrets.local.props` kopieren und ausfüllen (von git ignoriert).
+- **Microsoft:** Die Client-ID steht direkt in `Directory.Build.props` (`MicrosoftClientId`) – sie ist kein Geheimnis
+  (sie steht in jeder Anmeldeadresse). Jeder Build, lokal und in CI, hat sie damit eingebaut.
+  Eingebaut: `67da608f-1ccd-4664-94d7-fd12ea31f063` (Entra-Registrierung „ThixCalendar“).
+- **Google – GitHub (alle CI-Builds):** Repository › Settings › Secrets and variables › Actions:
+  `THIXCALENDAR_GOOGLE_CLIENT_ID`, `THIXCALENDAR_GOOGLE_CLIENT_SECRET`.
+- **Google – lokale Builds:** `secrets.local.props.example` nach `secrets.local.props` kopieren und ausfüllen (von git
+  ignoriert).
+- Überschreiben (z. B. Test-Registrierung): `THIXCALENDAR_MICROSOFT_CLIENT_ID` als Secret bzw. `MicrosoftClientId` in
+  `secrets.local.props`.
 
 Danach zeigt Einstellungen › Erweitert › *Eigene App-Registrierung* „eingebaut“ – und niemand muss dort etwas eintragen.
 Das Feld bleibt nur für Firmen, die fremde Apps sperren und eine eigene Registrierung verwenden wollen.

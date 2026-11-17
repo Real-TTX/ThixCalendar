@@ -13,9 +13,9 @@ name: desktop
 #   main (push)      : rolling release "release-channel" (OTA feed of release builds) + versioned release "v<version>"
 #   dev  (push)      : rolling pre-release "nightly-channel" (OTA feed of nightly builds)
 #
-# App registrations (optional repository secrets, README "Konten-Zugang"): THIXCALENDAR_MICROSOFT_CLIENT_ID,
-# THIXCALENDAR_GOOGLE_CLIENT_ID, THIXCALENDAR_GOOGLE_CLIENT_SECRET. MSBuild reads them as properties from the
-# environment; without them the users enter their own registration in the app (Einstellungen › Konten-Zugang).
+# App registrations (docs/APP-REGISTRIERUNG.md): the Microsoft client id is built in (Directory.Build.props). Optional
+# repository secrets THIXCALENDAR_GOOGLE_CLIENT_ID, THIXCALENDAR_GOOGLE_CLIENT_SECRET (and THIXCALENDAR_MICROSOFT_CLIENT_ID
+# to override) are read by MSBuild as properties from the environment. Users never enter a client id.
 
 on:
   push:
@@ -44,7 +44,7 @@ env:
   DOTNET_VERSION: '10.0.x'
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  # Read by MSBuild as properties (Directory.Build.props): the built-in app registrations, empty when not configured.
+  # Read by MSBuild as properties (Directory.Build.props); empty = the defaults there (Microsoft built in, Google none yet).
   MicrosoftClientId: ${{ secrets.THIXCALENDAR_MICROSOFT_CLIENT_ID }}
   GoogleClientId: ${{ secrets.THIXCALENDAR_GOOGLE_CLIENT_ID }}
   GoogleClientSecret: ${{ secrets.THIXCALENDAR_GOOGLE_CLIENT_SECRET }}
