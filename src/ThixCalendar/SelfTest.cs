@@ -58,6 +58,11 @@ internal static class SelfTest
             return Task.FromResult("");
         });
 
+        // Only whether they are there, never the values: shows that the build got the repository secrets.
+        await Check("app registrations", () => Task.FromResult(
+            $"Microsoft {(AccountService.IsConfigured(AccountKind.Microsoft) ? "built in" : "missing")}, " +
+            $"Google {(AccountService.IsConfigured(AccountKind.Google) ? "built in" : "missing")}"));
+
         await Check("calendar database (SQLite)", () =>
         {
             SampleData.Create(DateTime.Today);
