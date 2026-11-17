@@ -19,7 +19,7 @@ internal static class SampleData
             return;
         }
 
-        var accountId = CalendarStore.InsertAccount(new CalendarAccount { Kind = AccountKind.Local, Name = "Auf diesem Computer", State = AccountState.Ok, LastSync = DateTimeOffset.Now });
+        var accountId = CalendarStore.InsertAccount(new CalendarAccount { Kind = AccountKind.Local, Name = "Eigene Kalender", State = AccountState.Ok, LastSync = DateTimeOffset.Now });
         var work = CalendarStore.InsertCalendar(new CalendarInfo { AccountId = accountId, Name = "Arbeit", Color = "#2F6FED", IsPrimary = true, SortOrder = 0 });
         var home = CalendarStore.InsertCalendar(new CalendarInfo { AccountId = accountId, Name = "Privat", Color = "#16A34A", SortOrder = 1 });
         var sport = CalendarStore.InsertCalendar(new CalendarInfo { AccountId = accountId, Name = "Projekte", Color = "#9333EA", SortOrder = 2 });

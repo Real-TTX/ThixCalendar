@@ -5,7 +5,7 @@
 **Alle Kalender an einem Ort – mit Erinnerungen, die man nicht verpasst.** Für Windows und macOS.
 
 ThixCalendar bringt deinen **Microsoft-365-Kalender** (Arbeit), deinen **Google Kalender** (privat), abonnierte
-**ICS-Adressen** (Feiertage, Schule, Verein) und Kalender **auf diesem Computer** in einem Fenster zusammen – und sorgt
+**ICS-Adressen** (Feiertage, Schule, Verein) und **eigene Kalender** in einem Fenster zusammen – und sorgt
 dafür, dass du keinen Termin mehr übersiehst.
 
 | Woche (hell) | Woche (dunkel) |
@@ -107,7 +107,7 @@ Unter **Konten › Konto hinzufügen**:
 | **Microsoft 365 / Outlook.com** | Anmeldung im Browser (Microsoft Graph) | ✔ / ✔ |
 | **Google Kalender** | Anmeldung im Browser (Google Calendar API) | ✔ / ✔ |
 | **ICS-Abo** | Kalenderadresse (`https://…` oder `webcal://…`) | ✔ / – |
-| **Auf diesem Computer** | – | ✔ / ✔ |
+| **Eigene Kalender** | – (mit MatCloud auf allen Computern) | ✔ / ✔ |
 
 Die Anmeldung läuft im **eigenen Browser** (OAuth 2.0 mit PKCE, Antwort über eine Loopback-Adresse): ThixCalendar sieht
 dein Passwort nie. Gespeichert wird nur das Refresh-Token – unter Windows mit DPAPI verschlüsselt, unter macOS im
@@ -154,7 +154,7 @@ Richtlinien (Wert 1 = an) unter `HKLM\SOFTWARE\Policies\ThixCalendar` (Windows) 
 | Richtlinie | Wirkung |
 |---|---|
 | `LockConfiguration` | Einstellungen und Konten nur lesbar (Kalender und Erinnerungen bleiben nutzbar) |
-| `DisableOnlineAccounts` | keine Microsoft-, Google- oder ICS-Konten – nur Kalender auf diesem Computer |
+| `DisableOnlineAccounts` | keine Microsoft-, Google- oder ICS-Konten – nur eigene Kalender |
 | `DisableUpdates` | keine Update-Prüfung und -Installation |
 | `DisableCloud` | keine Verbindung zur MatCloud |
 

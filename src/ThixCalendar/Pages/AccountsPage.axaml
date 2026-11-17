@@ -92,7 +92,7 @@
               <controls:IconLabel Icon="rss" Text="ICS-Abo" />
             </Button>
             <Button Click="OnAddLocalClick">
-              <controls:IconLabel Icon="home" Text="Auf diesem Computer" />
+              <controls:IconLabel Icon="home" Text="Eigene Kalender" />
             </Button>
           </controls:ActionBar>
         </StackPanel>

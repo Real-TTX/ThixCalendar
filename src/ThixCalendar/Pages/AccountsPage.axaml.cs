@@ -19,7 +19,7 @@ namespace ThixCalendar.Pages;
 /// </summary>
 public partial class AccountsPage : UserControl, IRefreshable
 {
-    private static readonly string[] Kinds = ["Alle Arten", "Microsoft 365", "Google Kalender", "ICS-Abo", "Auf diesem Computer"];
+    private static readonly string[] Kinds = ["Alle Arten", "Microsoft 365", "Google Kalender", "ICS-Abo", "Eigene Kalender"];
     private static readonly string[] Sorts = ["Name", "Art", "Letzte Synchronisierung"];
 
     public AccountsPage()

@@ -14,7 +14,7 @@ namespace ThixCalendar.Core.Business;
 ///   accounts   (SyncId of the account)       kind, name, e-mail address, ICS address, shown or hidden. NEVER a sign-in: a
 ///                                            Microsoft or Google account from another computer arrives as "Anmeldung nötig"
 ///   calendars  (SyncId/hash of its key)      shown, reminders on/off, an own colour; the whole calendar for the own calendars
-///   events     (key of the event)            the events of the own calendars ("Auf diesem Computer") – Microsoft, Google and
+///   events     (key of the event)            the events of the own calendars ("Eigene Kalender") – Microsoft, Google and
 ///                                            ICS keep theirs themselves
 ///   answers    (hash of the occurrence)      Schließen / Später of a reminder: answered on one computer, gone on all
 /// Window sizes, the view, the menu and the app registrations stay on each computer.

@@ -3,7 +3,7 @@ namespace ThixCalendar.Core.Models;
 /// <summary>Where the calendars of an account come from.</summary>
 public enum AccountKind
 {
-    /// <summary>Calendars that only live on this computer.</summary>
+    /// <summary>ThixCalendar's own calendars ("Eigene Kalender"): kept here and, with MatCloud, the same on every computer.</summary>
     Local = 0,
 
     /// <summary>Microsoft 365 / Exchange Online / Outlook.com through Microsoft Graph.</summary>
@@ -77,7 +77,7 @@ public sealed record CalendarAccount
         AccountKind.Microsoft => "Microsoft 365",
         AccountKind.Google => "Google Kalender",
         AccountKind.Ics => "ICS-Abo",
-        _ => "Auf diesem Computer",
+        _ => "Eigene Kalender",
     };
 }
 
