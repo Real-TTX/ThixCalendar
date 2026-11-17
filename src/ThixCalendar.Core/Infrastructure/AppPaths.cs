@@ -21,6 +21,9 @@ public static class AppPaths
 
     public static string SettingsFile => Path.Combine(DataDirectory, "settings.json");
 
+    /// <summary>What this computer and MatCloud agreed on last (revision, a hash per item, items waiting for their account).</summary>
+    public static string CloudIndexFile => Path.Combine(DataDirectory, "cloud-sync.json");
+
     public static string UpdateDirectory => Path.Combine(DataDirectory, "updates");
 
     public static string LogDirectory => Path.Combine(DataDirectory, "logs");

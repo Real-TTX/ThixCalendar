@@ -61,6 +61,31 @@ public static class SettingsService
         });
     }
 
+    /// <summary>The connection to MatCloud (only <see cref="CloudService"/> changes it; no configuration lock: signing out must always work).</summary>
+    internal static AppSettings UpdateCloud(Func<CloudSettings, CloudSettings> change) =>
+        Save(settings => settings with { Cloud = change(settings.Cloud) });
+
+    /// <summary>The settings of the account as the cloud has them (no lock: they come from the account; checked all the same).</summary>
+    internal static void ApplyFromCloud(Func<AppSettings, AppSettings> change)
+    {
+        var current = SettingsStore.Read();
+        var next = Normalize(change(current)) with { Cloud = current.Cloud };
+        try
+        {
+            Validate(next);
+        }
+        catch (BusinessException exception)
+        {
+            Log.Warning($"Settings from the cloud refused: {exception.Message}");
+            return;
+        }
+
+        if (next != current)
+        {
+            Save(_ => next);
+        }
+    }
+
     /// <summary>The Microsoft app registration in use: the user's own or the built-in one.</summary>
     public static string MicrosoftClientId => Get().MicrosoftClientId is { Length: > 0 } own ? own : AppInfo.BuiltInMicrosoftClientId;
 

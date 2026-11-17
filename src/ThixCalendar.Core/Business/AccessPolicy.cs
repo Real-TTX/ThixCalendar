@@ -18,6 +18,7 @@ namespace ThixCalendar.Core.Business;
 ///   LockConfiguration   the settings and accounts are read-only (the calendars stay usable)
 ///   DisableOnlineAccounts  no Microsoft 365 / Google / ICS accounts (only calendars on this computer)
 ///   DisableUpdates      no update check, no update installation
+///   DisableCloud        no connection to MatCloud (nothing leaves the computer but what the accounts themselves sync)
 /// </summary>
 public static class AccessPolicy
 {
@@ -37,6 +38,8 @@ public static class AccessPolicy
 
     public static bool AreUpdatesDisabled => _readPolicy("DisableUpdates");
 
+    public static bool IsCloudDisabled => _readPolicy("DisableCloud");
+
     public static void EnsureConfigurationEditable()
     {
         if (IsConfigurationLocked)
@@ -50,6 +53,14 @@ public static class AccessPolicy
         if (AreOnlineAccountsDisabled)
         {
             throw new BusinessException("Online-Konten wurden von einem Administrator deaktiviert (Richtlinie DisableOnlineAccounts).");
+        }
+    }
+
+    public static void EnsureCloudAllowed()
+    {
+        if (IsCloudDisabled)
+        {
+            throw new BusinessException("Die Verbindung zur MatCloud wurde von einem Administrator deaktiviert (Richtlinie DisableCloud).");
         }
     }
 

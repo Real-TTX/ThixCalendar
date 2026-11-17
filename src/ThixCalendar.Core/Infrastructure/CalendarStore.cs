@@ -4,7 +4,11 @@ using ThixCalendar.Core.Models;
 namespace ThixCalendar.Core.Infrastructure;
 
 /// <summary>The answer the user gave to a reminder of one occurrence (snooze, dismiss).</summary>
-internal sealed record ReminderState(string OccurrenceKey, DateTimeOffset? DismissedTrigger, DateTimeOffset? SnoozedUntil, DateTimeOffset? SnoozedAt);
+internal sealed record ReminderState(string OccurrenceKey, DateTimeOffset? DismissedTrigger, DateTimeOffset? SnoozedUntil, DateTimeOffset? SnoozedAt)
+{
+    /// <summary>When the answer was given (read from the store; MatCloud compares it).</summary>
+    public DateTimeOffset UpdateDate { get; init; }
+}
 
 /// <summary>
 /// The accounts, calendars, events and reminder answers on disk (SQLite, calendar.db). Only the business layer uses this
@@ -19,9 +23,9 @@ internal static class CalendarStore
     /// <summary>The one local user of a desktop installation (CreateUserId / UpdateUserId).</summary>
     public const long LocalUserId = 1;
 
-    private const int SchemaVersion = 1;
+    private const int SchemaVersion = 2;
 
-    private const string AccountColumns = "Id, Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, CreateDate, UpdateDate";
+    private const string AccountColumns = "Id, Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, CreateDate, UpdateDate, SyncId";
 
     private const string CalendarColumns =
         "Id, AccountId, RemoteId, Name, Color, IsColorCustom, IsVisible, RemindersEnabled, IsReadOnly, IsPrimary, DefaultReminderMinutes, SortOrder, CreateDate, UpdateDate";
@@ -59,9 +63,9 @@ internal static class CalendarStore
         {
             using var command = Connection.CreateCommand();
             command.CommandText = """
-                INSERT INTO Account (Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible,
+                INSERT INTO Account (Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, SyncId,
                                      CreateDate, CreateUserId, UpdateDate, UpdateUserId, UpdateState)
-                VALUES ($kind, $name, $user, $url, $token, $state, $error, $lastSync, $visible, $now, $localUser, $now, $localUser, 1);
+                VALUES ($kind, $name, $user, $url, $token, $state, $error, $lastSync, $visible, $syncId, $now, $localUser, $now, $localUser, 1);
                 SELECT last_insert_rowid();
                 """;
             AddAccountParameters(command, account);
@@ -76,7 +80,7 @@ internal static class CalendarStore
             using var command = Connection.CreateCommand();
             command.CommandText = """
                 UPDATE Account SET Kind = $kind, Name = $name, UserName = $user, Url = $url, ProtectedToken = $token, State = $state,
-                       LastError = $error, LastSync = $lastSync, IsVisible = $visible, UpdateDate = $now, UpdateUserId = $localUser, UpdateState = 2
+                       LastError = $error, LastSync = $lastSync, IsVisible = $visible, SyncId = $syncId, UpdateDate = $now, UpdateUserId = $localUser, UpdateState = 2
                 WHERE Id = $id
                 """;
             AddAccountParameters(command, account);
@@ -124,7 +128,9 @@ internal static class CalendarStore
             command.CommandText = """
                 INSERT INTO Calendar (AccountId, RemoteId, Name, Color, IsColorCustom, IsVisible, RemindersEnabled, IsReadOnly, IsPrimary,
                                       DefaultReminderMinutes, SortOrder, CreateDate, CreateUserId, UpdateDate, UpdateUserId, UpdateState)
-                VALUES ($account, $remote, $name, $color, $custom, $visible, $reminders, $readOnly, $primary, $defaultReminder, $sort,
+                VALUES ($account,
+                        CASE WHEN $remote = '' AND (SELECT Kind FROM Account WHERE Id = $account) = 0 THEN lower(hex(randomblob(16))) ELSE $remote END,
+                        $name, $color, $custom, $visible, $reminders, $readOnly, $primary, $defaultReminder, $sort,
                         $now, $localUser, $now, $localUser, 1);
                 SELECT last_insert_rowid();
                 """;
@@ -147,6 +153,18 @@ internal static class CalendarStore
             AddCalendarParameters(command, calendar);
             command.Parameters.AddWithValue("$id", calendar.Id);
             command.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>All events of one calendar (the calendars on this computer, which MatCloud keeps the same everywhere).</summary>
+    public static List<CalendarEvent> LoadEventsOfCalendar(long calendarId)
+    {
+        lock (Gate)
+        {
+            using var command = Connection.CreateCommand();
+            command.CommandText = $"SELECT {EventColumns} FROM CalendarEvent WHERE CalendarId = $calendar ORDER BY StartDate, Id";
+            command.Parameters.AddWithValue("$calendar", calendarId);
+            return ReadEvents(command);
         }
     }
 
@@ -316,13 +334,13 @@ internal static class CalendarStore
         lock (Gate)
         {
             using var command = Connection.CreateCommand();
-            command.CommandText = "SELECT OccurrenceKey, DismissedTrigger, SnoozedUntil, SnoozedAt FROM ReminderState";
+            command.CommandText = "SELECT OccurrenceKey, DismissedTrigger, SnoozedUntil, SnoozedAt, UpdateDate FROM ReminderState";
             using var reader = command.ExecuteReader();
             var states = new Dictionary<string, ReminderState>(StringComparer.Ordinal);
             while (reader.Read())
             {
                 var key = reader.GetString(0);
-                states[key] = new ReminderState(key, ReadDate(reader, 1), ReadDate(reader, 2), ReadDate(reader, 3));
+                states[key] = new ReminderState(key, ReadDate(reader, 1), ReadDate(reader, 2), ReadDate(reader, 3)) { UpdateDate = FromMilliseconds(reader.GetInt64(4)) };
             }
 
             return states;
@@ -346,6 +364,17 @@ internal static class CalendarStore
             command.Parameters.AddWithValue("$snoozedAt", DateOrNull(state.SnoozedAt));
             command.Parameters.AddWithValue("$now", Now());
             command.Parameters.AddWithValue("$localUser", LocalUserId);
+            command.ExecuteNonQuery();
+        }
+    }
+
+    public static void DeleteReminderState(string occurrenceKey)
+    {
+        lock (Gate)
+        {
+            using var command = Connection.CreateCommand();
+            command.CommandText = "DELETE FROM ReminderState WHERE OccurrenceKey = $key";
+            command.Parameters.AddWithValue("$key", occurrenceKey);
             command.ExecuteNonQuery();
         }
     }
@@ -429,6 +458,22 @@ internal static class CalendarStore
             return;
         }
 
+        if (version == 1)
+        {
+            // 2: keys other computers know a row by (MatCloud): the account's SyncId, a key for every calendar and event on this computer.
+            using var upgrade = connection.CreateCommand();
+            upgrade.CommandText = $"""
+                ALTER TABLE Account ADD COLUMN SyncId TEXT NOT NULL DEFAULT '';
+                UPDATE Account SET SyncId = lower(hex(randomblob(16))) WHERE SyncId = '';
+                UPDATE Calendar SET RemoteId = lower(hex(randomblob(16)))
+                    WHERE RemoteId = '' AND AccountId IN (SELECT Id FROM Account WHERE Kind = 0);
+                UPDATE CalendarEvent SET RemoteId = lower(hex(randomblob(16))) WHERE RemoteId = '';
+                PRAGMA user_version = {SchemaVersion};
+                """;
+            upgrade.ExecuteNonQuery();
+            return;
+        }
+
         using var command = connection.CreateCommand();
         command.CommandText = $"""
             CREATE TABLE IF NOT EXISTS Account (
@@ -442,6 +487,7 @@ internal static class CalendarStore
                 LastError TEXT NOT NULL DEFAULT '',
                 LastSync INTEGER NULL,
                 IsVisible INTEGER NOT NULL DEFAULT 1,
+                SyncId TEXT NOT NULL DEFAULT '',
                 CreateDate INTEGER NOT NULL,
                 CreateUserId INTEGER NOT NULL,
                 UpdateDate INTEGER NOT NULL,
@@ -548,7 +594,8 @@ internal static class CalendarStore
     private static void AddEventParameters(SqliteCommand command, CalendarEvent calendarEvent)
     {
         command.Parameters.AddWithValue("$calendar", calendarEvent.CalendarId);
-        command.Parameters.AddWithValue("$remote", calendarEvent.RemoteId);
+        // An event of a calendar on this computer gets a key of its own: MatCloud and the reminder answers know it by that.
+        command.Parameters.AddWithValue("$remote", calendarEvent.RemoteId.Length > 0 ? calendarEvent.RemoteId : NewKey());
         command.Parameters.AddWithValue("$title", calendarEvent.Title);
         command.Parameters.AddWithValue("$start", ToMilliseconds(calendarEvent.Start));
         command.Parameters.AddWithValue("$end", ToMilliseconds(calendarEvent.End));
@@ -577,6 +624,7 @@ internal static class CalendarStore
         command.Parameters.AddWithValue("$error", account.LastError);
         command.Parameters.AddWithValue("$lastSync", DateOrNull(account.LastSync));
         command.Parameters.AddWithValue("$visible", account.IsVisible ? 1 : 0);
+        command.Parameters.AddWithValue("$syncId", account.SyncId.Length > 0 ? account.SyncId : NewKey());
         command.Parameters.AddWithValue("$now", Now());
         command.Parameters.AddWithValue("$localUser", LocalUserId);
     }
@@ -612,6 +660,7 @@ internal static class CalendarStore
         IsVisible = reader.GetInt32(9) != 0,
         CreateDate = FromMilliseconds(reader.GetInt64(10)),
         UpdateDate = FromMilliseconds(reader.GetInt64(11)),
+        SyncId = reader.GetString(12),
     };
 
     private static CalendarInfo ReadCalendar(SqliteDataReader reader) => new()
@@ -636,6 +685,9 @@ internal static class CalendarStore
         reader.IsDBNull(column) ? null : FromMilliseconds(reader.GetInt64(column));
 
     private static object DateOrNull(DateTimeOffset? value) => value is { } date ? ToMilliseconds(date) : DBNull.Value;
+
+    /// <summary>A new key of a row that other computers must know it by (32 hex digits).</summary>
+    public static string NewKey() => Guid.NewGuid().ToString("N");
 
     private static long Now() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 

@@ -52,6 +52,9 @@ public static class ReminderService
     /// <summary>Raised when the list of waiting reminders changed (any thread).</summary>
     public static event EventHandler? Changed;
 
+    /// <summary>Raised after an answer on this computer (Schließen, Später): MatCloud carries it to the other computers.</summary>
+    public static event EventHandler? Answered;
+
     /// <summary>The reminders waiting for an answer, earliest event first.</summary>
     public static IReadOnlyList<DueReminder> Active
     {
@@ -112,6 +115,7 @@ public static class ReminderService
         var state = states.GetValueOrDefault(reminder.Key) ?? new ReminderState(reminder.Key, null, null, null);
         CalendarStore.SaveReminderState(state with { DismissedTrigger = reminder.Trigger, SnoozedUntil = null, SnoozedAt = null });
         Remove(reminder.Key);
+        Answered?.Invoke(null, EventArgs.Empty);
     }
 
     /// <summary>"Alle schließen".</summary>
@@ -135,6 +139,7 @@ public static class ReminderService
         var state = states.GetValueOrDefault(reminder.Key) ?? new ReminderState(reminder.Key, null, null, null);
         CalendarStore.SaveReminderState(state with { SnoozedUntil = until, SnoozedAt = now });
         Remove(reminder.Key);
+        Answered?.Invoke(null, EventArgs.Empty);
     }
 
     /// <summary>The "Später" choices for a reminder: a few minutes, and "bis zum Beginn" while the event has not begun.</summary>
@@ -171,6 +176,36 @@ public static class ReminderService
             .OrderBy(item => item.Event.IsAllDay ? item.Event.StartLocal.Date.AddHours(23.9) : item.Event.StartLocal)
             .Take(count)
             .ToList();
+
+    /// <summary>
+    /// Answers or events came from another computer (MatCloud): a waiting reminder that is answered there, or whose event is
+    /// gone, leaves the window here. New ones come with the next <see cref="Check"/> as always (with their sound).
+    /// </summary>
+    public static void Refresh()
+    {
+        var now = DateTimeOffset.Now;
+        var settings = SettingsService.Get();
+        var items = CalendarService.Query(new EventQuery
+        {
+            From = now.LocalDateTime.Date.AddDays(-2),
+            To = (now + LookAhead).LocalDateTime,
+            IncludeHidden = true,
+        });
+        var states = CalendarStore.LoadReminderStates();
+        bool changed;
+        lock (Gate)
+        {
+            var due = ComputeDue(now, items, settings, states, Shown.Contains);
+            var still = _active.Where(active => due.Any(reminder => reminder.Key == active.Key && reminder.Stage == active.Stage)).ToList();
+            changed = still.Count != _active.Count;
+            _active = still;
+        }
+
+        if (changed)
+        {
+            Changed?.Invoke(null, EventArgs.Empty);
+        }
+    }
 
     /// <summary>Forgets answers to reminders of events long past (once a day).</summary>
     public static void Cleanup(DateTimeOffset now) => CalendarStore.PurgeReminderStates(now.AddDays(-45));

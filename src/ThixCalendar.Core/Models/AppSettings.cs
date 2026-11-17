@@ -83,4 +83,28 @@ public sealed record AppSettings
 
     /// <summary>The hint "ThixCalendar keeps running in the tray" has been shown.</summary>
     public bool TrayHintShown { get; init; }
+
+    // ===== MatCloud =====
+
+    public CloudSettings Cloud { get; init; } = new();
+}
+
+/// <summary>The connection to MatCloud, the cloud of the Thix apps. The device token is stored protected (DPAPI / Keychain), not in here.</summary>
+public sealed record CloudSettings
+{
+    /// <summary>The address of the cloud, e.g. https://cloud.example.com. Empty = never connected.</summary>
+    public string ServerUrl { get; init; } = "";
+
+    public string UserName { get; init; } = "";
+
+    public string DisplayName { get; init; } = "";
+
+    public string DeviceName { get; init; } = "";
+
+    public long DeviceId { get; init; }
+
+    /// <summary>The device token, protected for this user (Windows DPAPI); on macOS it lives in the Keychain.</summary>
+    public string ProtectedToken { get; init; } = "";
+
+    public bool IsConnected => ServerUrl.Length > 0 && DeviceId > 0;
 }

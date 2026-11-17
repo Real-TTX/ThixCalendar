@@ -64,6 +64,7 @@ public static class AccountService
         var calendar = new CalendarInfo
         {
             AccountId = accountId,
+            RemoteId = CalendarStore.NewKey(),
             Name = calendarName,
             Color = CalendarColors.ForIndex(count),
             IsPrimary = CalendarsOf(accountId).Count == 0,
@@ -343,9 +344,10 @@ public static class AccountService
 
     private static CalendarAccount Insert(CalendarAccount account)
     {
-        var id = CalendarStore.InsertAccount(account);
+        var keyed = account.SyncId.Length > 0 ? account : account with { SyncId = CalendarStore.NewKey() };
+        var id = CalendarStore.InsertAccount(keyed);
         CalendarService.RaiseChanged();
-        return account with { Id = id };
+        return keyed with { Id = id };
     }
 
     private static string RequireName(string name)

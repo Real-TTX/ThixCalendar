@@ -31,6 +31,12 @@ public static class AppInfo
 
     public static bool IsLocalBuild => Channel == "local";
 
+    /// <summary>How the cloud names the system of a device.</summary>
+    public static string PlatformName => OperatingSystem.IsWindows() ? "Windows" : OperatingSystem.IsMacOS() ? "macOS" : System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+
+    /// <summary>The name of this computer (the device name offered for the cloud).</summary>
+    public static string MachineName => Environment.MachineName;
+
     private static string? ReadMetadata(string key) =>
         ThisAssembly.GetCustomAttributes<AssemblyMetadataAttribute>().FirstOrDefault(attribute => attribute.Key == key)?.Value is { Length: > 0 } value
             ? value

@@ -307,7 +307,7 @@ public static class CalendarService
         var provider = AccountService.CreateProvider(account);
         if (provider is null)
         {
-            return calendarEvent;
+            return calendarEvent with { RemoteId = CalendarStore.NewKey() }; // an own calendar: the event gets its key here
         }
 
         var created = await provider.CreateEventAsync(calendar, calendarEvent, cancellationToken).ConfigureAwait(false);

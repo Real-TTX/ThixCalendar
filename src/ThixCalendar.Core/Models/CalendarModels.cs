@@ -55,8 +55,11 @@ public sealed record CalendarAccount
 
     public DateTimeOffset? LastSync { get; init; }
 
-    /// <summary>Hides every calendar of the account at once (the chips above the calendar).</summary>
+    /// <summary>Hides every calendar of the account at once (the filter above the calendar, the sidebar).</summary>
     public bool IsVisible { get; init; } = true;
+
+    /// <summary>The key every computer of the user knows this account by (MatCloud); made when the account is added.</summary>
+    public string SyncId { get; init; } = "";
 
     public DateTimeOffset CreateDate { get; init; }
 
@@ -144,7 +147,7 @@ public sealed record CalendarEvent
 
     public long CalendarId { get; init; }
 
-    /// <summary>The key at the provider (an occurrence of a series has its own key); empty for local events.</summary>
+    /// <summary>The key at the provider (an occurrence of a series has its own key); events on this computer get one of their own.</summary>
     public string RemoteId { get; init; } = "";
 
     public string Title { get; init; } = "";
