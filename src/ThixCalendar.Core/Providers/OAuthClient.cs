@@ -93,6 +93,13 @@ internal static class OAuthClient
 
         if (answer.TryGetValue("error", out var error))
         {
+            if (profile.ProviderName == "Microsoft" && NeedsAdminConsent(answer.GetValueOrDefault("error_description", "")))
+            {
+                throw new ProviderException("Deine Firma lässt ThixCalendar noch nicht zu. Ein Administrator von Microsoft 365 gibt ThixCalendar " +
+                                            $"einmal für die ganze Firma frei: {AdminConsentUrl(profile.ClientId)} öffnen und zustimmen. " +
+                                            "Danach klappt die Anmeldung für alle in der Firma.");
+            }
+
             throw new ProviderException(error == "access_denied"
                 ? "Die Anmeldung wurde abgebrochen oder der Zugriff nicht erlaubt."
                 : $"{profile.ProviderName} hat die Anmeldung abgelehnt ({answer.GetValueOrDefault("error_description", error)}).");
@@ -190,6 +197,19 @@ internal static class OAuthClient
         node.GetValueKind() == System.Text.Json.JsonValueKind.String && int.TryParse(node.GetValue<string>(), out var text) ? text : node.GetValue<int>();
 
     private static string FirstLine(string text) => text.Split('\n', '\r')[0].Trim();
+
+    /// <summary>
+    /// Microsoft's answers when the company does not let its users allow apps themselves: AADSTS65001 (no consent yet),
+    /// AADSTS90094 / 90095 (an administrator has to approve).
+    /// </summary>
+    internal static bool NeedsAdminConsent(string description) =>
+        description.Contains("AADSTS65001", StringComparison.Ordinal) || description.Contains("AADSTS90094", StringComparison.Ordinal) ||
+        description.Contains("AADSTS90095", StringComparison.Ordinal);
+
+    /// <summary>The address an administrator opens once to allow ThixCalendar for the whole company ("organizations": their own).</summary>
+    internal static string AdminConsentUrl(string clientId) =>
+        $"https://login.microsoftonline.com/organizations/v2.0/adminconsent?client_id={clientId}" +
+        "&scope=https://graph.microsoft.com/.default&redirect_uri=http://localhost";
 
     private static string Base64Url(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 

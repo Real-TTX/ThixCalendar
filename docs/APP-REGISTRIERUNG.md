@@ -39,6 +39,18 @@ ThixCalendar). Abhilfe: im Anmeldefenster *Anderes Konto verwenden* und das Firm
 | Privat (Outlook.com, Hotmail, Live) | Sofort; einmal „Zugriff erlauben“ bestätigen. |
 | Andere Firmen | Erlaubt deren IT Nutzern die Zustimmung zu Apps, sofort. Viele Firmen erlauben das aber nur für Apps von **verifizierten Herausgebern** – dann zeigt die Anmeldung „Administratorgenehmigung erforderlich“, und deren Administrator stimmt einmal zu (der Anmeldedialog bietet das an). |
 
+**„Deine Firma hat das nicht zugelassen“ / „Administratorgenehmigung erforderlich“:** Die Firma des Kontos lässt ihre
+Nutzer Apps nicht selbst zulassen (Einstellung des jeweiligen Microsoft-365-Mandanten, nicht von ThixCalendar). Ein
+Administrator **dieser** Firma öffnet einmal
+
+`https://login.microsoftonline.com/organizations/v2.0/adminconsent?client_id=67da608f-1ccd-4664-94d7-fd12ea31f063&scope=https://graph.microsoft.com/.default&redirect_uri=http://localhost`
+
+meldet sich mit seinem Administratorkonto an und stimmt *für die Organisation* zu. Danach landet der Browser auf einer
+leeren localhost-Seite (Fehlermeldung des Browsers ist normal) – die Freigabe ist erteilt, alle in der Firma können sich
+anmelden. ThixCalendar zeigt diese Adresse auch selbst, wenn Microsoft bei der Anmeldung eine Administratorzustimmung
+verlangt. Den Nutzern pauschal das Zulassen aller Apps zu erlauben (*Unternehmensanwendungen › Einwilligung und
+Berechtigungen*) ist dafür nicht nötig.
+
 *Unternehmensanwendungen › ThixCalendar › Eigenschaften › Zuweisung erforderlich* bleibt auf **Nein** (Standard) – sonst
 kommen nur ausdrücklich zugewiesene Personen hinein.
 

@@ -211,6 +211,21 @@ public sealed class SyncTests
     }
 
     [Fact]
+    public async Task A_company_that_needs_its_administrator_gets_the_approval_address()
+    {
+        using var data = new TestData();
+        using var browser = new HttpClient();
+        var failure = await Assert.ThrowsAsync<ProviderException>(() => OAuthClient.SignInAsync(OAuthProfile.Microsoft(ClientId), url =>
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(new Uri(url).Query);
+            _ = browser.GetStringAsync(query["redirect_uri"]!.Replace("localhost", "127.0.0.1") +
+                                       "?error=access_denied&error_description=AADSTS90094%3A+Admin+approval+required&state=x");
+        }, CancellationToken.None));
+        Assert.Contains("Administrator", failure.Message);
+        Assert.Contains($"adminconsent?client_id={ClientId}", failure.Message);
+    }
+
+    [Fact]
     public async Task Ranges_outside_the_window_are_loaded_once()
     {
         using var data = new TestData();
