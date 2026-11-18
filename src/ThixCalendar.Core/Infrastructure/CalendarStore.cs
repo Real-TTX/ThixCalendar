@@ -23,9 +23,9 @@ internal static class CalendarStore
     /// <summary>The one local user of a desktop installation (CreateUserId / UpdateUserId).</summary>
     public const long LocalUserId = 1;
 
-    private const int SchemaVersion = 2;
+    private const int SchemaVersion = 3;
 
-    private const string AccountColumns = "Id, Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, CreateDate, UpdateDate, SyncId";
+    private const string AccountColumns = "Id, Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, CreateDate, UpdateDate, SyncId, SyncMode";
 
     private const string CalendarColumns =
         "Id, AccountId, RemoteId, Name, Color, IsColorCustom, IsVisible, RemindersEnabled, IsReadOnly, IsPrimary, DefaultReminderMinutes, SortOrder, CreateDate, UpdateDate";
@@ -63,9 +63,9 @@ internal static class CalendarStore
         {
             using var command = Connection.CreateCommand();
             command.CommandText = """
-                INSERT INTO Account (Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, SyncId,
+                INSERT INTO Account (Kind, Name, UserName, Url, ProtectedToken, State, LastError, LastSync, IsVisible, SyncId, SyncMode,
                                      CreateDate, CreateUserId, UpdateDate, UpdateUserId, UpdateState)
-                VALUES ($kind, $name, $user, $url, $token, $state, $error, $lastSync, $visible, $syncId, $now, $localUser, $now, $localUser, 1);
+                VALUES ($kind, $name, $user, $url, $token, $state, $error, $lastSync, $visible, $syncId, $syncMode, $now, $localUser, $now, $localUser, 1);
                 SELECT last_insert_rowid();
                 """;
             AddAccountParameters(command, account);
@@ -80,7 +80,7 @@ internal static class CalendarStore
             using var command = Connection.CreateCommand();
             command.CommandText = """
                 UPDATE Account SET Kind = $kind, Name = $name, UserName = $user, Url = $url, ProtectedToken = $token, State = $state,
-                       LastError = $error, LastSync = $lastSync, IsVisible = $visible, SyncId = $syncId, UpdateDate = $now, UpdateUserId = $localUser, UpdateState = 2
+                       LastError = $error, LastSync = $lastSync, IsVisible = $visible, SyncId = $syncId, SyncMode = $syncMode, UpdateDate = $now, UpdateUserId = $localUser, UpdateState = 2
                 WHERE Id = $id
                 """;
             AddAccountParameters(command, account);
@@ -195,6 +195,19 @@ internal static class CalendarStore
             command.Parameters.AddWithValue("$from", ToMilliseconds(from));
             command.Parameters.AddWithValue("$to", ToMilliseconds(to));
             return ReadEvents(command);
+        }
+    }
+
+    /// <summary>The event of a calendar with this key at its provider (or of MatCloud), if there is one.</summary>
+    public static CalendarEvent? FindEvent(long calendarId, string remoteId)
+    {
+        lock (Gate)
+        {
+            using var command = Connection.CreateCommand();
+            command.CommandText = $"SELECT {EventColumns} FROM CalendarEvent WHERE CalendarId = $calendar AND RemoteId = $remote LIMIT 1";
+            command.Parameters.AddWithValue("$calendar", calendarId);
+            command.Parameters.AddWithValue("$remote", remoteId);
+            return ReadEvents(command).FirstOrDefault();
         }
     }
 
@@ -462,12 +475,24 @@ internal static class CalendarStore
         {
             // 2: keys other computers know a row by (MatCloud): the account's SyncId, a key for every calendar and event on this computer.
             using var upgrade = connection.CreateCommand();
-            upgrade.CommandText = $"""
+            upgrade.CommandText = """
                 ALTER TABLE Account ADD COLUMN SyncId TEXT NOT NULL DEFAULT '';
                 UPDATE Account SET SyncId = lower(hex(randomblob(16))) WHERE SyncId = '';
                 UPDATE Calendar SET RemoteId = lower(hex(randomblob(16)))
                     WHERE RemoteId = '' AND AccountId IN (SELECT Id FROM Account WHERE Kind = 0);
                 UPDATE CalendarEvent SET RemoteId = lower(hex(randomblob(16))) WHERE RemoteId = '';
+                PRAGMA user_version = 2;
+                """;
+            upgrade.ExecuteNonQuery();
+            version = 2;
+        }
+
+        if (version == 2)
+        {
+            // 3: who keeps an online account in step – the computers (0) or MatCloud (1).
+            using var upgrade = connection.CreateCommand();
+            upgrade.CommandText = $"""
+                ALTER TABLE Account ADD COLUMN SyncMode INTEGER NOT NULL DEFAULT 0;
                 PRAGMA user_version = {SchemaVersion};
                 """;
             upgrade.ExecuteNonQuery();
@@ -488,6 +513,7 @@ internal static class CalendarStore
                 LastSync INTEGER NULL,
                 IsVisible INTEGER NOT NULL DEFAULT 1,
                 SyncId TEXT NOT NULL DEFAULT '',
+                SyncMode INTEGER NOT NULL DEFAULT 0,
                 CreateDate INTEGER NOT NULL,
                 CreateUserId INTEGER NOT NULL,
                 UpdateDate INTEGER NOT NULL,
@@ -625,6 +651,7 @@ internal static class CalendarStore
         command.Parameters.AddWithValue("$lastSync", DateOrNull(account.LastSync));
         command.Parameters.AddWithValue("$visible", account.IsVisible ? 1 : 0);
         command.Parameters.AddWithValue("$syncId", account.SyncId.Length > 0 ? account.SyncId : NewKey());
+        command.Parameters.AddWithValue("$syncMode", (int)account.SyncMode);
         command.Parameters.AddWithValue("$now", Now());
         command.Parameters.AddWithValue("$localUser", LocalUserId);
     }
@@ -661,6 +688,7 @@ internal static class CalendarStore
         CreateDate = FromMilliseconds(reader.GetInt64(10)),
         UpdateDate = FromMilliseconds(reader.GetInt64(11)),
         SyncId = reader.GetString(12),
+        SyncMode = (AccountSyncMode)reader.GetInt32(13),
     };
 
     private static CalendarInfo ReadCalendar(SqliteDataReader reader) => new()

@@ -18,6 +18,8 @@ namespace ThixCalendar.Pages;
 /// </summary>
 public partial class SettingsPage
 {
+    private bool _showingDefaultMode;
+
     private CancellationTokenSource? _browserSignIn;
     private string? _browserAddress;
 
@@ -60,11 +62,37 @@ public partial class SettingsPage
             return;
         }
 
+        _showingDefaultMode = true;
+        DefaultSyncModeBox.SelectedIndex = SettingsService.Get().DefaultSyncMode == AccountSyncMode.Computers ? 1 : 0;
+        DefaultSyncModeBox.IsEnabled = !AccessPolicy.IsConfigurationLocked;
+        _showingDefaultMode = false;
         CloudServerText.Text = cloud.ServerUrl;
         CloudAccountText.Text = cloud.DisplayName.Length > 0 && cloud.DisplayName != cloud.UserName ? $"{cloud.DisplayName} ({cloud.UserName})" : cloud.UserName;
         CloudDeviceText.Text = cloud.DeviceName;
         CloudStateText.Text = status.Message;
         CloudLastSyncText.Text = status.LastSync is { } last ? Ui.FormatDateTime(last) : "–";
+    }
+
+    /// <summary>Who keeps new online accounts in step (the setting travels with MatCloud to every computer).</summary>
+    private void OnDefaultSyncModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_showingDefaultMode)
+        {
+            return;
+        }
+
+        var mode = DefaultSyncModeBox.SelectedIndex == 1 ? AccountSyncMode.Computers : AccountSyncMode.Cloud;
+        try
+        {
+            SettingsService.Update(settings => settings with { DefaultSyncMode = mode });
+            CloudMessage.Show(mode == AccountSyncMode.Cloud
+                ? "Neue Konten gleicht ab jetzt MatCloud ab."
+                : "Neue Konten melden sich ab jetzt auf jedem Computer selbst an.", InfoSeverity.Success);
+        }
+        catch (BusinessException exception)
+        {
+            CloudMessage.Show(exception.Message, InfoSeverity.Error);
+        }
     }
 
     /// <summary>The first way: MatCloud shows a code, the browser opens, the person confirms it there; ThixCalendar waits (Abbrechen ends it).</summary>

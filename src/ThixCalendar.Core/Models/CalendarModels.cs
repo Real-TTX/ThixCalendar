@@ -30,6 +30,16 @@ public enum AccountState
     SignedOut = 3,
 }
 
+/// <summary>
+/// Who keeps an online account (Microsoft, Google, ICS) in step: every computer signs in itself, or MatCloud keeps the sign-in and syncs on the server
+/// (the computers then get the events from MatCloud and change them through it). Own calendars are always in MatCloud.
+/// </summary>
+public enum AccountSyncMode
+{
+    Computers = 0,
+    Cloud = 1,
+}
+
 /// <summary>An account with one or more calendars. Its refresh token is stored protected (TokenStore), never in here.</summary>
 public sealed record CalendarAccount
 {
@@ -60,6 +70,12 @@ public sealed record CalendarAccount
 
     /// <summary>The key every computer of the user knows this account by (MatCloud); made when the account is added.</summary>
     public string SyncId { get; init; } = "";
+
+    /// <summary>Who keeps it in step (an online account): the computers or MatCloud.</summary>
+    public AccountSyncMode SyncMode { get; init; }
+
+    /// <summary>MatCloud keeps it in step: no sign-in here, the events come from MatCloud, changes go through it.</summary>
+    public bool IsKeptByCloud => SyncMode == AccountSyncMode.Cloud && Kind != AccountKind.Local;
 
     public DateTimeOffset CreateDate { get; init; }
 

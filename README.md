@@ -17,8 +17,13 @@ dafür, dass du keinen Termin mehr übersiehst.
 - **ThixLauncher** installiert ThixCalendar mit einem Klick, hält es aktuell und meldet es gleich bei deiner **MatCloud** an.
 - **MatCloud** (die Cloud der Thix-Apps) gleicht ab: deine Konten, die eigenen Kalender mit ihren Terminen, die Einstellungen der
   Erinnerungen und **deine Antworten auf Erinnerungen** – schließt du eine Erinnerung am Laptop, ist sie auch am Desktop erledigt.
-- **Anmeldungen bei Microsoft und Google bleiben auf jedem Computer für sich**: Ein Konto, das von einem anderen Computer kommt,
-  zeigt „Anmeldung nötig“ – einmal „Neu anmelden“, fertig.
+- **Abgleich über MatCloud – du entscheidest je Konto**: Unter Konten › *Abgleich* läuft ein Microsoft-, Google- oder ICS-Konto
+  *Über MatCloud* (MatCloud hält die Anmeldung geschützt und gleicht ab, auch wenn kein Computer läuft; deine anderen Computer
+  brauchen keine eigene Anmeldung, und im Browser unter *Kalender* stehen alle Termine) oder *Auf den Computern* (jeder Computer
+  meldet sich selbst an; ein Konto von einem anderen Computer zeigt „Anmeldung nötig“). Der Standard für neue Konten steht unter
+  Einstellungen › Cloud › *Neue Konten abgleichen* und gilt auf allen Geräten.
+- **Im Browser**: Die MatCloud zeigt deine Kalender unter */Calendar* – Woche, Monat, Termine, neue Termine; Konten verbindest du
+  dort auch direkt (Microsoft mit einem Code, ICS-Abos, Google über den Google-Zugang der MatCloud).
 - Ohne Launcher: Einstellungen › Cloud › *Im Browser anmelden* (oder mit Benutzername und Passwort).
 
 ## Erinnerungen, die man nicht übersieht

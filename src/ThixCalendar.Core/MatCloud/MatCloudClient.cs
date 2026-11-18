@@ -1,4 +1,4 @@
-// MatCloud.Contract 1.2.0 – a copy from MatCloud, do not edit here
+// MatCloud.Contract 1.3.0 – a copy from MatCloud, do not edit here
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -142,6 +142,21 @@ public sealed class MatCloudClient : IDisposable
 
     public Task<SyncPushResponse> PushAsync(SyncPushRequest request, CancellationToken ct) =>
         SendAsync<SyncPushResponse>(HttpMethod.Post, SyncContract.Push, JsonContent.Create(request, options: CloudContract.Json), TransferTimeout, ct);
+
+    // ---- ThixCalendar: the accounts MatCloud keeps in step ----
+
+    public Task<Calendar.CalendarCloudAccount> HandOverCalendarAsync(Calendar.CalendarHandover handover, CancellationToken ct) =>
+        SendAsync<Calendar.CalendarCloudAccount>(HttpMethod.Put, Calendar.CalendarContract.Connections, JsonContent.Create(handover, options: CloudContract.Json), RequestTimeout, ct);
+
+    public Task DisconnectCalendarAsync(string account, CancellationToken ct) =>
+        SendAsync<object>(HttpMethod.Post, Calendar.CalendarContract.Disconnect, JsonContent.Create(new Calendar.CalendarAccountRequest(account), options: CloudContract.Json), RequestTimeout, ct, expectBody: false);
+
+    public Task SyncCalendarNowAsync(string account, CancellationToken ct) =>
+        SendAsync<object>(HttpMethod.Post, Calendar.CalendarContract.SyncNow, JsonContent.Create(new Calendar.CalendarAccountRequest(account), options: CloudContract.Json), RequestTimeout, ct, expectBody: false);
+
+    /// <summary>Changes an event at the provider through MatCloud (it may take a while: the provider is asked first).</summary>
+    public Task<Calendar.CalendarEventChangeResult> ChangeCalendarEventAsync(Calendar.CalendarEventChange change, CancellationToken ct) =>
+        SendAsync<Calendar.CalendarEventChangeResult>(HttpMethod.Post, Calendar.CalendarContract.EventChange, JsonContent.Create(change, options: CloudContract.Json), TransferTimeout, ct);
 
     // ---- the building blocks (also for the routes of a module) ----
 

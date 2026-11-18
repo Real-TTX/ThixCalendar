@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using MatCloud.Contract;
+using MatCloud.Contract.Calendar;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
 
@@ -297,6 +298,65 @@ public static class CloudService
         {
             Kick();
         }
+    }
+
+    // ===== The accounts MatCloud keeps in step =====
+
+    /// <summary>Hands the sign-in of an account to MatCloud; the item of the account goes up first (MatCloud looks for it).</summary>
+    internal static async Task<CalendarCloudAccount> HandOverAsync(CalendarHandover handover, CancellationToken cancellationToken)
+    {
+        var (cloud, token) = RequireConnection();
+        using var client = CreateClient(cloud.ServerUrl, token);
+        await RoundAsync(client, AccountKey(cloud), cancellationToken);
+        return await client.HandOverCalendarAsync(handover, cancellationToken);
+    }
+
+    /// <summary>MatCloud forgets the sign-in of the account and what it wrote for it.</summary>
+    internal static async Task LetGoAsync(string accountSyncId, CancellationToken cancellationToken)
+    {
+        var (cloud, token) = RequireConnection();
+        using var client = CreateClient(cloud.ServerUrl, token);
+        await client.DisconnectCalendarAsync(accountSyncId, cancellationToken);
+    }
+
+    /// <summary>Creates, changes or deletes an event of an account MatCloud keeps (at the provider first).</summary>
+    internal static async Task<CalendarEventChangeResult> ChangeEventAsync(CalendarEventChange change, CancellationToken cancellationToken)
+    {
+        var (cloud, token) = RequireConnection();
+        using var client = CreateClient(cloud.ServerUrl, token);
+        return await client.ChangeCalendarEventAsync(change, cancellationToken);
+    }
+
+    /// <summary>Asks MatCloud to sync an account it keeps now ("Jetzt abgleichen"); the result comes with the sync. Nothing when not connected.</summary>
+    internal static void SyncAccountNow(string accountSyncId)
+    {
+        var cloud = SettingsService.Get().Cloud;
+        if (ReadToken(cloud) is not { } token)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var client = CreateClient(cloud.ServerUrl, token);
+                await client.SyncCalendarNowAsync(accountSyncId, CancellationToken.None);
+            }
+            catch (Exception exception) when (exception is CloudException or HttpRequestException or TaskCanceledException)
+            {
+                Log.Warning($"Cloud: sync now not asked ({exception.GetType().Name})");
+            }
+        });
+        Kick();
+    }
+
+    private static (CloudSettings Cloud, string Token) RequireConnection()
+    {
+        var cloud = SettingsService.Get().Cloud;
+        return ReadToken(cloud) is { } token
+            ? (cloud, token)
+            : throw new BusinessException("ThixCalendar ist nicht mit MatCloud verbunden (Einstellungen › Cloud).");
     }
 
     /// <summary>One round without the long poll (tests): what the loop does, with its handling of 401 and 403.</summary>

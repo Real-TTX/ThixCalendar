@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MatCloud.Contract;
+using MatCloud.Contract.Calendar;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
 
@@ -17,6 +18,9 @@ namespace ThixCalendar.Core.Business;
 ///   events     (key of the event)            the events of the own calendars ("Eigene Kalender") – Microsoft, Google and
 ///                                            ICS keep theirs themselves
 ///   answers    (hash of the occurrence)      Schließen / Später of a reminder: answered on one computer, gone on all
+/// An online account has a sync mode: the computers keep it in step (each signs in itself), or MatCloud does (it keeps the sign-in
+/// and writes the collections only it writes – cloud-accounts, cloud-calendars, cloud-events –, which come down here like the
+/// provider's own and never go up; changes of such events go through MatCloud, CloudService.ChangeEventAsync).
 /// Window sizes, the view, the menu and the app registrations stay on each computer.
 ///
 /// The index (cloud-sync.json) remembers per item the hash both sides agreed on last. A round: the cloud's changes come down and
@@ -33,6 +37,9 @@ internal static class CloudItems
     public const string Events = "events";
     public const string Answers = "answers";
     public const string SettingsKey = "calendar";
+    public const string CloudAccounts = CalendarContract.CloudAccounts;
+    public const string CloudCalendars = CalendarContract.CloudCalendars;
+    public const string CloudEvents = CalendarContract.CloudEvents;
 
     private static readonly object Gate = new();
     private static readonly JsonSerializerOptions Json = CloudContract.Json;
@@ -68,7 +75,8 @@ internal static class CloudItems
                 }
 
                 index.Parked.Remove(key);
-                if (remoteHash != mineHash)
+                // Only MatCloud writes the collections cloud-*: they are compared with what came down last, not with this computer.
+                if (SyncContract.IsServerCollection(item.Collection) ? remoteHash != known?.Hash || mine is not null : remoteHash != mineHash)
                 {
                     if (Apply(item))
                     {
@@ -109,6 +117,11 @@ internal static class CloudItems
             var local = Snapshot(index);
             foreach (var item in local)
             {
+                if (SyncContract.IsServerCollection(item.Collection))
+                {
+                    continue;
+                }
+
                 var hash = Hash(item.Data);
                 if (index.Items.TryGetValue(Key(item.Collection, item.Key), out var known) && known.Hash == hash)
                 {
@@ -131,6 +144,11 @@ internal static class CloudItems
                 if (entry.Hash is not null && !present.Contains(key))
                 {
                     var (collection, itemKey) = Split(key);
+                    if (SyncContract.IsServerCollection(collection))
+                    {
+                        continue; // only MatCloud writes (and deletes) these
+                    }
+
                     pending.Add(new SyncItemDto { Collection = collection, Key = itemKey, IsDeleted = true, UpdatedAt = now });
                 }
             }
@@ -235,6 +253,8 @@ internal static class CloudItems
 
         public int SyncIntervalMinutes { get; init; }
 
+        public AccountSyncMode? DefaultSyncMode { get; init; }
+
         public static SharedSettings From(AppSettings settings) => new()
         {
             DayStartHour = settings.DayStartHour,
@@ -248,6 +268,7 @@ internal static class CloudItems
             MissedReminderMinutes = settings.MissedReminderMinutes,
             RemindersPausedUntil = settings.RemindersPausedUntil?.ToUniversalTime(),
             SyncIntervalMinutes = settings.SyncIntervalMinutes,
+            DefaultSyncMode = settings.DefaultSyncMode,
         };
 
         public AppSettings ApplyTo(AppSettings settings) => settings with
@@ -263,10 +284,12 @@ internal static class CloudItems
             MissedReminderMinutes = MissedReminderMinutes,
             RemindersPausedUntil = RemindersPausedUntil,
             SyncIntervalMinutes = SyncIntervalMinutes,
+            DefaultSyncMode = DefaultSyncMode,
         };
     }
 
-    internal sealed record AccountData(AccountKind Kind, string Name, string UserName, string Url, bool IsVisible);
+    /// <summary>An account (CalendarAccountItem of the contract). <see cref="SyncMode"/> null: the computers (from before MatCloud kept accounts).</summary>
+    internal sealed record AccountData(AccountKind Kind, string Name, string UserName, string Url, bool IsVisible, AccountSyncMode? SyncMode = null);
 
     /// <summary>A calendar: for an online one only what the user chose (its name and colour come from the provider), else all of it.</summary>
     internal sealed record CalendarData(
@@ -298,7 +321,8 @@ internal static class CloudItems
         {
             foreach (var account in accounts)
             {
-                items.Add(new LocalItem(Accounts, account.SyncId, Serialize(new AccountData(account.Kind, account.Name, account.UserName, account.Url, account.IsVisible)), account.UpdateDate));
+                items.Add(new LocalItem(Accounts, account.SyncId, Serialize(new AccountData(account.Kind, account.Name, account.UserName, account.Url, account.IsVisible,
+                    account.Kind == AccountKind.Local ? null : account.SyncMode)), account.UpdateDate));
             }
 
             foreach (var calendar in calendars)
@@ -358,7 +382,7 @@ internal static class CloudItems
         var present = items.Select(item => Key(item.Collection, item.Key)).ToHashSet(StringComparer.Ordinal);
         foreach (var (key, parked) in index.Parked)
         {
-            if (!present.Contains(key) && parked.Data is { } data)
+            if (!present.Contains(key) && parked.Data is { } data && !SyncContract.IsServerCollection(parked.Collection))
             {
                 items.Add(new LocalItem(parked.Collection, parked.Key, data, parked.UpdatedAt));
             }
@@ -401,6 +425,9 @@ internal static class CloudItems
                 Calendars => SharesConfiguration && ApplyCalendar(item.Key, deleted ? null : Deserialize<CalendarData>(item.Data!)),
                 Events => SharesConfiguration && ApplyEvent(item.Key, deleted ? null : Deserialize<EventData>(item.Data!)),
                 Answers => ApplyAnswer(item.Key, deleted ? null : Deserialize<AnswerData>(item.Data!)),
+                CloudAccounts => AccessPolicy.AreOnlineAccountsDisabled || ApplyCloudAccount(item.Key, deleted ? null : Deserialize<CalendarCloudAccount>(item.Data!)),
+                CloudCalendars => AccessPolicy.AreOnlineAccountsDisabled || ApplyCloudCalendar(item.Key, deleted ? null : Deserialize<CalendarCloudCalendar>(item.Data!)),
+                CloudEvents => AccessPolicy.AreOnlineAccountsDisabled || ApplyCloudEvent(item.Key, deleted ? null : Deserialize<CalendarCloudEvent>(item.Data!)),
                 _ => true, // something a newer ThixCalendar keeps: not for this version
             };
         }
@@ -446,11 +473,24 @@ internal static class CloudItems
         existing ??= accounts.FirstOrDefault(account => account.Kind == data.Kind && SameAccount(account, data) && !IsShared(account.SyncId));
         if (existing is not null)
         {
-            var updated = existing with { SyncId = syncId, Name = data.Name, IsVisible = data.IsVisible, Url = data.Kind == AccountKind.Ics ? data.Url : existing.Url };
+            var mode = data.Kind == AccountKind.Local ? existing.SyncMode : data.SyncMode ?? AccountSyncMode.Computers;
+            var updated = existing with
+            {
+                SyncId = syncId, Name = data.Name, IsVisible = data.IsVisible, Url = data.Kind == AccountKind.Ics ? data.Url : existing.Url, SyncMode = mode,
+            };
+            if (mode != existing.SyncMode)
+            {
+                updated = mode == AccountSyncMode.Cloud
+                    ? updated with { State = AccountState.Ok, LastError = "" }
+                    : AccountService.HasSignIn(existing) || existing.Kind == AccountKind.Ics
+                        ? updated with { State = AccountState.Ok, LastError = "" }
+                        : updated with { State = AccountState.SignedOut, LastError = "Läuft wieder über die Computer – auf diesem Computer noch nicht angemeldet: „Neu anmelden“." };
+            }
+
             if (updated != existing)
             {
                 CalendarStore.UpdateAccount(updated);
-                if (updated.Url != existing.Url)
+                if (updated.Url != existing.Url || (mode != existing.SyncMode && mode == AccountSyncMode.Computers))
                 {
                     SyncService.Kick();
                 }
@@ -460,6 +500,7 @@ internal static class CloudItems
         }
 
         var online = data.Kind is AccountKind.Microsoft or AccountKind.Google;
+        var cloud = data.Kind != AccountKind.Local && data.SyncMode == AccountSyncMode.Cloud;
         CalendarStore.InsertAccount(new CalendarAccount
         {
             Kind = data.Kind,
@@ -468,11 +509,12 @@ internal static class CloudItems
             Url = data.Url,
             IsVisible = data.IsVisible,
             SyncId = syncId,
-            State = online ? AccountState.SignedOut : data.Kind == AccountKind.Local ? AccountState.Ok : AccountState.New,
-            LastError = online ? "Auf diesem Computer noch nicht angemeldet – „Neu anmelden“." : "",
+            SyncMode = cloud ? AccountSyncMode.Cloud : AccountSyncMode.Computers,
+            State = cloud ? AccountState.Ok : online ? AccountState.SignedOut : data.Kind == AccountKind.Local ? AccountState.Ok : AccountState.New,
+            LastError = online && !cloud ? "Auf diesem Computer noch nicht angemeldet – „Neu anmelden“." : "",
         });
-        Log.Info($"Account of kind {data.Kind} added (MatCloud)");
-        if (data.Kind == AccountKind.Ics)
+        Log.Info($"Account of kind {data.Kind} added (MatCloud{(cloud ? ", kept in step by MatCloud" : "")})");
+        if (data.Kind == AccountKind.Ics && !cloud)
         {
             SyncService.Kick();
         }
@@ -620,6 +662,171 @@ internal static class CloudItems
         return true;
     }
 
+    /// <summary>How MatCloud's sync of an account it keeps went: shown like the state of a sync here.</summary>
+    private static bool ApplyCloudAccount(string syncId, CalendarCloudAccount? data)
+    {
+        var account = CalendarStore.LoadAccounts().FirstOrDefault(candidate => candidate.SyncId == syncId);
+        if (account is null)
+        {
+            return data is null; // the account comes first
+        }
+
+        if (data is null)
+        {
+            return true;
+        }
+
+        if (!account.IsKeptByCloud)
+        {
+            return true; // a state from before the account went back to the computers
+        }
+
+        var (state, error) = data.State switch
+        {
+            CalendarCloudState.Ready => (AccountState.Ok, ""),
+            CalendarCloudState.Connecting => (AccountState.Ok, "MatCloud gleicht zum ersten Mal ab …"),
+            CalendarCloudState.SignInRequired => (AccountState.SignedOut, "MatCloud braucht eine neue Anmeldung: „Neu anmelden“ (hier oder im Browser unter Kalender › Konten)."),
+            _ => (AccountState.Error, data.Problem.Length > 0 ? "MatCloud: " + data.Problem : "MatCloud konnte nicht abgleichen."),
+        };
+        var updated = account with { State = state, LastError = error, LastSync = data.LastSync ?? account.LastSync };
+        if (updated != account)
+        {
+            CalendarStore.UpdateAccount(updated);
+        }
+
+        return true;
+    }
+
+    /// <summary>A calendar of an account MatCloud keeps, as the provider names it (the user's choices come with collection calendars).</summary>
+    private static bool ApplyCloudCalendar(string key, CalendarCloudCalendar? data)
+    {
+        var slash = key.IndexOf('/');
+        var account = CalendarStore.LoadAccounts().FirstOrDefault(candidate => candidate.SyncId == (slash > 0 ? key[..slash] : key));
+        if (account is null)
+        {
+            return data is null; // the account comes first
+        }
+
+        if (!account.IsKeptByCloud)
+        {
+            return true;
+        }
+
+        var existing = CalendarStore.LoadCalendars().FirstOrDefault(calendar => calendar.AccountId == account.Id && CalendarKey(account, calendar) == key);
+        if (data is null)
+        {
+            if (existing is not null)
+            {
+                CalendarStore.DeleteCalendar(existing.Id);
+            }
+
+            return true;
+        }
+
+        if (existing is null)
+        {
+            CalendarStore.InsertCalendar(new CalendarInfo
+            {
+                AccountId = account.Id,
+                RemoteId = data.RemoteId,
+                Name = data.Name,
+                Color = data.Color.Length > 0 ? data.Color : CalendarColors.Default,
+                IsReadOnly = data.IsReadOnly,
+                IsPrimary = data.IsPrimary,
+                DefaultReminderMinutes = data.DefaultReminderMinutes,
+            });
+            return true;
+        }
+
+        var updated = existing with
+        {
+            Name = data.Name,
+            Color = existing.IsColorCustom || data.Color.Length == 0 ? existing.Color : data.Color,
+            IsReadOnly = data.IsReadOnly,
+            IsPrimary = data.IsPrimary,
+            DefaultReminderMinutes = data.DefaultReminderMinutes,
+        };
+        if (updated != existing)
+        {
+            CalendarStore.UpdateCalendar(updated);
+        }
+
+        return true;
+    }
+
+    /// <summary>An event (one occurrence) of an account MatCloud keeps, kept by its key at the provider (reminder answers stay with it).</summary>
+    private static bool ApplyCloudEvent(string key, CalendarCloudEvent? data)
+    {
+        var calendarKey = data?.Calendar ?? (key.LastIndexOf('/') is var last and > 0 ? key[..last] : key);
+        if (!CalendarIdsByKey().TryGetValue(calendarKey, out var calendarId))
+        {
+            return data is null; // its calendar comes first
+        }
+
+        if (data is null)
+        {
+            var gone = CalendarStore.LoadEventsOfCalendar(calendarId).FirstOrDefault(calendarEvent => CalendarContract.EventKey(calendarKey, calendarEvent.RemoteId) == key);
+            if (gone is not null)
+            {
+                CalendarStore.DeleteEvent(gone.Id);
+            }
+
+            return true;
+        }
+
+        var existing = CalendarStore.FindEvent(calendarId, data.RemoteId);
+        var calendarEvent = FromCloud(data) with { Id = existing?.Id ?? 0, CalendarId = calendarId };
+        if (existing is null)
+        {
+            CalendarStore.InsertEvent(calendarEvent);
+        }
+        else if (existing with { CreateDate = default, UpdateDate = default } != calendarEvent)
+        {
+            CalendarStore.UpdateEvent(calendarEvent);
+        }
+
+        return true;
+    }
+
+    /// <summary>An event of MatCloud as this computer keeps events.</summary>
+    internal static CalendarEvent FromCloud(CalendarCloudEvent data) => new()
+    {
+        RemoteId = data.RemoteId,
+        Title = data.Title,
+        Start = data.Start,
+        End = data.End,
+        IsAllDay = data.IsAllDay,
+        Location = data.Location,
+        Description = data.Description,
+        MeetingUrl = data.MeetingUrl,
+        WebLink = data.WebLink,
+        Organizer = data.Organizer,
+        ReminderMinutes = data.ReminderMinutes,
+        Status = (EventStatus)(int)data.Status,
+        Response = (ResponseStatus)(int)data.Response,
+        IsRecurring = data.IsRecurring,
+    };
+
+    /// <summary>An event of this computer as MatCloud takes it (to create or change it at the provider).</summary>
+    internal static CalendarCloudEvent ToCloud(string calendarKey, CalendarEvent calendarEvent) => new()
+    {
+        Calendar = calendarKey,
+        RemoteId = calendarEvent.RemoteId,
+        Title = calendarEvent.Title,
+        Start = calendarEvent.Start.ToUniversalTime(),
+        End = calendarEvent.End.ToUniversalTime(),
+        IsAllDay = calendarEvent.IsAllDay,
+        Location = calendarEvent.Location,
+        Description = calendarEvent.Description,
+        MeetingUrl = calendarEvent.MeetingUrl,
+        WebLink = calendarEvent.WebLink,
+        Organizer = calendarEvent.Organizer,
+        ReminderMinutes = calendarEvent.ReminderMinutes,
+        Status = (CalendarEventStatus)(int)calendarEvent.Status,
+        Response = (CalendarResponse)(int)calendarEvent.Response,
+        IsRecurring = calendarEvent.IsRecurring,
+    };
+
     // ===== Plumbing =====
 
     /// <summary>calendar key -> id of the calendar here.</summary>
@@ -666,9 +873,12 @@ internal static class CloudItems
     {
         Settings => 0,
         Accounts => 1,
-        Calendars => 2,
-        Events => 3,
-        _ => 4,
+        CloudAccounts => 2,
+        CloudCalendars => 2,
+        Calendars => 3,
+        Events => 4,
+        CloudEvents => 4,
+        _ => 5,
     };
 
     private static string Serialize<T>(T value) => JsonSerializer.Serialize(value, Json);

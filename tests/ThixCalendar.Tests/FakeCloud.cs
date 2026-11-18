@@ -1,13 +1,16 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using MatCloud.Contract;
+using MatCloud.Contract.Calendar;
 
 namespace ThixCalendar.Tests;
 
 /// <summary>
 /// MatCloud in memory, after the rules of <see cref="CloudContract"/> and <see cref="SyncContract"/>: the sign-in with a
 /// password and in the browser (a code that a test approves or denies), the account, and the general sync of ThixCalendar – one
-/// revision counter, tombstones, the last writer wins by UpdatedAt (a delete too). Enough to test the desktop side.
+/// revision counter, tombstones, the last writer wins by UpdatedAt (a delete too), collections cloud-* only for the server – and the
+/// calendar routes (hand-over, let go, sync now, an event changed "at the provider"). Enough to test the desktop side.
 /// </summary>
 internal sealed class FakeCloud : HttpMessageHandler
 {
@@ -31,6 +34,19 @@ internal sealed class FakeCloud : HttpMessageHandler
     public bool IsAppSwitchedOff { get; set; }
 
     public long Revision => _revision;
+
+    /// <summary>The sign-ins handed over (account SyncId → the hand-over).</summary>
+    public Dictionary<string, CalendarHandover> HandedOver { get; } = [];
+
+    /// <summary>The accounts MatCloud was told to let go.</summary>
+    public List<string> LetGo { get; } = [];
+
+    /// <summary>The events changed through MatCloud, as the "provider" got them.</summary>
+    public List<CalendarEventChange> EventChanges { get; } = [];
+
+    /// <summary>What MatCloud's sync on the server would write (collections cloud-*), as the server.</summary>
+    public void PutFromServer<T>(string collection, string key, T? data) where T : class =>
+        PutFromElsewhere(collection, key, data is null ? null : JsonSerializer.Serialize(data, CloudContract.Json));
 
     /// <summary>The live items of a collection as the cloud has them.</summary>
     public List<SyncItemDto> Live(string collection)
@@ -217,6 +233,13 @@ internal sealed class FakeCloud : HttpMessageHandler
                     var results = new List<SyncPushResult>();
                     foreach (var item in push.Items)
                     {
+                        if (SyncContract.IsServerCollection(item.Collection))
+                        {
+                            Items.TryGetValue((item.Collection, item.Key), out var kept);
+                            results.Add(new SyncPushResult(item.Collection, item.Key, kept?.Revision ?? 0, false, kept));
+                            continue;
+                        }
+
                         if (Items.TryGetValue((item.Collection, item.Key), out var current) && current.UpdatedAt > item.UpdatedAt)
                         {
                             results.Add(new SyncPushResult(item.Collection, item.Key, current.Revision, false, current));
@@ -236,6 +259,53 @@ internal sealed class FakeCloud : HttpMessageHandler
 
                     return Json(HttpStatusCode.OK, new SyncPushResponse(results, _revision));
                 }
+            }
+
+            case CalendarContract.Connections when request.Method == HttpMethod.Put:
+            {
+                var handover = (await request.Content!.ReadFromJsonAsync<CalendarHandover>(CloudContract.Json, cancellationToken))!;
+                lock (_gate)
+                {
+                    HandedOver[handover.Account] = handover;
+                }
+
+                PutFromServer(CalendarContract.CloudAccounts, handover.Account, new CalendarCloudAccount(handover.Kind, handover.UserName, CalendarCloudState.Connecting, null));
+                return Json(HttpStatusCode.OK, new CalendarCloudAccount(handover.Kind, handover.UserName, CalendarCloudState.Connecting, null));
+            }
+
+            case CalendarContract.Disconnect:
+            {
+                var account = (await request.Content!.ReadFromJsonAsync<CalendarAccountRequest>(CloudContract.Json, cancellationToken))!;
+                lock (_gate)
+                {
+                    LetGo.Add(account.Account);
+                    HandedOver.Remove(account.Account);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            case CalendarContract.SyncNow:
+                return new HttpResponseMessage(HttpStatusCode.Accepted);
+
+            case CalendarContract.EventChange:
+            {
+                var change = (await request.Content!.ReadFromJsonAsync<CalendarEventChange>(CloudContract.Json, cancellationToken))!;
+                lock (_gate)
+                {
+                    EventChanges.Add(change);
+                }
+
+                if (change.Delete)
+                {
+                    PutFromServer<CalendarCloudEvent>(CalendarContract.CloudEvents, change.Event!, null);
+                    return Json(HttpStatusCode.OK, new CalendarEventChangeResult(change.Event!, null));
+                }
+
+                var stored = change.Data! with { RemoteId = change.Data!.RemoteId.Length > 0 ? change.Data.RemoteId : "PROVIDER-" + EventChanges.Count };
+                var key = CalendarContract.EventKey(stored.Calendar, stored.RemoteId);
+                PutFromServer(CalendarContract.CloudEvents, key, stored);
+                return Json(HttpStatusCode.OK, new CalendarEventChangeResult(key, stored));
             }
 
             default:

@@ -74,9 +74,9 @@ public static class SyncService
     {
         foreach (var account in CalendarStore.LoadAccounts().Where(account => account.Kind != AccountKind.Local))
         {
-            if (account.State == AccountState.SignedOut)
+            if (account.State == AccountState.SignedOut || account.IsKeptByCloud)
             {
-                continue; // waits for "Neu anmelden"
+                continue; // waits for "Neu anmelden" / MatCloud keeps it in step
             }
 
             await SyncAccountAsync(account.Id, cancellationToken);
@@ -95,6 +95,12 @@ public static class SyncService
         try
         {
             var account = CalendarStore.LoadAccounts().FirstOrDefault(item => item.Id == accountId);
+            if (account is { IsKeptByCloud: true })
+            {
+                CloudService.SyncAccountNow(account.SyncId); // MatCloud keeps it in step: it is asked to sync now
+                return;
+            }
+
             if (account is null || AccountService.CreateProvider(account) is not { } provider)
             {
                 return;
@@ -164,7 +170,8 @@ public static class SyncService
             }
         }
 
-        var accounts = CalendarStore.LoadAccounts().Where(account => account.Kind != AccountKind.Local && account.State != AccountState.SignedOut).ToList();
+        var accounts = CalendarStore.LoadAccounts()
+            .Where(account => account.Kind != AccountKind.Local && account.State != AccountState.SignedOut && !account.IsKeptByCloud).ToList();
         if (accounts.Count == 0 || AccessPolicy.AreOnlineAccountsDisabled)
         {
             return false;

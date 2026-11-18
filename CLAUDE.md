@@ -11,7 +11,10 @@ until answered, come again at the start (large, centred), play a sound (repeated
 meetings with one click. UI language German; code, comments and identifiers English. The mockup of the main window is
 `docs/mockups/hauptfenster.png`; the sister project ThixClip (`../ThixClip`) is the reference for structure and look.
 **MatCloud** (the cloud of all Thix apps, `../MatCloud`, app id `calendar`, the general sync) keeps the accounts, the own
-calendars with their events, the reminder settings and the answers to reminders the same on every computer; **ThixLauncher**
+calendars with their events, the reminder settings and the answers to reminders the same on every computer, and – per account,
+the user's choice (**sync mode** "Auf den Computern" | "Über MatCloud", default for new accounts in Einstellungen › Cloud, it travels)
+– it keeps Microsoft / Google / ICS accounts in step itself on the server (module `MatCloud.Apps.Calendar`, also a web app at
+`/Calendar`): then the computers need no sign-in, get the events from MatCloud and change them through it; **ThixLauncher**
 (`../ThixLauncher`, its catalog `AppCatalog`) installs ThixCalendar and hands over its MatCloud sign-in.
 
 Stack: **.NET 10**, C#. **Avalonia 11.3** with **MatDesktop 0.2.0** (the desktop toolkit of MatDesign: Fluent in the colours of
@@ -21,6 +24,9 @@ the tokens, title bar, menu, tray, setup window), SQLite (Microsoft.Data.Sqlite)
 ## Build / run / test
 
 - `dotnet build ThixCalendar.slnx` – expected: 0 warnings, 0 errors.
+- **The providers are copied into MatCloud** (its calendar module syncs on the server with the same code): after a change of
+  `Models/CalendarModels.cs` or `Providers/*` run `node tools/providers-copy.js ../MatCloud/src/Apps/MatCloud.Apps.Calendar` and
+  commit it in MatCloud (its tests hold the copy to `thixcalendar.version`).
 - `dotnet test tests/ThixCalendar.Tests` – reminder rules (pure `ReminderService.ComputeDue` with explicit times, and
   through the database), events / accounts / settings with validation and policies, Graph / Google / ICS parsing, sync
   against fake providers (`FakeHttp` replaces the network via `ProviderHttp.HandlerForTests`, `AccountService.SignInForTests`
@@ -67,7 +73,11 @@ src/ThixCalendar.Core   (no UI) models, business layer (static classes), infrast
                         CloudService (MatCloud: sign-in in the browser / with a password / ThixLauncher's hand-over, the loop
                         pull -> push -> long poll, 401 signs out, 403 waits), CloudItems (what travels: settings, accounts
                         WITHOUT sign-ins, calendars – for online ones only what the user chose –, the events of the own
-                        calendars, the answers to reminders; index cloud-sync.json; items that cannot be applied yet are parked)
+                        calendars, the answers to reminders; index cloud-sync.json; items that cannot be applied yet are parked;
+                        the collections only MatCloud writes – cloud-accounts, cloud-calendars, cloud-events – come down for the
+                        accounts MatCloud keeps and never go up), CloudCalendarProvider (the "provider" of such an account:
+                        changes go through MatCloud, POST /api/v1/calendar/events), AccountService.SetSyncModeAsync (hand the
+                        sign-in to MatCloud and forget it here / let it go back to the computers)
   Infrastructure/       CalendarStore (SQLite calendar.db: Account, Calendar, CalendarEvent, ReminderState; ReplaceEvents keeps
                         row ids of known remote keys), SettingsStore (settings.json), TokenStore (DPAPI / Keychain), AppPaths,
                         AppInfo (version, channel, built-in client ids), Log, ProblemReports (crash / hang reports)
@@ -122,7 +132,10 @@ tests/ThixCalendar.Tests
 - **Relational rules** (SQLite): PascalCase tables/columns, key `Id` (64 bit), `CreateDate`, `CreateUserId`, `UpdateDate`,
   `UpdateUserId`, `UpdateState` (1 created, 2 updated). Rows are deleted for real (the providers are the truth).
 - **MatCloud rules** (CloudItems): the general sync, last writer wins by `UpdatedAt`, a delete leaves a tombstone. Sign-ins at
-  Microsoft and Google NEVER travel (an account from another computer arrives as "Anmeldung nötig"); the calendars of
+  Microsoft and Google never travel between computers (an account "Auf den Computern" from another computer arrives as
+  "Anmeldung nötig"); only the hand-over to MatCloud (sync mode Cloud, PUT /api/v1/calendar/connections) gives one away – and only
+  one of ThixCalendar's own registration (MatCloud refreshes it with the same client id); this computer forgets it then. An
+  account MatCloud keeps is never synced here (SyncService skips it) and its events are MatCloud's (cloud-events); the calendars of
   Microsoft, Google and ICS stay theirs (only shown / reminders / an own colour travel); an answer to a reminder travels by its
   occurrence as every computer names it (calendar key : event key : start). What cannot be applied yet is parked, never deleted.
 - **Providers are the truth**: a change goes to Microsoft / Google first; only what they accepted is stored. Graph gets only

@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using MatCloud.Contract;
+using MatCloud.Contract.Calendar;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
 using ThixCalendar.Core.Providers;
@@ -34,6 +36,79 @@ public static class AccountService
         AccountKind.Google => SettingsService.GoogleClient is { ClientId.Length: > 0, ClientSecret.Length: > 0 },
         _ => true,
     };
+
+    /// <summary>
+    /// Who keeps a new online account in step: the default of the settings (it travels with MatCloud; unset = MatCloud) while this computer is connected
+    /// to MatCloud, else the computers.
+    /// </summary>
+    public static AccountSyncMode DefaultSyncMode => CloudService.IsConnected && !AccessPolicy.IsCloudDisabled
+        ? SettingsService.Get().DefaultSyncMode ?? AccountSyncMode.Cloud
+        : AccountSyncMode.Computers;
+
+    /// <summary>This computer still has a sign-in of the account.</summary>
+    internal static bool HasSignIn(CalendarAccount account) => TokenStore.Read(TokenKey(account.Id), account.ProtectedToken) is { Length: > 0 };
+
+    /// <summary>
+    /// Changes who keeps the account in step. To MatCloud: this computer hands its sign-in over (or MatCloud asks for one in the browser) and forgets it;
+    /// the events then come from MatCloud. To the computers: MatCloud forgets the sign-in; this computer syncs itself again (after "Neu anmelden" when it
+    /// has no sign-in of its own).
+    /// </summary>
+    public static async Task<CalendarAccount> SetSyncModeAsync(long accountId, AccountSyncMode mode, CancellationToken cancellationToken = default)
+    {
+        AccessPolicy.EnsureConfigurationEditable();
+        var account = Get(accountId) ?? throw new BusinessException("Dieses Konto gibt es nicht mehr.");
+        if (account.Kind == AccountKind.Local || account.SyncMode == mode)
+        {
+            return account;
+        }
+
+        if (mode == AccountSyncMode.Cloud)
+        {
+            if (!CloudService.IsConnected || AccessPolicy.IsCloudDisabled)
+            {
+                throw new BusinessException("Dafür muss ThixCalendar mit MatCloud verbunden sein (Einstellungen › Cloud).");
+            }
+
+            EnsureHandOverPossible(account);
+            CalendarStore.UpdateAccount(account with { SyncMode = AccountSyncMode.Cloud, State = AccountState.Ok, LastError = "" });
+            try
+            {
+                await HandOverAsync(Get(accountId)!, cancellationToken);
+            }
+            catch (BusinessException)
+            {
+                CalendarStore.UpdateAccount(Get(accountId)! with { SyncMode = AccountSyncMode.Computers, State = account.State, LastError = account.LastError });
+                throw;
+            }
+        }
+        else
+        {
+            try
+            {
+                await CloudService.LetGoAsync(account.SyncId, cancellationToken);
+            }
+            catch (Exception exception) when (exception is CloudException or HttpRequestException or BusinessException or TaskCanceledException)
+            {
+                Log.Warning($"Account {accountId}: MatCloud not told to let go ({exception.GetType().Name}); it does when it sees the account");
+            }
+
+            var signedIn = account.Kind == AccountKind.Ics || HasSignIn(account);
+            CalendarStore.UpdateAccount(account with
+            {
+                SyncMode = AccountSyncMode.Computers,
+                State = signedIn ? AccountState.Ok : AccountState.SignedOut,
+                LastError = signedIn ? "" : "Läuft wieder über die Computer – auf diesem Computer noch nicht angemeldet: „Neu anmelden“.",
+            });
+            if (signedIn)
+            {
+                await SyncService.SyncAccountAsync(accountId, cancellationToken);
+            }
+        }
+
+        Log.Info($"Account {accountId} is kept in step by {(mode == AccountSyncMode.Cloud ? "MatCloud" : "the computers")}");
+        CalendarService.RaiseChanged();
+        return Get(accountId)!;
+    }
 
     /// <summary>A calendar that lives only on this computer (no account anywhere needed).</summary>
     public static CalendarAccount AddLocal(string name, string calendarName = "Kalender")
@@ -114,6 +189,11 @@ public static class AccountService
 
         var accountName = name.Trim().Length > 0 ? name.Trim() : calendars[0].Name;
         var account = Insert(new CalendarAccount { Kind = AccountKind.Ics, Name = accountName, Url = address });
+        if (await KeepInCloudAsync(account, cancellationToken))
+        {
+            return Get(account.Id) ?? account;
+        }
+
         await SyncService.SyncAccountAsync(account.Id, cancellationToken);
         return Get(account.Id) ?? account;
     }
@@ -144,6 +224,14 @@ public static class AccountService
 
         StoreTokens(account, tokens);
         CalendarStore.UpdateAccount(Get(accountId)! with { State = AccountState.Ok, LastError = "", UserName = userName.Length > 0 ? userName : account.UserName });
+        if (account.IsKeptByCloud)
+        {
+            EnsureHandOverPossible(account);
+            await HandOverAsync(Get(accountId)!, cancellationToken);
+            CalendarService.RaiseChanged();
+            return Get(accountId)!;
+        }
+
         await SyncService.SyncAccountAsync(accountId, cancellationToken);
         return Get(accountId)!;
     }
@@ -197,7 +285,7 @@ public static class AccountService
     }
 
     /// <summary>The provider of an account (null for a local one: its events live only in the database).</summary>
-    internal static ICalendarProvider? CreateProvider(CalendarAccount account) => account.Kind switch
+    internal static ICalendarProvider? CreateProvider(CalendarAccount account) => account.IsKeptByCloud ? new CloudCalendarProvider(account) : account.Kind switch
     {
         AccountKind.Microsoft => new GraphProvider(cancellationToken => AccessTokenAsync(account.Id, cancellationToken)),
         AccountKind.Google => new GoogleProvider(cancellationToken => AccessTokenAsync(account.Id, cancellationToken)),
@@ -283,8 +371,87 @@ public static class AccountService
         });
         StoreTokens(account, tokens);
         Log.Info($"Account {account.Id} ({kind}) added");
+        if (await KeepInCloudAsync(Get(account.Id) ?? account, cancellationToken))
+        {
+            return Get(account.Id) ?? account;
+        }
+
         await SyncService.SyncAccountAsync(account.Id, cancellationToken);
         return Get(account.Id) ?? account;
+    }
+
+    /// <summary>
+    /// A new account goes to MatCloud when that is the default (and possible): true when MatCloud keeps it now. When MatCloud cannot take it, it stays on
+    /// the computers (nothing is lost; the user can switch it later).
+    /// </summary>
+    private static async Task<bool> KeepInCloudAsync(CalendarAccount account, CancellationToken cancellationToken)
+    {
+        if (DefaultSyncMode != AccountSyncMode.Cloud || !UsesBuiltInRegistration(account.Kind))
+        {
+            return false;
+        }
+
+        CalendarStore.UpdateAccount(account with { SyncMode = AccountSyncMode.Cloud, State = AccountState.Ok, LastError = "" });
+        try
+        {
+            await HandOverAsync(Get(account.Id)!, cancellationToken);
+            CalendarService.RaiseChanged();
+            return true;
+        }
+        catch (BusinessException exception)
+        {
+            Log.Warning($"Account {account.Id} stays on the computers: {exception.Message}");
+            CalendarStore.UpdateAccount(Get(account.Id)! with { SyncMode = AccountSyncMode.Computers });
+            return false;
+        }
+    }
+
+    /// <summary>MatCloud refreshes a sign-in with ThixCalendar's own registration: one of a registration entered here cannot go there.</summary>
+    private static bool UsesBuiltInRegistration(AccountKind kind) => kind switch
+    {
+        AccountKind.Microsoft => SettingsService.MicrosoftClientId == CalendarContract.MicrosoftClientId,
+        AccountKind.Google => SettingsService.GoogleClient.ClientId == CalendarContract.GoogleClientId,
+        _ => true,
+    };
+
+    private static void EnsureHandOverPossible(CalendarAccount account)
+    {
+        if (account.IsOnline && !UsesBuiltInRegistration(account.Kind))
+        {
+            throw new BusinessException("Mit einer eigenen App-Registrierung (Einstellungen › Erweitert) kann MatCloud das Konto nicht übernehmen – es bleibt auf den Computern.");
+        }
+    }
+
+    /// <summary>Hands the sign-in of this computer to MatCloud (when it has one; else MatCloud asks for one) and forgets it here.</summary>
+    private static async Task HandOverAsync(CalendarAccount account, CancellationToken cancellationToken)
+    {
+        var token = account.IsOnline ? TokenStore.Read(TokenKey(account.Id), account.ProtectedToken) ?? "" : "";
+        if (account.IsOnline && token.Length == 0)
+        {
+            return; // MatCloud shows "Anmeldung nötig" until the account is signed in (here or in the browser)
+        }
+
+        try
+        {
+            await CloudService.HandOverAsync(new CalendarHandover(account.SyncId, (CalendarAccountKind)(int)account.Kind, account.UserName, token, account.Url), cancellationToken);
+        }
+        catch (CloudException exception)
+        {
+            throw new BusinessException("MatCloud hat das Konto nicht übernommen: " + exception.Message);
+        }
+        catch (HttpRequestException)
+        {
+            throw new BusinessException("MatCloud ist nicht erreichbar – das Konto bleibt vorerst auf den Computern.");
+        }
+
+        if (account.IsOnline)
+        {
+            TokenStore.Delete(TokenKey(account.Id));
+            AccessTokens.TryRemove(account.Id, out _);
+            CalendarStore.UpdateAccount(Get(account.Id)! with { ProtectedToken = "" });
+        }
+
+        Log.Info($"Account {account.Id} handed over to MatCloud");
     }
 
     /// <summary>Signs in and finds out who: Microsoft asks Graph /me, Google's ID token carries the e-mail address.</summary>

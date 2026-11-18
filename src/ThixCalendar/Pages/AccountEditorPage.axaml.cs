@@ -21,6 +21,7 @@ public partial class AccountEditorPage : UserControl, IRefreshable
     private readonly AccountKind _kind;
     private long? _accountId;
     private bool _isBusy;
+    private bool _showingMode;
 
     /// <summary>The XAML previewer (a new local calendar).</summary>
     public AccountEditorPage()
@@ -70,10 +71,18 @@ public partial class AccountEditorPage : UserControl, IRefreshable
             UrlBox.Text = account.Url;
         }
 
+        SyncModeField.IsVisible = account is { Kind: not AccountKind.Local } && CloudService.IsConnected && !AccessPolicy.IsCloudDisabled;
+        _showingMode = true;
+        SyncModeBox.SelectedIndex = account?.SyncMode == AccountSyncMode.Cloud ? 1 : 0;
+        _showingMode = false;
         UserLabel.IsVisible = UserText.IsVisible = account?.IsOnline == true;
         UserText.Text = account?.UserName ?? "";
         Facts.IsVisible = !isNew;
         SyncText.Text = account?.Kind == AccountKind.Local ? "–" : account?.LastSync is { } last ? Ui.FormatDateTime(last) : "noch nie";
+        if (account?.IsKeptByCloud == true)
+        {
+            SyncText.Text += " · durch MatCloud";
+        }
 
         StateNote.Hide();
         if (account?.State == AccountState.SignedOut)
@@ -296,6 +305,40 @@ public partial class AccountEditorPage : UserControl, IRefreshable
         if (_accountId is { } id && Window is { } window && await SignInDialog.RunAsync(window, _kind, id) is not null)
         {
             Message.Show("Wieder angemeldet und synchronisiert.", InfoSeverity.Success);
+            Refresh();
+        }
+    }
+
+    /// <summary>Who keeps the account in step: handed to MatCloud or back to the computers, at once.</summary>
+    private async void OnSyncModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_showingMode || _accountId is not { } id || _isBusy)
+        {
+            return;
+        }
+
+        var mode = SyncModeBox.SelectedIndex == 1 ? AccountSyncMode.Cloud : AccountSyncMode.Computers;
+        _isBusy = true;
+        SyncModeBox.IsEnabled = false;
+        try
+        {
+            var account = await AccountService.SetSyncModeAsync(id, mode);
+            Message.Show(mode == AccountSyncMode.Cloud
+                ? account.IsOnline && account.State == AccountState.Ok && !AccountService.List().Any(a => a.Id == id && a.State == AccountState.SignedOut)
+                    ? "MatCloud gleicht das Konto jetzt ab – auch wenn dieser Computer aus ist."
+                    : "Das Konto läuft über MatCloud."
+                : account.State == AccountState.SignedOut
+                    ? "Das Konto läuft wieder über die Computer. Melde es hier neu an („Neu anmelden“)."
+                    : "Das Konto läuft wieder über die Computer.", InfoSeverity.Success);
+        }
+        catch (BusinessException exception)
+        {
+            Message.Show(exception.Message, InfoSeverity.Error);
+        }
+        finally
+        {
+            _isBusy = false;
+            SyncModeBox.IsEnabled = true;
             Refresh();
         }
     }

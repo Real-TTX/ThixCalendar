@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MatCloud.Contract;
+using MatCloud.Contract.Calendar;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Infrastructure;
 using ThixCalendar.Core.Models;
@@ -207,6 +208,101 @@ public sealed class CloudTests : IDisposable
         AccessPolicy.UsePolicyReaderForTests(name => name == "DisableCloud");
 
         await Assert.ThrowsAsync<BusinessException>(() => CloudService.ConnectAsync(Server, FakeCloud.UserName, FakeCloud.Password, "LAPTOP"));
+    }
+
+    [Fact]
+    public async Task A_new_account_goes_to_MatCloud_and_this_computer_forgets_its_sign_in()
+    {
+        await SignInAsync("LAPTOP");
+        SignInAtMicrosoft();
+
+        var account = await AccountService.AddMicrosoftAsync(_ => { });
+
+        Assert.Equal(AccountSyncMode.Cloud, account.SyncMode);
+        var handover = _cloud.HandedOver[account.SyncId];
+        Assert.Equal((CalendarAccountKind.Microsoft, "refresh-1", "anna@firma.de"), (handover.Kind, handover.RefreshToken, handover.UserName));
+        Assert.False(AccountService.HasSignIn(account));
+        var item = _cloud.Live(CloudItems.Accounts).Single(candidate => candidate.Key == account.SyncId); // went up before the hand-over
+        Assert.Equal(AccountSyncMode.Cloud, JsonSerializer.Deserialize<CloudItems.AccountData>(item.Data!, CloudContract.Json)!.SyncMode);
+    }
+
+    [Fact]
+    public async Task With_the_default_on_the_computers_a_new_account_keeps_its_sign_in_here()
+    {
+        await SignInAsync("LAPTOP");
+        SettingsService.Update(settings => settings with { DefaultSyncMode = AccountSyncMode.Computers });
+        SignInAtMicrosoft();
+
+        var account = await AccountService.AddMicrosoftAsync(_ => { });
+
+        Assert.Equal(AccountSyncMode.Computers, account.SyncMode);
+        Assert.Empty(_cloud.HandedOver);
+        Assert.True(AccountService.HasSignIn(account));
+    }
+
+    [Fact]
+    public async Task The_events_MatCloud_keeps_arrive_without_a_sign_in_and_changes_go_through_MatCloud()
+    {
+        await SignInAsync("LAPTOP");
+        var (calendarKey, eventKey) = AccountKeptByCloud("acc-cloud");
+        await CloudService.SyncOnceAsync();
+
+        var account = Assert.Single(AccountService.List());
+        Assert.Equal((AccountSyncMode.Cloud, AccountState.Ok), (account.SyncMode, account.State)); // no "Neu anmelden" on this computer
+        var meeting = Assert.Single(CalendarService.Range(DateTime.Today, DateTime.Today.AddDays(3))).Event;
+        Assert.Equal("Team-Meeting", meeting.Title);
+        Assert.True(Assert.Single(AccountService.CalendarsOf(account.Id)).IsPrimary);
+
+        // a change goes to MatCloud (and so to Microsoft) first; it stays one event when MatCloud's sync brings it back
+        await CalendarService.SaveEventAsync(meeting with { Title = "Team-Meeting (verschoben)" });
+        Assert.Equal(eventKey, Assert.Single(_cloud.EventChanges).Event);
+        await CloudService.SyncOnceAsync();
+        Assert.Equal("Team-Meeting (verschoben)", Assert.Single(CalendarService.Range(DateTime.Today, DateTime.Today.AddDays(3))).Event.Title);
+        Assert.DoesNotContain(_cloud.Items.Values, item => SyncContract.IsServerCollection(item.Collection) && item.Source == "LAPTOP");
+
+        // gone at the provider: gone here
+        _cloud.PutFromServer<CalendarCloudEvent>(CalendarContract.CloudEvents, eventKey, null);
+        await CloudService.SyncOnceAsync();
+        Assert.Empty(CalendarService.Range(DateTime.Today, DateTime.Today.AddDays(3)));
+        Assert.NotEmpty(calendarKey);
+    }
+
+    [Fact]
+    public async Task Back_to_the_computers_MatCloud_lets_go_and_this_computer_needs_a_sign_in()
+    {
+        await SignInAsync("LAPTOP");
+        AccountKeptByCloud("acc-cloud");
+        await CloudService.SyncOnceAsync();
+        var account = Assert.Single(AccountService.List());
+
+        var back = await AccountService.SetSyncModeAsync(account.Id, AccountSyncMode.Computers);
+
+        Assert.Equal("acc-cloud", Assert.Single(_cloud.LetGo));
+        Assert.Equal((AccountSyncMode.Computers, AccountState.SignedOut), (back.SyncMode, back.State));
+        await CloudService.SyncOnceAsync();
+        var item = _cloud.Live(CloudItems.Accounts).Single(candidate => candidate.Key == "acc-cloud");
+        Assert.Equal(AccountSyncMode.Computers, JsonSerializer.Deserialize<CloudItems.AccountData>(item.Data!, CloudContract.Json)!.SyncMode);
+    }
+
+    /// <summary>A Microsoft account another device (or the browser) let MatCloud keep, with what MatCloud's sync wrote for it.</summary>
+    private (string CalendarKey, string EventKey) AccountKeptByCloud(string syncId)
+    {
+        _cloud.PutFromElsewhere(CloudItems.Accounts, syncId, JsonSerializer.Serialize(
+            new CloudItems.AccountData(AccountKind.Microsoft, "Arbeit", "anna@firma.de", "", true, AccountSyncMode.Cloud), CloudContract.Json));
+        var calendarKey = CalendarContract.CalendarKey(syncId, "CAL1");
+        var eventKey = CalendarContract.EventKey(calendarKey, "E1");
+        var start = new DateTimeOffset(DateTime.Today.AddDays(1).AddHours(9));
+        _cloud.PutFromServer(CalendarContract.CloudAccounts, syncId, new CalendarCloudAccount(CalendarAccountKind.Microsoft, "anna@firma.de", CalendarCloudState.Ready, DateTimeOffset.UtcNow));
+        _cloud.PutFromServer(CalendarContract.CloudCalendars, calendarKey, new CalendarCloudCalendar(syncId, "CAL1", "Kalender", "#2F6FED", false, true, 15));
+        _cloud.PutFromServer(CalendarContract.CloudEvents, eventKey, new CalendarCloudEvent { Calendar = calendarKey, RemoteId = "E1", Title = "Team-Meeting", Start = start, End = start.AddHours(1) });
+        return (calendarKey, eventKey);
+    }
+
+    /// <summary>Microsoft "signs in" (ThixCalendar's own registration, as MatCloud needs it) and Graph names the account.</summary>
+    private void SignInAtMicrosoft()
+    {
+        AccountService.SignInForTests = (_, _) => Task.FromResult(new ThixCalendar.Core.Providers.OAuthTokens("access-1", "refresh-1", DateTimeOffset.UtcNow.AddHours(1), null));
+        _data.Http.Json("graph.microsoft.com/v1.0/me?", """{"displayName":"Anna","mail":"anna@firma.de"}""");
     }
 
     private static Task SignInAsync(string device) => CloudService.ConnectAsync(Server, FakeCloud.UserName, FakeCloud.Password, device);

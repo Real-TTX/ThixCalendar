@@ -54,6 +54,13 @@
                            Text="Google Kalender: Einstellungen › Kalender › „Privatadresse im iCal-Format“. Outlook / Microsoft 365: Einstellungen › Kalender › Freigegebene Kalender › „Kalender veröffentlichen“ › ICS-Link. Feiertage, Schul- und Vereinstermine bieten oft einen „Abonnieren“-Link an. Ein Abo kann nur gelesen werden – für Einträge und Änderungen verbinde das Konto selbst." />
               </StackPanel>
             </Border>
+            <mat:MatFormField x:Name="SyncModeField" Label="Abgleich" controls:FormErrors.Field="SyncMode"
+                              Hint="Über MatCloud: MatCloud hält die Anmeldung und gleicht ab – auch wenn kein Computer läuft; deine anderen Computer brauchen keine eigene Anmeldung, und im Browser stehen alle Termine.">
+              <ComboBox x:Name="SyncModeBox" MinWidth="280" SelectionChanged="OnSyncModeChanged" AutomationProperties.Name="Abgleich">
+                <ComboBoxItem Content="Auf den Computern" />
+                <ComboBoxItem Content="Über MatCloud" />
+              </ComboBox>
+            </mat:MatFormField>
             <Grid x:Name="Facts" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
               <TextBlock Text="Art" Theme="{StaticResource MatText.Muted}" Margin="0,3,24,3" />
               <TextBlock Grid.Column="1" x:Name="KindText" Margin="0,3" />

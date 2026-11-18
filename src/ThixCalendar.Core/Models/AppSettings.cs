@@ -59,6 +59,9 @@ public sealed record AppSettings
     /// <summary>How often the online accounts are asked for changes (minutes).</summary>
     public int SyncIntervalMinutes { get; init; } = 5;
 
+    /// <summary>Who keeps a new online account in step (travels with MatCloud); null: MatCloud, when this computer is connected to it.</summary>
+    public AccountSyncMode? DefaultSyncMode { get; init; }
+
     /// <summary>The user's own app registrations (empty = the ones built into this version).</summary>
     public string MicrosoftClientId { get; init; } = "";
 

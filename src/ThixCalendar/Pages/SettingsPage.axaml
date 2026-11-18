@@ -100,7 +100,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,16,0">
             <TextBlock Theme="{StaticResource MatText.Muted}" TextWrapping="Wrap" Margin="0,0,0,16"
-                       Text="Mit MatCloud, der Cloud der Thix-Apps, sind deine Konten, die eigenen Kalender mit ihren Terminen, die Einstellungen der Erinnerungen und deine Antworten auf Erinnerungen auf allen PCs und Macs gleich: Schließt du eine Erinnerung am Laptop, ist sie auch am Desktop erledigt. Anmeldungen bei Microsoft und Google bleiben auf jedem Computer für sich." />
+                       Text="Mit MatCloud, der Cloud der Thix-Apps, sind deine Konten, die eigenen Kalender mit ihren Terminen, die Einstellungen der Erinnerungen und deine Antworten auf Erinnerungen auf allen PCs und Macs gleich: Schließt du eine Erinnerung am Laptop, ist sie auch am Desktop erledigt. Konten von Microsoft, Google und ICS-Abos kann MatCloud selbst abgleichen – dann brauchen deine Computer keine eigene Anmeldung, der Abgleich läuft auch, wenn kein Computer an ist, und im Browser stehen alle Termine." />
             <controls:InfoBar x:Name="CloudMessage" Margin="0,0,0,12" />
 
             <!-- Not connected: sign in, in the browser (every account, also MatIdentity) or with user name and password -->
@@ -181,6 +181,13 @@
                   <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CloudLastSyncText" Margin="0,4" />
                 </Grid>
               </Border>
+              <mat:MatSettingRow Title="Neue Konten abgleichen"
+                                 Description="Über MatCloud: MatCloud hält die Anmeldung und gleicht ab, auch wenn kein Computer läuft. Auf den Computern: jeder Computer meldet sich selbst an. Gilt auf allen Geräten; jedes Konto lässt sich unter Konten einzeln umstellen.">
+                <ComboBox x:Name="DefaultSyncModeBox" MinWidth="220" SelectionChanged="OnDefaultSyncModeChanged" AutomationProperties.Name="Neue Konten abgleichen">
+                  <ComboBoxItem Content="Über MatCloud" />
+                  <ComboBoxItem Content="Auf den Computern" />
+                </ComboBox>
+              </mat:MatSettingRow>
               <controls:ActionBar>
                 <Button Theme="{StaticResource MatButton.Primary}" Click="OnCloudSyncNowClick">
                   <controls:IconLabel Icon="refresh" Text="Jetzt synchronisieren" />
