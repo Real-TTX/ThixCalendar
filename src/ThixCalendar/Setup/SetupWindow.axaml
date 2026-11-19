@@ -43,14 +43,15 @@
           <TextBlock x:Name="WelcomeText" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="21"
                      Text="ThixCalendar zeigt deine Kalender aus Microsoft 365, Google und ICS-Abos zusammen und erinnert dich an jeden Termin – so, dass du keinen mehr verpasst. Es läuft im Infobereich der Taskleiste." />
           <Border x:Name="OptionsCard" Theme="{StaticResource MatCard}" Padding="18,2" Margin="0,0,0,14">
-            <StackPanel>
-              <mat:MatSettingRow Title="Bei der Windows-Anmeldung starten" Description="Im Infobereich, ohne Fenster – damit Erinnerungen immer kommen">
+            <!-- The rows follow installer.json (SETUP-08): only offered options, each on as its default; file types are added in code. -->
+            <StackPanel x:Name="OptionsPanel">
+              <mat:MatSettingRow x:Name="AutostartRow" Title="Bei der Windows-Anmeldung starten" Description="Im Infobereich, ohne Fenster – damit Erinnerungen immer kommen">
                 <ToggleSwitch x:Name="AutostartToggle" IsChecked="True" OnContent="" OffContent="" AutomationProperties.Name="Bei der Windows-Anmeldung starten" />
               </mat:MatSettingRow>
-              <mat:MatSettingRow Title="Verknüpfung auf dem Desktop" Description="Ein Startmenü-Eintrag wird immer angelegt">
+              <mat:MatSettingRow x:Name="DesktopRow" Title="Verknüpfung auf dem Desktop" Description="Ein Startmenü-Eintrag wird immer angelegt">
                 <ToggleSwitch x:Name="DesktopToggle" OnContent="" OffContent="" AutomationProperties.Name="Verknüpfung auf dem Desktop" />
               </mat:MatSettingRow>
-              <mat:MatSettingRow Title="Updates automatisch installieren" Description="Neue Versionen ohne Rückfrage, ThixCalendar startet danach neu" BorderThickness="0">
+              <mat:MatSettingRow x:Name="AutoUpdateRow" Title="Updates automatisch installieren" Description="Neue Versionen ohne Rückfrage, ThixCalendar startet danach neu">
                 <ToggleSwitch x:Name="AutoUpdateToggle" IsChecked="True" OnContent="" OffContent="" AutomationProperties.Name="Updates automatisch installieren" />
               </mat:MatSettingRow>
             </StackPanel>

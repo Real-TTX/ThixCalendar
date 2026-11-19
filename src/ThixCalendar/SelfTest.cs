@@ -11,7 +11,7 @@ namespace ThixCalendar;
 
 /// <summary>
 /// "ThixCalendar.exe --self-test &lt;report file&gt;": the published program checks itself – everything trimming or
-/// single-file packaging could break silently: JSON of settings and update manifest, SQLite, Ical.Net, the provider JSON,
+/// single-file packaging could break silently: JSON of settings, update manifest and install options, SQLite, Ical.Net, the provider JSON,
 /// SkiaSharp (tray badge), the protected token store, the sound, Windows shortcuts (COM) and the windows of the app with
 /// their bindings. It runs in a fresh temporary data folder (Program sets it), never touches the user's data, writes a
 /// report and ends with exit code 0 (all passed) or 1. CI runs it on every Windows build.
@@ -106,6 +106,14 @@ internal static class SelfTest
         {
             var due = ReminderService.Check(DateTimeOffset.Now);
             return Task.FromResult($"{ReminderService.Active.Count} due");
+        });
+
+        await Check("install options (installer.json, arguments)", () =>
+        {
+            Ensure(InstallerOptions.Config is { Autostart: not null, DesktopShortcut: not null, AutomaticUpdates: not null }, "installer.json not read");
+            var request = InstallerOptions.Parse([InstallerOptions.QuietArgument, "--autostart=no", "--desktop-shortcut=yes"]);
+            Ensure(request is { Action: SetupAction.Install, Choices: { Autostart: false, DesktopShortcut: true } }, "arguments not read");
+            return Task.FromResult("");
         });
 
         await Check("token store", () =>

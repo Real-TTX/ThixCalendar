@@ -13,6 +13,9 @@ namespace ThixCalendar.Core.Business;
 /// </summary>
 public static class MacAppBundle
 {
+    /// <summary>CFBundleIdentifier of ThixCalendar.app (scripts/package-macos.sh).</summary>
+    public const string BundleId = "info.schmoldt.thixcalendar";
+
     /// <summary>The bundle this process runs from (…/ThixCalendar.app/Contents/MacOS/ThixCalendar), or null.</summary>
     public static string? Current => BundleOf(Environment.ProcessPath);
 

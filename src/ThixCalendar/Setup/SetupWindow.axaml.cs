@@ -1,9 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Runtime.Versioning;
+using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ThixCalendar.Controls;
 using ThixCalendar.Core.Business;
 using ThixCalendar.Core.Infrastructure;
+using ThixCalendar.Core.Models;
 using MatDesktop;
 
 namespace ThixCalendar.Setup;
@@ -18,6 +22,7 @@ public partial class SetupWindow : MatWindow
     private readonly bool _isUninstall;
     private readonly bool _isUpdate;
     private readonly ObservableCollection<string> _steps = [];
+    private readonly Dictionary<string, ToggleSwitch> _fileTypeToggles = new(StringComparer.OrdinalIgnoreCase);
     private bool _isWorking;
     private bool _isFinished;
     private bool _succeeded;
@@ -84,13 +89,52 @@ public partial class SetupWindow : MatWindow
         }
         else
         {
-            AutostartToggle.IsChecked = true;
-            DesktopToggle.IsChecked = InstallService.HasDesktopShortcut;
-            AutoUpdateToggle.IsChecked = true;
+            ShowOptions(InstallerOptions.Config);
             PrimaryLabel.Text = "Installieren";
         }
 
         PlaceInfo.Show($"Wird für dein Benutzerkonto installiert – ohne Administratorrechte – nach {InstallService.ProgramFolder}.", InfoSeverity.Info);
+    }
+
+    /// <summary>
+    /// The options of a first install from installer.json (SETUP-08): only what it offers, each on as its default – the same
+    /// questions ThixLauncher asks before it installs quietly. A file type gets a row of its own.
+    /// </summary>
+    private void ShowOptions(InstallerConfig config)
+    {
+        AutostartRow.IsVisible = config.Autostart is not null;
+        AutostartToggle.IsChecked = config.Autostart?.Default == true;
+        DesktopRow.IsVisible = config.DesktopShortcut is not null;
+        DesktopToggle.IsChecked = config.DesktopShortcut?.Default == true || InstallService.HasDesktopShortcut;
+        AutoUpdateRow.IsVisible = config.AutomaticUpdates is not null;
+        AutoUpdateToggle.IsChecked = config.AutomaticUpdates?.Default == true;
+
+        foreach (var type in config.FileTypes)
+        {
+            var title = $"{type.Extension}-Dateien mit ThixCalendar öffnen";
+            var toggle = new ToggleSwitch { IsChecked = type.Default, OnContent = "", OffContent = "" };
+            AutomationProperties.SetName(toggle, title);
+            _fileTypeToggles[type.Extension] = toggle;
+            OptionsPanel.Children.Add(new MatSettingRow { Title = title, Description = type.Name, Content = toggle });
+        }
+
+        var rows = OptionsPanel.Children.OfType<MatSettingRow>().Where(row => row.IsVisible).ToList();
+        OptionsCard.IsVisible = rows.Count > 0;
+        if (rows.Count > 0)
+        {
+            rows[^1].BorderThickness = new Thickness(0);
+        }
+    }
+
+    /// <summary>The answers of the options as install choices (an option not offered stays null).</summary>
+    private InstallChoices Choices()
+    {
+        var config = InstallerOptions.Config;
+        return new InstallChoices(
+            config.DesktopShortcut is null ? null : DesktopToggle.IsChecked == true,
+            config.Autostart is null ? null : AutostartToggle.IsChecked == true,
+            config.AutomaticUpdates is null ? null : AutoUpdateToggle.IsChecked == true,
+            config.FileTypes.Where(type => _fileTypeToggles.GetValueOrDefault(type.Extension)?.IsChecked == true).Select(type => type.Extension).ToList());
     }
 
     private void ShowConfirmPage()
@@ -132,7 +176,7 @@ public partial class SetupWindow : MatWindow
         PrimaryButton.IsEnabled = CancelButton.IsEnabled = false;
 
         var source = App.ExecutablePath;
-        var options = _isUpdate ? null : new InstallOptions(AutostartToggle.IsChecked == true, DesktopToggle.IsChecked == true, AutoUpdateToggle.IsChecked == true);
+        var choices = _isUpdate ? null : Choices();
         var deleteData = DeleteDataToggle.IsChecked == true;
         void Report(string step) => Ui.Post(() => _steps.Add(step));
 
@@ -147,7 +191,7 @@ public partial class SetupWindow : MatWindow
                 }
                 else
                 {
-                    InstallService.Install(source, options, Report);
+                    InstallService.Install(source, choices, Report);
                 }
             });
         }

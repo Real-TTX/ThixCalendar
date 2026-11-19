@@ -96,6 +96,20 @@ starten. Installiert pro Benutzer nach `%LocalAppData%\Programs\ThixCalendar` (o
 Startmenü, „Installierte Apps“, Autostart, optional Desktop-Verknüpfung und automatischen Updates (vorausgewählt).
 Deinstallieren über „Installierte Apps“ (auf Wunsch samt Daten).
 
+**Ohne Fenster** (ThixLauncher, ThixInstall, Administratoren) – die Optionen des Setups als Argumente (MatDesign SETUP-05/08;
+was angeboten wird, steht in `src/ThixCalendar.Core/installer.json` und im Update-Manifest unter `installer`):
+
+```
+ThixCalendarSetup.exe --quiet --desktop-shortcut=yes --autostart=yes --automatic-updates=yes [--start]
+ThixCalendar.exe --configure --autostart=no        # nur anwenden (macOS: …/ThixCalendar.app/Contents/MacOS/ThixCalendar)
+ThixCalendar.exe --uninstall --quiet
+```
+
+Nicht angegebene Optionen: bei der Erstinstallation der Standard (Autostart und automatische Updates an, keine
+Desktop-Verknüpfung), bei einem Update bleibt es, wie es ist. `--start` startet ThixCalendar danach im Infobereich.
+ThixCalendar öffnet keine Dateien (ICS-Kalender werden über ihre Adresse abonniert): `--file-types` kennt nur `none` und `default` (beides: keine).
+Ein falscher Wert bricht mit Exit-Code 2 ab, ohne etwas zu installieren.
+
 **macOS** – `ThixCalendar-macOS-arm64.dmg` (Apple Silicon) bzw. `-x64.dmg` (Intel) öffnen und ThixCalendar in
 „Programme“ ziehen. Die App ist ad hoc signiert: beim ersten Start Rechtsklick › Öffnen. Autostart unter
 Einstellungen › Allgemein (LaunchAgent).

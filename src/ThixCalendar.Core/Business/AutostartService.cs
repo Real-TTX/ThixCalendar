@@ -18,6 +18,7 @@ public static class AutostartService
     private const string LaunchAgentLabel = "info.schmoldt.thixcalendar";
 
     private static string? _launchAgentFolderForTests;
+    private static bool? _inMemoryEntry;
 
     /// <summary>The LaunchAgent file (macOS).</summary>
     public static string LaunchAgentFile => Path.Combine(
@@ -28,6 +29,11 @@ public static class AutostartService
 
     public static bool IsEnabled()
     {
+        if (_inMemoryEntry is { } entry)
+        {
+            return entry;
+        }
+
         if (OperatingSystem.IsWindows())
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath);
@@ -52,7 +58,11 @@ public static class AutostartService
     /// <summary>For the setup: installing and uninstalling the user's own program is not a configuration change.</summary>
     internal static void WriteEntry(string executablePath)
     {
-        if (OperatingSystem.IsWindows())
+        if (_inMemoryEntry is not null)
+        {
+            _inMemoryEntry = true;
+        }
+        else if (OperatingSystem.IsWindows())
         {
             WriteRunValue(executablePath);
         }
@@ -65,7 +75,11 @@ public static class AutostartService
 
     internal static void RemoveEntry()
     {
-        if (OperatingSystem.IsWindows())
+        if (_inMemoryEntry is not null)
+        {
+            _inMemoryEntry = false;
+        }
+        else if (OperatingSystem.IsWindows())
         {
             RemoveRunValue();
         }
@@ -98,6 +112,9 @@ public static class AutostartService
         """;
 
     internal static void UseLaunchAgentFolderForTests(string? folder) => _launchAgentFolderForTests = folder;
+
+    /// <summary>The entry only in memory (tests: the install never touches the real Run key); null = the real entry.</summary>
+    internal static void UseInMemoryEntry(bool? enabled) => _inMemoryEntry = enabled;
 
     [SupportedOSPlatform("windows")]
     private static void WriteRunValue(string executablePath)

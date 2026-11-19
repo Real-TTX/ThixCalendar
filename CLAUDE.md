@@ -32,8 +32,9 @@ the tokens, title bar, menu, tray, setup window), SQLite (Microsoft.Data.Sqlite)
   against fake providers (`FakeHttp` replaces the network via `ProviderHttp.HandlerForTests`, `AccountService.SignInForTests`
   replaces the browser), the real OAuth loopback, event layout, time input, and the **UI rendered headless** (`UiTests`;
   with `THIXCALENDAR_SCREENSHOTS=<folder>` screenshots of every page and the reminder window in light and dark – look at
-  them). `CloudTests`: sign-in (browser, password, ThixLauncher's hand-over) and two computers (two data folders) meeting in
-  `FakeCloud` (MatCloud's general sync in memory). `CopyTests` hold the copies of MatDesktop and of the MatCloud contract.
+  them). `InstallTests`: install / update / uninstall with the install options and the command line (program, registry
+  and autostart redirected). `CloudTests`: sign-in (browser, password, ThixLauncher's hand-over) and two computers (two data
+  folders) meeting in `FakeCloud` (MatCloud's general sync in memory). `CopyTests` hold the copies of MatDesktop and of the MatCloud contract.
   Tests never touch real data, Keychain, registry values or LaunchAgents (`TestData`), and never play a sound.
 - Run with sample data: `THIXCALENDAR_DATA_DIR=<folder> THIXCALENDAR_SAMPLE_DATA=1 dotnet run --project src/ThixCalendar`
   (own instance, never meets the installed one; `SampleData` only fills an empty database in an override folder).
@@ -69,7 +70,14 @@ src/ThixCalendar.Core   (no UI) models, business layer (static classes), infrast
                         ReminderService (ComputeDue: stages Before / Start / AllDay, answers per occurrence, missed window,
                         snooze, pause; Check/Dismiss/Snooze/Upcoming), SettingsService, AccessPolicy (LockConfiguration,
                         DisableOnlineAccounts, DisableUpdates), AutostartService (HKCU Run / LaunchAgent), InstallService
-                        (Windows self-installing exe), UpdateService + MacAppBundle (OTA from GitHub releases), SampleData,
+                        (Windows self-installing exe), InstallerOptions (SETUP-08 of MatDesign: installer.json – embedded,
+                        and as "installer" in the update manifest – says what the setup offers: desktop shortcut, autostart,
+                        automatic updates, file types (none: ThixCalendar opens no files); the command line --quiet / --update /
+                        --configure [--desktop-shortcut=yes|no --autostart=yes|no --automatic-updates=yes|no
+                        --file-types=…|none|default] [--start], a bare --autostart stays the start at sign-in, a wrong value =
+                        exit code 2; Current/Apply; file types: Platform/Windows/FileAssociations in HKCU\Software\Classes,
+                        Platform/Mac/MacFileAssociations with Launch Services), UpdateService + MacAppBundle (OTA from GitHub
+                        releases), SampleData,
                         CloudService (MatCloud: sign-in in the browser / with a password / ThixLauncher's hand-over, the loop
                         pull -> push -> long poll, 401 signs out, 403 waits), CloudItems (what travels: settings, accounts
                         WITHOUT sign-ins, calendars – for online ones only what the user chose –, the events of the own
@@ -87,7 +95,8 @@ src/ThixCalendar.Core   (no UI) models, business layer (static classes), infrast
                         ProviderHttp (one HttpClient, JsonNode only, ProviderException), MeetingLinks (Teams/Meet/Zoom/Webex)
   MatCloud/             COPY of MatCloud's contract (never edited here): CloudContract, CloudApps, Devices, Handoff (CloudHandoff),
                         Sync (the general sync), MatCloudClient
-  Platform/             Chime (own two-note WAV via winmm on Windows, afplay "Glass" on macOS), WindowActivation, Windows/ShellLink
+  Platform/             Chime (own two-note WAV via winmm on Windows, afplay "Glass" on macOS), WindowActivation, Windows/ShellLink,
+                        Windows/FileAssociations, Mac/MacFileAssociations (install options)
 src/ThixCalendar        (Avalonia app)
   Program / App         start-up: ProblemReports first, self test, Windows setup mode, single instance (mutex + pipe), tray,
                         sync, MatCloud (+ ThixLauncher's sign-in), reminders; Initialize installs MatDesktop's theme with
@@ -116,7 +125,7 @@ src/ThixCalendar        (Avalonia app)
                         ReminderWindow (topmost, never activated, corner; centred with "Beginnt jetzt" at the start)
   Tray/                 TrayIcon (badge: red = reminders waiting, amber = paused; next events; pause; sync; quit), TrayIconImages,
                         NotificationToast
-  Setup/                SetupWindow (Windows install / update / uninstall assistant)
+  Setup/                SetupWindow (Windows install / update / uninstall assistant; its options follow installer.json)
   Dialogs/              ConfirmDialog, SignInDialog (waits for the browser sign-in), PauseDialog, ProblemReportDialog
 tests/ThixCalendar.Tests
 ```
@@ -168,7 +177,8 @@ tests/ThixCalendar.Tests
   other names, no "generated with" lines.**
 - `.github/workflows/desktop.yml` (every branch): Windows (test, publish win-x64 single file = `ThixCalendarSetup.exe`, self
   test), macOS (test, publish osx-arm64 + osx-x64, `package-macos.sh` → dmg/zip), publish (manifest
-  `thixcalendar-update.json`, rolling releases `release-channel` / `nightly-channel`, versioned release `v<version>` on main).
+  `thixcalendar-update.json` with `"installer"` = installer.json, rolling releases `release-channel` / `nightly-channel`,
+  versioned release `v<version>` on main).
   The **Microsoft and Google client ids are built in** (`Directory.Build.props`; Entra multi-tenant + personal, Google desktop
   client; a public client id is no secret). Google's client secret comes ONLY from the repository secret
   `THIXCALENDAR_GOOGLE_CLIENT_SECRET` (GitHub push protection blocks it in git); without it Google counts as not set up
