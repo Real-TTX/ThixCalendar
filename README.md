@@ -149,6 +149,8 @@ Outlook › Einstellungen › Kalender › Freigegebene Kalender › *Kalender v
   `release-channel` bzw. `nightly-channel`, Manifest `thixcalendar-update.json` mit SHA-256 je Paket).
 - **Full-Auto-Update** (Standard, abschaltbar): neue Versionen werden ohne Rückfrage installiert, ThixCalendar startet
   danach wieder im Infobereich. Sonst bietet es Tray und Einstellungen › Updates an.
+- Nach **Update installieren** in den Einstellungen – oder einem Update, während das Fenster offen ist – kommt ThixCalendar
+  mit seinem Fenster wieder; ein Update im Hintergrund kehrt still in den Infobereich zurück.
 - Lokale Builds aktualisieren sich nie.
 
 ## Versionen, Branches, CI

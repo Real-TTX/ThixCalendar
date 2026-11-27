@@ -20,7 +20,8 @@ namespace ThixCalendar;
 ///  - Windows: the published ThixCalendar.exe is also its setup (RunSetupIfRequested).
 ///  - One instance per user and data folder: a second start opens the window of the first one.
 ///  - "--autostart" (sign-in) and "--tray" (after an update) start hidden in the tray / menu bar: the reminders run
-///    without the window.
+///    without the window. After an update asked for in the window (or with the window open) the window shows again
+///    (UpdateService.TakeShowWindowAfterUpdate).
 /// </summary>
 public partial class App : Application
 {
@@ -96,6 +97,9 @@ public partial class App : Application
     /// <summary>The main window (null during setup).</summary>
     public MainWindow? MainWindow => _mainWindow;
 
+    /// <summary>The main window is on the screen (not only in the tray).</summary>
+    public bool IsMainWindowShown => _mainWindow is { IsVisible: true };
+
     /// <summary>
     /// Ends the process through the main loop. Shutting down straight from OnFrameworkInitializationCompleted (update,
     /// quiet uninstall, second instance) throws "Dispatcher shut down" because the loop has not started yet.
@@ -120,7 +124,8 @@ public partial class App : Application
         _mainWindow = new MainWindow();
         _trayIcon = new TrayIcon(this);
 
-        var startHidden = args.Contains(TrayArgument) || args.Contains(AutostartService.StartupArgument);
+        // After an update asked for in the window (or with the window open) the window comes back, even though the restart says "--tray".
+        var startHidden = (args.Contains(TrayArgument) || args.Contains(AutostartService.StartupArgument)) && !UpdateService.TakeShowWindowAfterUpdate();
         if (!startHidden)
         {
             _mainWindow.Show();

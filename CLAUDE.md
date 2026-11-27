@@ -32,7 +32,7 @@ the tokens, title bar, menu, tray, setup window), SQLite (Microsoft.Data.Sqlite)
   against fake providers (`FakeHttp` replaces the network via `ProviderHttp.HandlerForTests`, `AccountService.SignInForTests`
   replaces the browser), the real OAuth loopback, event layout, time input, and the **UI rendered headless** (`UiTests`;
   with `THIXCALENDAR_SCREENSHOTS=<folder>` screenshots of every page and the reminder window in light and dark – look at
-  them). `InstallTests`: install / update / uninstall with the install options and the command line (program, registry
+  them). `InstallTests`: install / update / uninstall with the install options, the window after an update, and the command line (program, registry
   and autostart redirected). `CloudTests`: sign-in (browser, password, ThixLauncher's hand-over) and two computers (two data
   folders) meeting in `FakeCloud` (MatCloud's general sync in memory). `CopyTests` hold the copies of MatDesktop and of the MatCloud contract.
   Tests never touch real data, Keychain, registry values or LaunchAgents (`TestData`), and never play a sound.
@@ -77,7 +77,8 @@ src/ThixCalendar.Core   (no UI) models, business layer (static classes), infrast
                         --file-types=…|none|default] [--start], a bare --autostart stays the start at sign-in, a wrong value =
                         exit code 2; Current/Apply; file types: Platform/Windows/FileAssociations in HKCU\Software\Classes,
                         Platform/Mac/MacFileAssociations with Launch Services), UpdateService + MacAppBundle (OTA from GitHub
-                        releases), SampleData,
+                        releases; the restart says "--tray", a marker "show-window-after-update" in the update folder
+                        brings the window back after an update asked for in the window or with the window open), SampleData,
                         CloudService (MatCloud: sign-in in the browser / with a password / ThixLauncher's hand-over, the loop
                         pull -> push -> long poll, 401 signs out, 403 waits), CloudItems (what travels: settings, accounts
                         WITHOUT sign-ins, calendars – for online ones only what the user chose –, the events of the own
